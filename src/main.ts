@@ -1,5 +1,11 @@
 import { createApp } from 'vue'
-import './style.css'
 import App from './App.vue'
+import router from './router/index'
+import { createPinia } from 'pinia'
+import ElementPlus from 'element-plus'
+import 'reset-css'
+import './style/base.css'
 
-createApp(App).mount('#app')
+const app = createApp(App)
+app.use(router).use(createPinia()).use(ElementPlus, { size: 'small', zIndex: 3000 })
+app.mount('#app')
