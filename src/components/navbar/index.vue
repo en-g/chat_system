@@ -12,11 +12,11 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
+  import { useRouter, useRoute } from 'vue-router'
 
   const router = useRouter()
+  const route = useRoute()
 
-  const currentActive = ref<number>(0)
   const navbarDefaultList: string[] = ['#icon-message', '#icon-contacts', '#icon-pyq', '#icon-life']
   const navbarActiveList: string[] = [
     '#icon-message-active',
@@ -24,10 +24,13 @@
     '#icon-pyq-active',
     '#icon-life-active',
   ]
+  const currentActive = ref<number>(
+    navbarDefaultList.findIndex((item: string) => item.includes(route.path.split('/')[1]))
+  )
 
   const listenClickNavigationLink = (index: number) => {
     currentActive.value = index
-    router.push(`${navbarDefaultList[index].split('-')[1]}`)
+    router.replace(`/${navbarDefaultList[index].split('-')[1]}`)
   }
 </script>
 

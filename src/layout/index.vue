@@ -5,9 +5,7 @@
     </el-header>
     <el-main>
       <router-view v-slot="{ Component }">
-        <keep-alive>
-          <component :is="Component" />
-        </keep-alive>
+        <component :is="Component" />
       </router-view>
     </el-main>
   </el-container>

@@ -1,4 +1,9 @@
 @import 'common.css';
+html,
+body {
+  font-size: 13px;
+  user-select: none;
+}
 .el-container,
 .el-header,
 .el-main {
@@ -11,4 +16,29 @@
   fill: currentColor;
   overflow: hidden;
   cursor: pointer;
+}
+.el-menu {
+  border-right: none !important;
+}
+.el-menu .el-sub-menu .el-sub-menu__title,
+.el-menu .el-sub-menu .el-sub-menu__title .contacts-list-item-title {
+  height: 30px !important;
+}
+.el-menu .el-sub-menu .el-sub-menu__title:hover {
+  background-color: #fff !important;
+}
+.el-menu .el-sub-menu .el-sub-menu__title .el-icon {
+  display: none !important;
+}
+@media screen and (min-width: 1000px) {
+  .contacts-container .contacts-content {
+    flex: 5;
+  }
+}
+@media screen and (max-width: 1000px) and (min-width: 768px) {
+}
+@media screen and (max-width: 768px) {
+  .contacts-container .contacts-content {
+    flex: 0 !important;
+  }
 }
