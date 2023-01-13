@@ -39,7 +39,7 @@
     .navbar-list {
       display: flex;
       &-item {
-        padding: 10px 15px;
+        padding: 0 15px;
       }
     }
   }

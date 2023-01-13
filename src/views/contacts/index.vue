@@ -23,26 +23,47 @@
           </div>
         </div>
         <div class="contacts-friend-group-list">
-          <Contacts title="好友列表" type="friend" :contacts-list="friendsList" />
-          <Contacts title="群聊列表" type="group" :contacts-list="groupsList" />
+          <Contacts
+            title="好友列表"
+            type="friend"
+            :contacts-list="friendsList"
+            @showContactsInfo="listenShowContactsInfo"
+          />
+          <Contacts
+            title="群聊列表"
+            type="group"
+            :contacts-list="groupsList"
+            @showContactsInfo="listenShowContactsInfo"
+          />
         </div>
       </el-scrollbar>
     </div>
     <div class="contacts-content">
-      <router-view v-slot="{ Component }">
-        <component :is="Component" />
-      </router-view>
+      <div v-show="isShow" class="real">
+        <div class="back" @click="listenClickBack">
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-back"></use>
+          </svg>
+        </div>
+        <router-view v-slot="{ Component }">
+          <component :is="Component" />
+        </router-view>
+      </div>
+      <div v-show="!isShow" class="fill"></div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+  import { ref } from 'vue'
   import { useRouter } from 'vue-router'
   import useStore from '@/store/index'
   import Contacts from './children/contacts/index.vue'
 
   const router = useRouter()
   const store = useStore()
+
+  const isShow = ref<boolean>(false)
 
   const friendsList = [
     {
@@ -140,6 +161,7 @@
   ]
 
   const listenNavigateToFriendAssistant = () => {
+    isShow.value = true
     store.clickContactsType = ''
     router.push({
       name: 'assistant',
@@ -150,6 +172,7 @@
   }
 
   const listenNavigateToGroupAssistant = () => {
+    isShow.value = true
     store.clickContactsType = ''
     router.push({
       name: 'assistant',
@@ -158,6 +181,14 @@
       },
     })
   }
+
+  const listenShowContactsInfo = () => {
+    isShow.value = true
+  }
+
+  const listenClickBack = () => {
+    isShow.value = false
+  }
 </script>
 
 <style scoped lang="less">
@@ -165,14 +196,13 @@
     width: 100%;
     height: 100%;
     display: flex;
+    position: relative;
     .contacts-menu {
       flex: 1;
       height: 100%;
       border-right: 1px solid var(--border-color);
       .contacts-menu-scrollbar {
         height: 100%;
-        // padding: 10px 20px;
-        // box-sizing: border-box;
         .contacts-edit-friend-group {
           width: 100%;
           padding: 10px 20px;
@@ -234,7 +264,24 @@
     }
     .contacts-content {
       flex: 5;
+      width: 100%;
       height: 100%;
+      .real {
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+        .back {
+          display: none;
+          position: absolute;
+          left: 10px;
+          top: 10px;
+        }
+      }
+      .fill {
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+      }
     }
   }
 </style>

@@ -35,6 +35,7 @@
 
   const router = useRouter()
   const store = useStore()
+  const emit = defineEmits(['showContactsInfo'])
 
   const props = defineProps<{
     type: string
@@ -54,6 +55,7 @@
   }
 
   const listenNavigateToContactsInfo = (id: number) => {
+    emit('showContactsInfo')
     clickContactsId.value = id
     store.clickContactsType = props.type
     router.push({

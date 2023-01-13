@@ -58,6 +58,22 @@ html, body {
   // }
   .contacts-container .contacts-content {
     flex: 0 !important;
-    // display: none;
+    & .real {
+      position: absolute;
+      left: 0;
+      z-index: 100;
+      & .back {
+        display: block !important;
+      }
+    }
+    & .fill {
+      display: none;
+    }
+  }
+  .header-container .header-search-add {
+    flex: 2 !important;
+  }
+  .navbar-container .navbar-list-item {
+    padding: 0 10px !important;
   }
 }

@@ -164,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, computed, watch } from 'vue'
+  import { ref, computed, watch } from 'vue'
   import { useRoute } from 'vue-router'
 
   const route = useRoute()
@@ -202,10 +202,10 @@
       }
     }
   }
-  let info = reactive<any>(getcontactsInfo())
+  let info = ref<any>(getcontactsInfo())
 
   watch(type, () => {
-    info = getcontactsInfo()
+    info.value = getcontactsInfo()
   })
 
   const listenEditRemarks = () => {
@@ -288,9 +288,10 @@
         }
       }
       .info-show-desc-friend .info-show-desc-item {
-        width: 220px;
+        width: 200px;
       }
       .info-show-desc-friend .title {
+        width: 26px;
         margin-right: 20px;
       }
       .info-show-desc-group .info-show-desc-item {
@@ -300,8 +301,12 @@
         max-width: 155px;
       }
       .info-show-desc-group .title {
-        width: 85px;
+        width: 65px;
+        margin-right: 20px;
       }
     }
+  }
+  .el-input {
+    width: 130px !important;
   }
 </style>
