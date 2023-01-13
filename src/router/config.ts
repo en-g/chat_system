@@ -1,7 +1,11 @@
 const routes: Array<any> = [
   {
     path: '/',
-    redirect: '/contacts',
+    redirect: '/login',
+  },
+  {
+    path: '/login',
+    component: () => import('@/views/login/index.vue'),
   },
   {
     path: '/',
