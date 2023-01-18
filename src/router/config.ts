@@ -46,16 +46,6 @@ const routes: Array<any> = [
       },
     ],
   },
-  {
-    path: '/pass',
-    name: 'pass',
-    component: () => import('@/views/pass/index.vue'),
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: () => import('@/views/register/index.vue'),
-  },
 ]
 
 export default routes

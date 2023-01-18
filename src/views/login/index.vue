@@ -57,6 +57,16 @@
         </div>
       </el-card>
     </div>
+    <div v-if="isUpdate" class="login-update-password">
+      <div class="login-update-password-content">
+        <UpdatePassword @cancle="listenCancleUpdate" @confirm="listenConfirmUpdate" />
+      </div>
+    </div>
+    <div v-if="isRegister" class="login-register">
+      <div class="login-register-content">
+        <Register @cancle="listenCancleRegister" @confirm="listenConfirmRegister" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -74,6 +84,8 @@
   import { TIP_TYPE } from '@/config/index'
   import { localStorage } from '@/utils/storage'
   import useStore from '@/store/index'
+  import UpdatePassword from '@/components/updatePassword/index.vue'
+  import Register from './children/register/index.vue'
 
   const router = useRouter()
   const store = useStore()
@@ -94,6 +106,8 @@
     ],
   })
   const isRemember = ref<boolean>(false)
+  const isUpdate = ref<boolean>(false)
+  const isRegister = ref<boolean>(false)
 
   const initLoginInfo = () => {
     const storage = localStorage()
@@ -135,11 +149,28 @@
   }
 
   const listenUpdatePassword = () => {
-    router.push({ name: 'pass' })
+    isUpdate.value = true
   }
 
   const listenUserRegister = () => {
-    router.push({ name: 'register' })
+    isRegister.value = true
+  }
+
+  const listenCancleUpdate = () => {
+    isUpdate.value = false
+  }
+
+  const listenConfirmUpdate = () => {
+    isUpdate.value = false
+    loginInfo.password = ''
+  }
+
+  const listenCancleRegister = () => {
+    isRegister.value = false
+  }
+
+  const listenConfirmRegister = () => {
+    isRegister.value = false
   }
 </script>
 
@@ -182,14 +213,14 @@
       z-index: 100;
       .login-card {
         width: 100%;
-        padding: 0 10px;
+        padding: 20px;
         box-sizing: border-box;
         .title {
           font-size: var(--title-font-size);
           font-weight: var(--title-font-weight);
           margin-bottom: 20px;
           border-bottom: 1px solid var(--border-color);
-          padding: 15px 0;
+          padding-bottom: 20px;
           box-sizing: border-box;
         }
         .username {
@@ -215,6 +246,26 @@
             margin-bottom: 15px;
           }
         }
+      }
+    }
+    .login-update-password,
+    .login-register {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      // background-color: rgba(0, 0, 0, 0.3);
+      z-index: 200;
+      // display: flex;
+      // justify-content: center;
+      // align-items: center;
+      &-content {
+        width: 370px;
+        position: fixed;
+        right: 10%;
+        top: 50%;
+        transform: translateY(-50%);
       }
     }
   }
