@@ -15,6 +15,7 @@
     "element-plus": "^2.2.28",
     "pinia": "^2.0.28",
     "reset-css": "^5.0.1",
+    "swiper": "^8.4.6",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },

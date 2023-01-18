@@ -30,6 +30,12 @@ body {
 .el-menu .el-sub-menu .el-sub-menu__title .el-icon {
   display: none !important;
 }
+.el-button + .el-button {
+  margin-left: 0px !important;
+}
+.el-link__inner {
+  font-size: 12px;
+}
 @media screen and (min-width: 1000px) {
   .contacts-container .contacts-content {
     flex: 5;

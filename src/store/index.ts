@@ -4,6 +4,7 @@ const useStore = defineStore('main', {
   state: () => {
     return {
       clickContactsType: '',
+      user_id: -1,
     }
   },
   getters: {},

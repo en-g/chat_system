@@ -1,5 +1,5 @@
 interface StorageInterface {
-  keyPrefix: string
+  keyPrefix?: string
   get: (key: string) => any
   set: (key: string, value: any) => void
   has: (key: string) => boolean
@@ -12,9 +12,9 @@ const lStorage = window.localStorage
 const sStorage = window.sessionStorage
 
 class LStorage implements StorageInterface {
-  keyPrefix: string
-  constructor(keyPrefix: string) {
-    this.keyPrefix = `cs_${keyPrefix}`
+  keyPrefix?: string
+  constructor(keyPrefix?: string) {
+    this.keyPrefix = keyPrefix ? `cs_${keyPrefix}` : 'cs'
   }
 
   get(key: string): any {
@@ -46,17 +46,19 @@ class LStorage implements StorageInterface {
   }
 
   clearSelf(): void {
-    const arr = Array.from({ length: lStorage.length }, (_, index) => lStorage.key(index)).filter((key) =>
-      key?.startsWith(this.keyPrefix)
-    )
-    arr.forEach((key) => lStorage.removeItem(key as string))
+    if (this.keyPrefix) {
+      const arr = Array.from({ length: lStorage.length }, (_, index) => lStorage.key(index)).filter((key) =>
+        key?.startsWith(this.keyPrefix as string)
+      )
+      arr.forEach((key) => lStorage.removeItem(key as string))
+    }
   }
 }
 
 class SStorage implements StorageInterface {
-  keyPrefix: string
-  constructor(keyPrefix: string) {
-    this.keyPrefix = `cs_${keyPrefix}`
+  keyPrefix?: string
+  constructor(keyPrefix?: string) {
+    this.keyPrefix = keyPrefix ? `cs_${keyPrefix}` : 'cs'
   }
 
   get(key: string): any {
@@ -88,17 +90,19 @@ class SStorage implements StorageInterface {
   }
 
   clearSelf(): void {
-    const arr = Array.from({ length: sStorage.length }, (_, index) => sStorage.key(index)).filter((key) =>
-      key?.startsWith(this.keyPrefix)
-    )
-    arr.forEach((key) => sStorage.removeItem(key as string))
+    if (this.keyPrefix) {
+      const arr = Array.from({ length: sStorage.length }, (_, index) => sStorage.key(index)).filter((key) =>
+        key?.startsWith(this.keyPrefix as string)
+      )
+      arr.forEach((key) => sStorage.removeItem(key as string))
+    }
   }
 }
 
-export function localStorage(keyPrefix: string): LStorage {
+export function localStorage(keyPrefix?: string): LStorage {
   return new LStorage(keyPrefix)
 }
 
-export function sessionStorage(keyPrefix: string): SStorage {
+export function sessionStorage(keyPrefix?: string): SStorage {
   return new SStorage(keyPrefix)
 }
