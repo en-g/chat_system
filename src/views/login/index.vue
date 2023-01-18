@@ -20,6 +20,9 @@
         <swiper-slide class="login-swiper-item">
           <img src="../../assets/images/bg2.jpg" />
         </swiper-slide>
+        <swiper-slide class="login-swiper-item">
+          <img src="../../assets/images/bg3.jpg" />
+        </swiper-slide>
       </swiper>
     </div>
     <div class="login-cover"></div>
