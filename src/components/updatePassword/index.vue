@@ -12,20 +12,20 @@
           status-icon
         >
           <el-form-item class="update-password-main-form-item" label="邮箱" prop="email">
-            <el-input v-model="passInfo.email" size="normal" placeholder="请输入邮箱" />
+            <el-input v-model="passInfo.email" size="default" placeholder="请输入邮箱" />
           </el-form-item>
           <el-form-item class="update-password-main-form-item" label="用户名" prop="username">
-            <el-input v-model="passInfo.username" size="normal" placeholder="请输入用户名" />
+            <el-input v-model="passInfo.username" size="default" placeholder="请输入用户名" />
           </el-form-item>
           <el-form-item class="update-password-main-form-item" label="新密码" prop="newPass">
-            <el-input v-model="passInfo.newPass" size="normal" placeholder="请输入新密码" />
+            <el-input v-model="passInfo.newPass" size="default" placeholder="请输入新密码" />
           </el-form-item>
           <el-form-item class="update-password-main-form-item" label="确认密码" prop="confirmPass">
-            <el-input v-model="passInfo.confirmPass" size="normal" placeholder="请确认新密码" />
+            <el-input v-model="passInfo.confirmPass" size="default" placeholder="请确认新密码" />
           </el-form-item>
           <el-form-item class="update-password-main-form-item" label="验证码" prop="verificationCode">
             <div class="verification-code">
-              <el-input v-model="passInfo.verificationCode" size="normal" placeholder="请输入验证码" />
+              <el-input v-model="passInfo.verificationCode" size="default" placeholder="请输入验证码" />
               <div class="count-down" :class="{ send: isSend }" @click="listenSendVerificationCode">
                 {{ isSend ? `${countDown}s` : '发送验证码' }}
               </div>
@@ -33,8 +33,10 @@
           </el-form-item>
         </el-form>
         <div class="update-password-main-button">
-          <el-button class="update-password-main-button-item" size="normal" @click="listenCancleUpdate">取消</el-button>
-          <el-button class="update-password-main-button-item" type="primary" size="normal" @click="listenConfirmUpdate"
+          <el-button class="update-password-main-button-item" size="default" @click="listenCancleUpdate"
+            >取消</el-button
+          >
+          <el-button class="update-password-main-button-item" type="primary" size="default" @click="listenConfirmUpdate"
             >确定</el-button
           >
         </div>
@@ -45,8 +47,10 @@
 
 <script setup lang="ts">
   import { ref, reactive } from 'vue'
-  import { PassInfoType } from '../../types/pass'
-  import type { FormRules } from 'element-plus'
+  import { PassInfoType, updatePassType } from '@/types/pass'
+  import { ElMessage, FormRules } from 'element-plus'
+  import { updatePassword } from '@/api/pass'
+  import { TIP_TYPE } from '@/config/index'
 
   const emit = defineEmits(['cancle', 'confirm'])
 
@@ -117,8 +121,24 @@
     emit('cancle')
   }
 
-  const listenConfirmUpdate = () => {
-    emit('confirm')
+  const listenConfirmUpdate = async () => {
+    const info: updatePassType = {
+      email: passInfo.email,
+      username: passInfo.username,
+      newPass: passInfo.newPass,
+      verificationCode: passInfo.verificationCode,
+    }
+    if (info.email && info.username && info.newPass && info.verificationCode) {
+      const { data } = await updatePassword(info)
+      if (data) {
+        ElMessage.success(TIP_TYPE.UPDATE_PASS_SUCCESS)
+        emit('confirm')
+      } else {
+        ElMessage.error(TIP_TYPE.UPDATE_PASS_FAIL)
+      }
+    } else {
+      ElMessage.error(TIP_TYPE.PASS_INFO_ERROR)
+    }
   }
 </script>
 

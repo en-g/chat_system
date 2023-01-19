@@ -5,3 +5,10 @@ export interface PassInfoType {
   confirmPass: string
   verificationCode: string
 }
+
+export interface updatePassType {
+  username: string
+  email: string
+  newPass: string
+  verificationCode: string
+}
