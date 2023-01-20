@@ -1,5 +1,5 @@
 import { get, post } from '@/request/index'
-import { UserLoginType } from '@/types/login'
+import { RegisterInfoType, UserLoginType } from '@/types/login'
 
 const userLogin = (info: UserLoginType) => {
   return Promise.resolve(
@@ -23,4 +23,15 @@ const searchUser = (info: UserLoginType) => {
   )
 }
 
-export { userLogin, searchUser }
+const userRegister = (info: RegisterInfoType) => {
+  return Promise.resolve(
+    post({
+      url: 'login/register',
+      data: {
+        ...info,
+      },
+    })
+  )
+}
+
+export { userLogin, searchUser, userRegister }

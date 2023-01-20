@@ -3,9 +3,16 @@ export interface UserLoginType {
   password: string
 }
 
-export interface AccountRegisterInfo {
+export interface AccountRegisterInfoType {
   email: string
   username: string
   password: string
   verificationCode: string
+}
+
+export interface RegisterInfoType {
+  email: string
+  username: string
+  password: string
+  verificationCode?: string
 }

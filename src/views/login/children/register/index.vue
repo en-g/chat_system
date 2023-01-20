@@ -5,24 +5,24 @@
       <div class="register-main">
         <el-form
           class="register-main-form"
-          :model="register"
+          :model="registerInfo"
           :rules="verificationRules"
           label-position="left"
           label-width="70px"
           status-icon
         >
           <el-form-item class="register-main-form-item" label="邮箱" prop="email">
-            <el-input v-model="register.email" size="normal" placeholder="请输入邮箱" />
+            <el-input v-model="registerInfo.email" size="default" placeholder="请输入邮箱" />
           </el-form-item>
           <el-form-item class="register-main-form-item" label="用户名" prop="username">
-            <el-input v-model="register.username" size="normal" placeholder="请输入用户名" />
+            <el-input v-model="registerInfo.username" size="default" placeholder="请输入用户名" />
           </el-form-item>
           <el-form-item class="register-main-form-item" label="密码" prop="password">
-            <el-input v-model="register.password" size="normal" placeholder="请输入密码" />
+            <el-input v-model="registerInfo.password" size="default" placeholder="请输入密码" />
           </el-form-item>
           <el-form-item class="register-main-form-item" label="验证码" prop="verificationCode">
             <div class="verification-code">
-              <el-input v-model="register.verificationCode" size="normal" placeholder="请输入验证码" />
+              <el-input v-model="registerInfo.verificationCode" size="default" placeholder="请输入验证码" />
               <div class="count-down" :class="{ send: isSend }" @click="listenSendVerificationCode">
                 {{ isSend ? `${countDown}s` : '发送验证码' }}
               </div>
@@ -30,8 +30,8 @@
           </el-form-item>
         </el-form>
         <div class="register-main-button">
-          <el-button class="register-main-button-item" size="normal" @click="listenCancleRegister">取消</el-button>
-          <el-button class="register-main-button-item" type="primary" size="normal" @click="listenConfirmRegister"
+          <el-button class="register-main-button-item" size="default" @click="listenCancleRegister">取消</el-button>
+          <el-button class="register-main-button-item" type="primary" size="default" @click="listenConfirmRegister"
             >确定</el-button
           >
         </div>
@@ -53,12 +53,14 @@
 
 <script setup lang="ts">
   import { ref, reactive } from 'vue'
-  import { AccountRegisterInfo } from '@/types/login'
-  import type { FormRules } from 'element-plus'
+  import { AccountRegisterInfoType, RegisterInfoType } from '@/types/login'
+  import { ElMessage, FormRules } from 'element-plus'
+  import { userRegister } from '@/api/login'
+  import { TIP_TYPE } from '@/config/index'
 
   const emit = defineEmits(['cancle', 'confirm'])
 
-  const register = reactive<AccountRegisterInfo>({
+  const registerInfo = reactive<AccountRegisterInfoType>({
     email: '',
     username: '',
     password: '',
@@ -67,6 +69,7 @@
   const countDown = ref<number>(60)
   const isSend = ref<boolean>(false)
   const dialogVisible = ref<boolean>(false)
+  const registerId = ref<number>(-1)
 
   const validateEmail = (rule: any, value: any, callback: any) => {
     const reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/
@@ -112,8 +115,24 @@
     emit('cancle')
   }
 
-  const listenConfirmRegister = () => {
-    dialogVisible.value = true
+  const listenConfirmRegister = async () => {
+    if (registerInfo.email && registerInfo.username && registerInfo.password && registerInfo.verificationCode) {
+      const { data } = await userRegister(registerInfo)
+      if (data.type === 1) {
+        ElMessage.error(TIP_TYPE.REGISTER_EMAIL_REPEAT)
+      } else if (data.type === 2) {
+        ElMessage.error(TIP_TYPE.REGISTER_USERNAME_REPEAT)
+      } else if (data.type === 3) {
+        ElMessage.error(TIP_TYPE.REGISTER_FAIL)
+      } else if (data.type === 0) {
+        ElMessage.success(TIP_TYPE.REGISTER_SUCCESS)
+        registerId.value = data.id
+        dialogVisible.value = true
+      }
+    } else {
+      ElMessage.error(TIP_TYPE.REGISTER_INFO_ERROR)
+    }
+    // dialogVisible.value = true
     // emit('confirm')
   }
 </script>
