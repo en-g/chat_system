@@ -46,6 +46,12 @@ const routes: Array<any> = [
       },
     ],
   },
+  // 功能测试路由
+  {
+    path: '/test',
+    name: 'test',
+    component: () => import('@/views/test/index.vue'),
+  },
 ]
 
 export default routes

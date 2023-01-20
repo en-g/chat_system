@@ -28,6 +28,7 @@ declare module '@vue/runtime-core' {
     ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
+    ElUpload: typeof import('element-plus/es')['ElUpload']
     Navbar: typeof import('./src/components/navbar/index.vue')['default']
     PersonalAvatar: typeof import('./src/components/personalAvatar/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
