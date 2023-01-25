@@ -24,7 +24,7 @@
             <div class="verification-code">
               <el-input v-model="registerInfo.verificationCode" size="default" placeholder="请输入验证码" />
               <div class="count-down" :class="{ send: isSend }" @click="listenSendVerificationCode">
-                {{ isSend ? `${countDown}s` : '发送验证码' }}
+                {{ isSend ? `${countDown}` : '发送验证码' }}
               </div>
             </div>
           </el-form-item>
@@ -40,8 +40,8 @@
         <span>是否填写个人信息？</span>
         <template #footer>
           <div class="register-dialog-button">
-            <el-button class="register-dialog-button-item" @click="dialogVisible = false">否</el-button>
-            <el-button class="register-dialog-button-item" type="primary" @click="dialogVisible = false">
+            <el-button class="register-dialog-button-item" @click="listenSkipWriteInfo">否</el-button>
+            <el-button class="register-dialog-button-item" type="primary" @click="listenChooseWriteInfo">
               是
             </el-button>
           </div>
@@ -53,12 +53,12 @@
 
 <script setup lang="ts">
   import { ref, reactive } from 'vue'
-  import { AccountRegisterInfoType, RegisterInfoType } from '@/types/login'
+  import { AccountRegisterInfoType, RegisterCodeInfoType, RegisterInfoType } from '@/types/login'
   import { ElMessage, FormRules } from 'element-plus'
-  import { userRegister } from '@/api/login'
+  import { getUserRegisterCode, userRegister } from '@/api/login'
   import { TIP_TYPE } from '@/config/index'
 
-  const emit = defineEmits(['cancle', 'confirm'])
+  const emit = defineEmits(['cancle', 'skip', 'write'])
 
   const registerInfo = reactive<AccountRegisterInfoType>({
     email: '',
@@ -97,7 +97,7 @@
     verificationCode: [{ required: true, message: '验证码不能为空', trigger: 'blur' }],
   })
 
-  const listenSendVerificationCode = () => {
+  const listenSendVerificationCode = async () => {
     if (!isSend.value) {
       isSend.value = true
       const interval = setInterval(() => {
@@ -108,6 +108,19 @@
         }
       }, 1000)
       // 发送验证码
+      const info: RegisterCodeInfoType = {
+        email: registerInfo.email,
+        username: registerInfo.username,
+      }
+      const { data } = await getUserRegisterCode(info)
+      switch (data.status) {
+        case 0:
+          ElMessage.error(TIP_TYPE.VERIFICATION_CODE_FAIL)
+          break
+        case 1:
+          ElMessage.success(TIP_TYPE.VERIFICATION_CODE_SUCCESS)
+          break
+      }
     }
   }
 
@@ -118,22 +131,41 @@
   const listenConfirmRegister = async () => {
     if (registerInfo.email && registerInfo.username && registerInfo.password && registerInfo.verificationCode) {
       const { data } = await userRegister(registerInfo)
-      if (data.type === 1) {
-        ElMessage.error(TIP_TYPE.REGISTER_EMAIL_REPEAT)
-      } else if (data.type === 2) {
-        ElMessage.error(TIP_TYPE.REGISTER_USERNAME_REPEAT)
-      } else if (data.type === 3) {
-        ElMessage.error(TIP_TYPE.REGISTER_FAIL)
-      } else if (data.type === 0) {
-        ElMessage.success(TIP_TYPE.REGISTER_SUCCESS)
-        registerId.value = data.id
-        dialogVisible.value = true
+      switch (data.status) {
+        case 0:
+          ElMessage.error(TIP_TYPE.REGISTER_FAIL)
+          break
+        case 1:
+          ElMessage.success(TIP_TYPE.REGISTER_SUCCESS)
+          registerId.value = data.id
+          dialogVisible.value = true
+          break
+        case 2:
+          ElMessage.error(TIP_TYPE.REGISTER_EMAIL_REPEAT)
+          break
+        case 3:
+          ElMessage.error(TIP_TYPE.REGISTER_USERNAME_REPEAT)
+          break
+        case 4:
+          ElMessage.error(TIP_TYPE.VERIFICATION_CODE_ERROR)
+          break
+        case 5:
+          ElMessage.error(TIP_TYPE.VERIFICATION_CODE_EXPIRED)
+          break
       }
     } else {
       ElMessage.error(TIP_TYPE.REGISTER_INFO_ERROR)
     }
-    // dialogVisible.value = true
-    // emit('confirm')
+  }
+
+  const listenSkipWriteInfo = () => {
+    emit('skip', registerId.value)
+    dialogVisible.value = false
+  }
+
+  const listenChooseWriteInfo = () => {
+    emit('write', registerId.value)
+    dialogVisible.value = false
   }
 </script>
 

@@ -16,3 +16,24 @@ export interface RegisterInfoType {
   password: string
   verificationCode?: string
 }
+
+export interface RegisterCodeInfoType {
+  email: string
+  username: string
+}
+
+export interface AccountSelfInfoType {
+  userId: number
+  nickname: string
+  avatarUrl: string
+  sex: string
+  birthday: Date
+}
+
+export interface AccountRandomSelfInfoType {
+  userId: number
+}
+
+export interface AccountSelfIdType {
+  id: number
+}

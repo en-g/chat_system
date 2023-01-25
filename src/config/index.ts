@@ -9,7 +9,7 @@ const ERROR_TYPE = {
 const TIP_TYPE = {
   LOGIN_INFO_ERROR: '输入的账号或密码错误，请重新输入！',
   LOGIN_SUCCESS: '登录成功，即将跳转！',
-  UPDATE_PASS_SUCCESS: '修改密码成功，即将跳转到登录界面！',
+  UPDATE_PASS_SUCCESS: '修改密码成功！',
   UPDATE_PASS_FAIL: '修改密码失败，请检查输入的信息是否准确！',
   PASS_INFO_ERROR: '输入的信息不完整，请重新输入！',
   REGISTER_EMAIL_REPEAT: '输入的邮箱已被绑定，请重新输入！',
@@ -17,6 +17,19 @@ const TIP_TYPE = {
   REGISTER_SUCCESS: '注册成功！',
   REGISTER_FAIL: '注册成功，请检查网络是否通畅！',
   REGISTER_INFO_ERROR: '输入的信息不完整，请重新输入！',
+  VERIFICATION_CODE_ERROR: '验证码错误，请重新获取验证码！',
+  VERIFICATION_CODE_EXPIRED: '验证码已过期，请重新获取验证码！',
+  VERIFICATION_CODE_FAIL: '获取验证码失败，请重新获取！',
+  VERIFICATION_CODE_SUCCESS: '获取验证码成功，请查看邮箱！',
+  VERIFICATION_CODE_EMAIL_ERROR: '输入的邮箱或用户名无效，请输入正确的邮箱！',
+  UPLOAD_AVATAR_FAIL: '上传头像失败，请重新上传！',
+  UPLOAD_AVATAR_SUCCESS: '上传头像成功！',
+  IMAGE_MIMETYPE_ERROR: '不支持的图片类型，请重新上传',
+  WRITE_SELF_INFO_SUCCESS: '个人信息上传成功！',
+  WRITE_SELF_INFO_FAIL: '个人信息上传失败',
+  WRITE_SELF_INFO_ERROR: '输入的个人信息不完整，请重新输入！',
+  RANDOM_SELF_INFO_FAIL: '随机生成个人信息失败，请重新注册！',
+  RANDOM_SELF_INFO_SUCCESS: '随机生成个人信息成功！',
 }
 
 export { BASE_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

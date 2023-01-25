@@ -1,5 +1,11 @@
 import { get, post } from '@/request/index'
-import { RegisterInfoType, UserLoginType } from '@/types/login'
+import {
+  RegisterInfoType,
+  UserLoginType,
+  RegisterCodeInfoType,
+  AccountSelfInfoType,
+  AccountRandomSelfInfoType,
+} from '@/types/login'
 
 const userLogin = (info: UserLoginType) => {
   return Promise.resolve(
@@ -34,4 +40,49 @@ const userRegister = (info: RegisterInfoType) => {
   )
 }
 
-export { userLogin, searchUser, userRegister }
+const getUserRegisterCode = (info: RegisterCodeInfoType) => {
+  return Promise.resolve(
+    get({
+      url: 'email/register',
+      params: {
+        ...info,
+      },
+    })
+  )
+}
+
+const getDefaultAvatarList = () => {
+  return Promise.resolve(get({ url: 'login/register/avatar/list' }))
+}
+
+const writeUserRegisterInfo = (info: AccountSelfInfoType) => {
+  return Promise.resolve(
+    post({
+      url: 'login/register/info',
+      data: {
+        ...info,
+      },
+    })
+  )
+}
+
+const randomUserRegisterInfo = (id: AccountRandomSelfInfoType) => {
+  return Promise.resolve(
+    post({
+      url: 'login/register/random/info',
+      data: {
+        ...id,
+      },
+    })
+  )
+}
+
+export {
+  userLogin,
+  searchUser,
+  userRegister,
+  getUserRegisterCode,
+  getDefaultAvatarList,
+  writeUserRegisterInfo,
+  randomUserRegisterInfo,
+}

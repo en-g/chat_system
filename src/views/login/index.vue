@@ -64,7 +64,12 @@
     </div>
     <div v-if="isRegister" class="login-register">
       <div class="login-register-content">
-        <Register @cancle="listenCancleRegister" @confirm="listenConfirmRegister" />
+        <Register @cancle="listenCancleRegister" @skip="listenSkipWriteInfo" @write="listenChooseWriteInfo" />
+      </div>
+    </div>
+    <div v-if="isWrite" class="login-write-info">
+      <div class="login-write-info-content">
+        <WriteInfo :id="registerId" @cancle="listenCancleWriteInfo" @confirm="listenConfirmWriteInfo" />
       </div>
     </div>
   </div>
@@ -79,13 +84,14 @@
   import 'swiper/css/effect-fade'
   import { UserLoginType } from '@/types/login'
   import type { FormRules } from 'element-plus'
-  import { searchUser, userLogin } from '@/api/login'
+  import { randomUserRegisterInfo, searchUser, userLogin } from '@/api/login'
   import { ElMessage } from 'element-plus'
   import { TIP_TYPE } from '@/config/index'
   import { localStorage } from '@/utils/storage'
   import useStore from '@/store/index'
   import UpdatePassword from '@/components/updatePassword/index.vue'
   import Register from './children/register/index.vue'
+  import WriteInfo from './children/writeInfo/index.vue'
 
   const router = useRouter()
   const store = useStore()
@@ -108,6 +114,8 @@
   const isRemember = ref<boolean>(false)
   const isUpdate = ref<boolean>(false)
   const isRegister = ref<boolean>(false)
+  const isWrite = ref<boolean>(false)
+  const registerId = ref<number>(-1)
 
   const initLoginInfo = () => {
     const storage = localStorage()
@@ -169,8 +177,39 @@
     isRegister.value = false
   }
 
-  const listenConfirmRegister = () => {
+  const listenSkipWriteInfo = async (id: number) => {
+    registerId.value = id
+    const { data } = await randomUserRegisterInfo({
+      userId: id,
+    })
+    if (data) {
+      ElMessage.success(TIP_TYPE.RANDOM_SELF_INFO_SUCCESS)
+    } else {
+      ElMessage.error(TIP_TYPE.RANDOM_SELF_INFO_FAIL)
+    }
     isRegister.value = false
+  }
+
+  const listenChooseWriteInfo = (id: number) => {
+    registerId.value = id
+    isWrite.value = true
+    isRegister.value = false
+  }
+
+  const listenCancleWriteInfo = async () => {
+    const { data } = await randomUserRegisterInfo({
+      userId: registerId.value,
+    })
+    if (data) {
+      ElMessage.success(TIP_TYPE.RANDOM_SELF_INFO_SUCCESS)
+    } else {
+      ElMessage.error(TIP_TYPE.RANDOM_SELF_INFO_FAIL)
+    }
+    isWrite.value = false
+  }
+
+  const listenConfirmWriteInfo = () => {
+    isWrite.value = false
   }
 </script>
 
@@ -249,7 +288,8 @@
       }
     }
     .login-update-password,
-    .login-register {
+    .login-register,
+    .login-write-info {
       position: fixed;
       top: 0;
       left: 0;

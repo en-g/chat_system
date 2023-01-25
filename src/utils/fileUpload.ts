@@ -4,11 +4,13 @@ import { fileSlice } from './fileSlice'
 
 class FileUpload {
   async singleFileUpload(model: string, file: any) {
+    // 检查文件类型
     if (!this.judgeFileTypeLegitimacy(file.type)) {
       return {
-        status: 3,
+        status: 2,
       }
     }
+    // 文件分块
     const sliceRes: any = await fileSlice(file)
     if (sliceRes.status === 0) {
       return {

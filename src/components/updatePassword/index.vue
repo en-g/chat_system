@@ -47,9 +47,9 @@
 
 <script setup lang="ts">
   import { ref, reactive } from 'vue'
-  import { PassInfoType, updatePassType } from '@/types/pass'
+  import { PassInfoType, updatePassCodeType, updatePassType } from '@/types/pass'
   import { ElMessage, FormRules } from 'element-plus'
-  import { updatePassword } from '@/api/pass'
+  import { getUpdatePasswordCode, updatePassword } from '@/api/pass'
   import { TIP_TYPE } from '@/config/index'
 
   const emit = defineEmits(['cancle', 'confirm'])
@@ -103,7 +103,7 @@
     verificationCode: [{ required: true, message: '验证码不能为空', trigger: 'blur' }],
   })
 
-  const listenSendVerificationCode = () => {
+  const listenSendVerificationCode = async () => {
     if (!isSend.value) {
       isSend.value = true
       const interval = setInterval(() => {
@@ -114,6 +114,23 @@
         }
       }, 1000)
       // 发送验证码
+      const info: updatePassCodeType = {
+        email: passInfo.email,
+        username: passInfo.username,
+      }
+      const { data } = await getUpdatePasswordCode(info)
+      console.log(data)
+      switch (data.status) {
+        case 0:
+          ElMessage.error(TIP_TYPE.VERIFICATION_CODE_FAIL)
+          break
+        case 1:
+          ElMessage.success(TIP_TYPE.VERIFICATION_CODE_SUCCESS)
+          break
+        case 2:
+          ElMessage.error(TIP_TYPE.VERIFICATION_CODE_EMAIL_ERROR)
+          break
+      }
     }
   }
 
@@ -130,11 +147,20 @@
     }
     if (info.email && info.username && info.newPass && info.verificationCode) {
       const { data } = await updatePassword(info)
-      if (data) {
-        ElMessage.success(TIP_TYPE.UPDATE_PASS_SUCCESS)
-        emit('confirm')
-      } else {
-        ElMessage.error(TIP_TYPE.UPDATE_PASS_FAIL)
+      switch (data.status) {
+        case 0:
+          ElMessage.error(TIP_TYPE.UPDATE_PASS_FAIL)
+          break
+        case 1:
+          ElMessage.success(TIP_TYPE.UPDATE_PASS_SUCCESS)
+          emit('confirm')
+          break
+        case 2:
+          ElMessage.error(TIP_TYPE.VERIFICATION_CODE_ERROR)
+          break
+        case 3:
+          ElMessage.error(TIP_TYPE.VERIFICATION_CODE_EXPIRED)
+          break
       }
     } else {
       ElMessage.error(TIP_TYPE.PASS_INFO_ERROR)

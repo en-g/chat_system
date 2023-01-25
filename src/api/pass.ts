@@ -1,5 +1,5 @@
-import { put } from '@/request/index'
-import { updatePassType } from '../types/pass'
+import { get, put } from '@/request/index'
+import { updatePassCodeType, updatePassType } from '../types/pass'
 
 const updatePassword = (info: updatePassType) => {
   return Promise.resolve(
@@ -12,4 +12,15 @@ const updatePassword = (info: updatePassType) => {
   )
 }
 
-export { updatePassword }
+const getUpdatePasswordCode = (info: updatePassCodeType) => {
+  return Promise.resolve(
+    get({
+      url: 'email/update',
+      params: {
+        ...info,
+      },
+    })
+  )
+}
+
+export { updatePassword, getUpdatePasswordCode }

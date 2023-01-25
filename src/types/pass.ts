@@ -12,3 +12,8 @@ export interface updatePassType {
   newPass: string
   verificationCode: string
 }
+
+export interface updatePassCodeType {
+  username: string
+  email: string
+}
