@@ -4,7 +4,7 @@
       <div class="info-show-avatar">
         <el-avatar :size="80" :src="info.avatarUrl" />
       </div>
-      <div class="info-show-name">{{ info.name }}</div>
+      <div class="info-show-name">{{ info.name || info.nickname }}</div>
       <div v-if="type === 'friend'" class="info-show-interaction-friend">
         <div class="item message">
           <el-tooltip content="发送消息" placement="top">
@@ -74,7 +74,7 @@
         </div>
         <div class="info-show-desc-item">
           <div class="title">昵称</div>
-          <div class="content">{{ info.name }}</div>
+          <div class="content">{{ info.nickname }}</div>
         </div>
         <div class="info-show-desc-item">
           <div class="title">备注</div>
@@ -108,13 +108,13 @@
         </div>
         <div class="info-show-desc-item">
           <div class="title">生日</div>
-          <div class="content">{{ info.birthday?.toLocaleDateString() }}</div>
+          <div class="content">{{ info.birthday }}</div>
         </div>
       </div>
       <div v-else class="info-show-desc-group">
         <div class="info-show-desc-item">
           <div class="title">群号</div>
-          <div class="content">{{ info.groupNumber }}</div>
+          <div class="content">{{ info.number }}</div>
         </div>
         <div class="info-show-desc-item">
           <div class="title">群名称</div>
@@ -128,16 +128,16 @@
           <div class="title">我的群昵称</div>
           <div v-show="isEdit">
             <el-input
-              v-model="info.groupNickname"
-              :placeholder="info.groupNickname"
+              v-model="info.remarks"
+              :placeholder="info.remarks"
               maxlength="10"
               autofocus
               @blur="listenConfirmEdit"
             />
           </div>
           <div v-show="!isEdit" class="edit-remarks">
-            <div class="content" :class="{ tip: !info.groupNickname }">
-              {{ info.groupNickname ? info.groupNickname : '添加我的群昵称' }}
+            <div class="content" :class="{ tip: !info.remarks }">
+              {{ info.remarks ? info.remarks : '添加我的群昵称' }}
             </div>
             <el-tooltip content="修改群昵称" placement="top">
               <svg class="icon" aria-hidden="true" @click="listenEditRemarks">
@@ -148,15 +148,17 @@
         </div>
         <div class="info-show-desc-item">
           <div class="title">我的群身份</div>
-          <div class="content">{{ info.identity }}</div>
+          <div class="content">{{ info.isLeader === 1 ? '群主' : '群成员' }}</div>
         </div>
         <div class="info-show-desc-item">
           <div class="title">群公告</div>
-          <div class="content">{{ info.notice }}</div>
+          <div class="content" :class="{ tip: !info.notice }">
+            {{ info.notice }}<span v-show="!info.notice">暂无公告</span>
+          </div>
         </div>
         <div class="info-show-desc-item">
           <div class="title">创建时间</div>
-          <div class="content">{{ info.createTime?.toLocaleDateString() }}</div>
+          <div class="content">{{ info.createTime }}</div>
         </div>
       </div>
     </div>
@@ -166,46 +168,44 @@
 <script setup lang="ts">
   import { ref, computed, watch } from 'vue'
   import { useRoute } from 'vue-router'
+  import { getFriendInfo, getGroupInfo } from '@/api/contacts'
+  import { GetContactsInfoType, GetGroupInfoType } from '@/types/contacts'
+  import useStore from '@/store/index'
 
   const route = useRoute()
+  const store = useStore()
 
-  const id = route.query.id
+  const id = computed((): string => {
+    return route.query.id as string
+  })
   const isEdit = ref<boolean>(false)
   const type = computed((): string => {
     return route.query.type as string
   })
 
-  const getcontactsInfo = () => {
+  const getcontactsInfo = async () => {
     if (type.value === 'friend') {
-      return {
-        id: 1,
-        name: '陈小明',
-        username: 'abc123456',
-        remarks: '',
-        avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-        email: '123456789@qq.com',
-        sex: '男',
-        birthday: new Date(),
+      const ids: GetContactsInfoType = {
+        userId: store.user_id,
+        friendId: parseInt(id.value),
       }
+      const { data } = await getFriendInfo(ids)
+      data.birthday = data.birthday.split('T')[0]
+      return data
     } else {
-      return {
-        id: 1,
-        groupNumber: 123456789,
-        name: '无敌暴龙战神',
-        avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-        notice:
-          '大家新年快乐大家新年快乐大家新年快乐大家新年快乐大家新年快乐大家新年快乐大家新年快乐大家新年快乐大家新年快乐大家新年快乐',
-        createTime: new Date(),
-        leader: '小明',
-        groupNickname: '小明',
-        identity: '我',
+      const ids: GetGroupInfoType = {
+        userId: store.user_id,
+        groupId: parseInt(id.value),
       }
+      const { data } = await getGroupInfo(ids)
+      data.createTime = data.createTime.split('T')[0]
+      return data
     }
   }
-  let info = ref<any>(getcontactsInfo())
+  let info = ref<any>(await getcontactsInfo())
 
-  watch(type, () => {
-    info.value = getcontactsInfo()
+  watch([type, id], async () => {
+    info.value = await getcontactsInfo()
   })
 
   const listenEditRemarks = () => {

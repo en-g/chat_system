@@ -17,3 +17,13 @@ export interface ContactsListItemType {
 export interface GetContactsListType {
   userId: number
 }
+
+export interface GetContactsInfoType {
+  userId: number
+  friendId: number
+}
+
+export interface GetGroupInfoType {
+  userId: number
+  groupId: number
+}
