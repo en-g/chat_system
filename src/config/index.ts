@@ -21,7 +21,7 @@ const TIP_TYPE = {
   VERIFICATION_CODE_EXPIRED: '验证码已过期，请重新获取验证码！',
   VERIFICATION_CODE_FAIL: '获取验证码失败，请重新获取！',
   VERIFICATION_CODE_SUCCESS: '获取验证码成功，请查看邮箱！',
-  VERIFICATION_CODE_EMAIL_ERROR: '输入的邮箱或用户名无效，请输入正确的邮箱！',
+  VERIFICATION_CODE_EMAIL_ERROR: '输入的邮箱或用户名无效，请输入正确的信息！',
   UPLOAD_AVATAR_FAIL: '上传头像失败，请重新上传！',
   UPLOAD_AVATAR_SUCCESS: '上传头像成功！',
   IMAGE_MIMETYPE_ERROR: '不支持的图片类型，请重新上传',
@@ -30,6 +30,7 @@ const TIP_TYPE = {
   WRITE_SELF_INFO_ERROR: '输入的个人信息不完整，请重新输入！',
   RANDOM_SELF_INFO_FAIL: '随机生成个人信息失败，请重新注册！',
   RANDOM_SELF_INFO_SUCCESS: '随机生成个人信息成功！',
+  EMAIL_NOT_NULL: '邮箱不能为空，请重新输入！',
 }
 
 export { BASE_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

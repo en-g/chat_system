@@ -30,6 +30,14 @@ export interface AccountSelfInfoType {
   birthday: Date
 }
 
+export interface AccountSelfInfoUploadType {
+  userId: number
+  nickname: string
+  avatarUrl: string
+  sex: string
+  birthday: string
+}
+
 export interface AccountRandomSelfInfoType {
   userId: number
 }

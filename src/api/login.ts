@@ -5,6 +5,7 @@ import {
   RegisterCodeInfoType,
   AccountSelfInfoType,
   AccountRandomSelfInfoType,
+  AccountSelfInfoUploadType,
 } from '@/types/login'
 
 const userLogin = (info: UserLoginType) => {
@@ -55,7 +56,7 @@ const getDefaultAvatarList = () => {
   return Promise.resolve(get({ url: 'login/register/avatar/list' }))
 }
 
-const writeUserRegisterInfo = (info: AccountSelfInfoType) => {
+const writeUserRegisterInfo = (info: AccountSelfInfoUploadType) => {
   return Promise.resolve(
     post({
       url: 'login/register/info',

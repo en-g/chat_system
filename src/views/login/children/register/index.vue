@@ -18,7 +18,13 @@
             <el-input v-model="registerInfo.username" size="default" placeholder="请输入用户名" />
           </el-form-item>
           <el-form-item class="register-main-form-item" label="密码" prop="password">
-            <el-input v-model="registerInfo.password" size="default" placeholder="请输入密码" />
+            <el-input
+              v-model="registerInfo.password"
+              type="password"
+              show-password
+              size="default"
+              placeholder="请输入密码"
+            />
           </el-form-item>
           <el-form-item class="register-main-form-item" label="验证码" prop="verificationCode">
             <div class="verification-code">
@@ -98,12 +104,17 @@
   })
 
   const listenSendVerificationCode = async () => {
+    if (!registerInfo.email) {
+      ElMessage.error(TIP_TYPE.EMAIL_NOT_NULL)
+      return
+    }
     if (!isSend.value) {
       isSend.value = true
       const interval = setInterval(() => {
         countDown.value -= 1
         if (countDown.value === -1) {
           isSend.value = false
+          countDown.value = 60
           clearInterval(interval)
         }
       }, 1000)

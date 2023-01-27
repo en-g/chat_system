@@ -105,7 +105,13 @@
 
   const listenConfirmWriteInfo = async () => {
     if (selfInfo.avatarUrl && selfInfo.birthday && selfInfo.nickname && selfInfo.sex) {
-      const { data } = await writeUserRegisterInfo(selfInfo)
+      const { data } = await writeUserRegisterInfo({
+        userId: selfInfo.userId,
+        nickname: selfInfo.nickname,
+        avatarUrl: selfInfo.avatarUrl,
+        sex: selfInfo.sex,
+        birthday: selfInfo.birthday.toLocaleDateString(),
+      })
       if (data) {
         ElMessage.success(TIP_TYPE.WRITE_SELF_INFO_SUCCESS)
         emit('confirm')

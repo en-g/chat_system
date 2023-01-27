@@ -18,10 +18,22 @@
             <el-input v-model="passInfo.username" size="default" placeholder="请输入用户名" />
           </el-form-item>
           <el-form-item class="update-password-main-form-item" label="新密码" prop="newPass">
-            <el-input v-model="passInfo.newPass" size="default" placeholder="请输入新密码" />
+            <el-input
+              v-model="passInfo.newPass"
+              type="password"
+              show-password
+              size="default"
+              placeholder="请输入新密码"
+            />
           </el-form-item>
           <el-form-item class="update-password-main-form-item" label="确认密码" prop="confirmPass">
-            <el-input v-model="passInfo.confirmPass" size="default" placeholder="请确认新密码" />
+            <el-input
+              v-model="passInfo.confirmPass"
+              type="password"
+              show-password
+              size="default"
+              placeholder="请确认新密码"
+            />
           </el-form-item>
           <el-form-item class="update-password-main-form-item" label="验证码" prop="verificationCode">
             <div class="verification-code">
@@ -104,12 +116,17 @@
   })
 
   const listenSendVerificationCode = async () => {
+    if (!passInfo.email) {
+      ElMessage.error(TIP_TYPE.EMAIL_NOT_NULL)
+      return
+    }
     if (!isSend.value) {
       isSend.value = true
       const interval = setInterval(() => {
         countDown.value -= 1
         if (countDown.value === -1) {
           isSend.value = false
+          countDown.value = 60
           clearInterval(interval)
         }
       }, 1000)
@@ -119,7 +136,6 @@
         username: passInfo.username,
       }
       const { data } = await getUpdatePasswordCode(info)
-      console.log(data)
       switch (data.status) {
         case 0:
           ElMessage.error(TIP_TYPE.VERIFICATION_CODE_FAIL)
