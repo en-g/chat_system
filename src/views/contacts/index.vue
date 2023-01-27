@@ -55,110 +55,37 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import { ref, reactive } from 'vue'
   import { useRouter } from 'vue-router'
   import useStore from '@/store/index'
   import Contacts from './children/contacts/index.vue'
+  import { getContactsList, getGroupsList } from '@/api/contacts'
+  import { ContactsListType } from '@/types/contacts'
 
   const router = useRouter()
   const store = useStore()
 
   const isShow = ref<boolean>(false)
 
-  const friendsList = [
-    {
-      id: 1,
-      friendGroup: '朋友',
-      list: [
-        {
-          id: 1,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '小明大胜靠德静安寺打开将第三大酒店',
-          signature: '雨过天晴见彩虹',
-        },
-        {
-          id: 2,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '小明',
-          signature: '雨过天晴见彩虹',
-        },
-        {
-          id: 3,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '小明',
-          signature: '雨过天晴见彩虹',
-        },
-      ],
-    },
-    {
-      id: 2,
-      friendGroup: '家人',
-      list: [],
-    },
-    {
-      id: 3,
-      friendGroup: '亲戚',
-      list: [
-        {
-          id: 7,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '小明',
-          signature: '雨过天晴见彩虹',
-        },
-        {
-          id: 8,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '小明',
-          signature: '雨过天晴见彩虹',
-        },
-        {
-          id: 9,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '小明',
-          signature: '雨过天晴见彩虹',
-        },
-      ],
-    },
-  ]
-  const groupsList = [
-    {
-      id: 1,
-      friendGroup: '我的群聊',
-      list: [
-        {
-          id: 1,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '牛逼群',
-        },
-        {
-          id: 2,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '牛逼群',
-        },
-      ],
-    },
-    {
-      id: 2,
-      friendGroup: '已加入的群聊',
-      list: [
-        {
-          id: 7,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '牛逼群',
-        },
-        {
-          id: 8,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '牛逼群',
-        },
-        {
-          id: 9,
-          avatarUrl: 'https://img0.baidu.com/it/u=2043872740,4219194252&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-          name: '牛逼群',
-        },
-      ],
-    },
-  ]
+  // 获取联系人列表
+  const getContactsListData = async () => {
+    const result = await getContactsList({
+      userId: store.user_id,
+    })
+    return result
+  }
+  const { data: friends } = await getContactsListData()
+  const friendsList = reactive<ContactsListType[]>(friends)
+
+  // 获取群聊列表
+  const getGroupsListData = async () => {
+    const result = await getGroupsList({
+      userId: store.user_id,
+    })
+    return result
+  }
+  const { data: groups } = await getGroupsListData()
+  const groupsList = reactive<ContactsListType[]>(groups)
 
   const listenNavigateToFriendAssistant = () => {
     isShow.value = true

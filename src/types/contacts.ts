@@ -1,12 +1,19 @@
 export interface ContactsListType {
   id: number
-  friendGroup: string
-  list: ContactsListItemType[]
+  name: string
+  total: number
+  members: ContactsListItemType[] | []
 }
 
 export interface ContactsListItemType {
   id: number
-  avatarUrl: string
   name: string
+  remarks?: string
+  avatarUrl: string
   signature?: string
+  status?: number
+}
+
+export interface GetContactsListType {
+  userId: number
 }

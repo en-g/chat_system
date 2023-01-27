@@ -1,19 +1,24 @@
 <template>
   <div class="contacts-list-container">
     <div class="contacts-list-item">
-      <el-menu class="contacts-list-menu" @open="listenOpenMenu" @close="listenCloseMenu">
-        <el-sub-menu v-for="item in props.contactsList" :key="item.id" :index="item.friendGroup">
+      <el-menu
+        v-if="props.contactsList.length > 0"
+        class="contacts-list-menu"
+        @open="listenOpenMenu"
+        @close="listenCloseMenu"
+      >
+        <el-sub-menu v-for="item in props.contactsList" :key="item.id" :index="item.name">
           <template #title>
             <div class="contacts-list-item-title">
-              <div v-show="!item.list.length" class="left-fill"></div>
-              <svg v-show="!!item.list.length" class="icon" aria-hidden="true">
-                <use :xlink:href="openList.includes(item.friendGroup) ? '#icon-down' : '#icon-right'"></use>
+              <div v-show="!item.total" class="left-fill"></div>
+              <svg v-show="!!item.total" class="icon" aria-hidden="true">
+                <use :xlink:href="openList.includes(item.name) ? '#icon-down' : '#icon-right'"></use>
               </svg>
-              {{ item.friendGroup }}
+              {{ item.name }}
             </div>
           </template>
           <div
-            v-for="item1 in item.list"
+            v-for="item1 in item.members"
             :key="item1.id"
             :class="{ 'contacts-item-active': item1.id === clickContactsId && store.clickContactsType === props.type }"
             @click="listenNavigateToContactsInfo(item1.id)"
@@ -22,6 +27,9 @@
           </div>
         </el-sub-menu>
       </el-menu>
+      <el-link v-else class="contacts-list-add" type="primary" @click="listenAddFriendOrGroup">
+        {{ props.type === 'friend' ? '暂无好友，点击添加好友' : '暂未加入群聊，点击加入群聊' }}
+      </el-link>
     </div>
   </div>
 </template>
@@ -66,12 +74,17 @@
       },
     })
   }
+
+  const listenAddFriendOrGroup = () => {
+    console.log('add')
+  }
 </script>
 
 <style scoped lang="less">
   .contacts-list-container {
     .contacts-list-item {
       .contacts-list-menu {
+        margin-bottom: 10px;
         .contacts-list-item-title {
           width: 100%;
           display: flex;
@@ -88,6 +101,9 @@
         & .contacts-item-active {
           background-color: var(--mouse-hover-active);
         }
+      }
+      .contacts-list-add {
+        margin-left: 20px;
       }
     }
   }
