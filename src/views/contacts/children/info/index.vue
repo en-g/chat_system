@@ -171,41 +171,67 @@
   import { getFriendInfo, getGroupInfo } from '@/api/contacts'
   import { GetContactsInfoType, GetGroupInfoType } from '@/types/contacts'
   import useStore from '@/store/index'
+  import { sessionStorage } from '@/utils/storage'
 
   const route = useRoute()
   const store = useStore()
+  const storage = sessionStorage(`${store.user_id}`)
 
-  const id = computed((): string => {
-    return route.query.id as string
+  const id = computed((): number => {
+    return parseInt(route.query.id as string)
   })
   const isEdit = ref<boolean>(false)
   const type = computed((): string => {
     return route.query.type as string
   })
 
-  const getcontactsInfo = async () => {
+  const getContactsInfoData = async () => {
+    const contactsInfo = storage.get('contactsInfo') || []
+    const info = contactsInfo.find((item: any) => item.id === id.value)
+    if (info) {
+      return info
+    }
+    const ids: GetContactsInfoType = {
+      userId: store.user_id,
+      friendId: id.value,
+    }
+    const { data } = await getFriendInfo(ids)
+    data.birthday = data.birthday.split('T')[0]
+    contactsInfo.push(data)
+    storage.set('contactsInfo', contactsInfo)
+    return data
+  }
+
+  const getGroupsInfoData = async () => {
+    const groupsInfo = storage.get('groupsInfo') || []
+    const info = groupsInfo.find((item: any) => item.id === id.value)
+    if (info) {
+      return info
+    }
+    const ids: GetGroupInfoType = {
+      userId: store.user_id,
+      groupId: id.value,
+    }
+    const { data } = await getGroupInfo(ids)
+    data.createTime = data.createTime.split('T')[0]
+    groupsInfo.push(data)
+    storage.set('groupsInfo', groupsInfo)
+    return data
+  }
+
+  const getInfo = async () => {
     if (type.value === 'friend') {
-      const ids: GetContactsInfoType = {
-        userId: store.user_id,
-        friendId: parseInt(id.value),
-      }
-      const { data } = await getFriendInfo(ids)
-      data.birthday = data.birthday.split('T')[0]
+      const data = await getContactsInfoData()
       return data
     } else {
-      const ids: GetGroupInfoType = {
-        userId: store.user_id,
-        groupId: parseInt(id.value),
-      }
-      const { data } = await getGroupInfo(ids)
-      data.createTime = data.createTime.split('T')[0]
+      const data = await getGroupsInfoData()
       return data
     }
   }
-  let info = ref<any>(await getcontactsInfo())
+  const info = ref<any>(await getInfo())
 
   watch([type, id], async () => {
-    info.value = await getcontactsInfo()
+    info.value = await getInfo()
   })
 
   const listenEditRemarks = () => {
