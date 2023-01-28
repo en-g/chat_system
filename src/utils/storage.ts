@@ -3,6 +3,7 @@ interface StorageInterface {
   get: (key: string) => any
   set: (key: string, value: any) => void
   has: (key: string) => boolean
+  delete: (key: string, index: number) => void
   remove: (key: string) => void
   clear: () => void
   clearSelf: () => void
@@ -34,6 +35,12 @@ class LStorage implements StorageInterface {
   has(key: string): boolean {
     const skey = `${this.keyPrefix}_${key}`
     return !!lStorage.getItem(skey)
+  }
+
+  delete(key: string, index: number) {
+    const data = this.get(key) || []
+    data.splice(index, 1)
+    this.set(key, data)
   }
 
   remove(key: string): void {
@@ -78,6 +85,12 @@ class SStorage implements StorageInterface {
   has(key: string): boolean {
     const skey = `${this.keyPrefix}_${key}`
     return !!sStorage.getItem(skey)
+  }
+
+  delete(key: string, index: number) {
+    const data = this.get(key) || []
+    data.splice(index, 1)
+    this.set(key, data)
   }
 
   remove(key: string): void {

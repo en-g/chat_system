@@ -35,10 +35,10 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import { inject, reactive, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import ContactsListItem from './contactsListItem.vue'
-  import { ContactsListType } from '@/types/contacts'
+  import { ContactsListItemType, ContactsListType } from '@/types/contacts'
   import useStore from '@/store/index'
 
   const router = useRouter()
@@ -50,7 +50,7 @@
     contactsList: ContactsListType[] // 列表数据
   }>()
 
-  const openList: string[] = [] // 保存被点击下拉的分组
+  const openList = reactive<Array<string>>([]) // 保存被点击下拉的分组
   const clickContactsId = ref<number>(-1) // 查看的联系人或群聊 ID
 
   // 点击下拉分组

@@ -1,5 +1,11 @@
-import { get } from '@/request/index'
-import { GetContactsInfoType, GetContactsListType, GetGroupInfoType } from '@/types/contacts'
+import { get, put } from '@/request/index'
+import {
+  GetContactsInfoType,
+  GetContactsListType,
+  GetGroupInfoType,
+  UpdateContactsRemarksType,
+  UpdateGroupsRemarksType,
+} from '@/types/contacts'
 
 // 获取联系人列表
 const getContactsList = (id: GetContactsListType) => {
@@ -31,4 +37,24 @@ const getGroupInfo = (ids: GetGroupInfoType) => {
   )
 }
 
-export { getContactsList, getGroupsList, getFriendInfo, getGroupInfo }
+// 修改联系人备注
+const updateContactsRemarks = (info: UpdateContactsRemarksType) => {
+  return Promise.resolve(
+    put({
+      url: 'friends/remarks',
+      data: info,
+    })
+  )
+}
+
+// 修改用户群昵称
+const updateGroupsRemarks = (info: UpdateGroupsRemarksType) => {
+  return Promise.resolve(
+    put({
+      url: 'groups/remarks',
+      data: info,
+    })
+  )
+}
+
+export { getContactsList, getGroupsList, getFriendInfo, getGroupInfo, updateContactsRemarks, updateGroupsRemarks }

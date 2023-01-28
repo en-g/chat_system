@@ -33,6 +33,10 @@ const TIP_TYPE = {
   RANDOM_SELF_INFO_FAIL: '随机生成个人信息失败，请重新注册！',
   RANDOM_SELF_INFO_SUCCESS: '随机生成个人信息成功！',
   EMAIL_NOT_NULL: '邮箱不能为空，请重新输入！',
+  UPDATE_CONTACTS_REMARKS_SUCCESS: '修改联系人备注成功！',
+  UPDATE_CONTACTS_REMARKS_FAIL: '修改联系人备注失败，请检查网络是否通畅！',
+  UPDATE_GROUPS_REMARKS_SUCCESS: '修改群昵称成功！',
+  UPDATE_GROUPS_REMARKS_FAIL: '修改群昵称失败，请检查网络是否通畅！',
 }
 
 export { BASE_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

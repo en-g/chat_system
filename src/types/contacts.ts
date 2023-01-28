@@ -27,3 +27,15 @@ export interface GetGroupInfoType {
   userId: number
   groupId: number
 }
+
+export interface UpdateContactsRemarksType {
+  userId: number
+  friendId: number
+  remarks: string
+}
+
+export interface UpdateGroupsRemarksType {
+  userId: number
+  groupId: number
+  remarks: string
+}

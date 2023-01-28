@@ -55,14 +55,15 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive } from 'vue'
-  import { useRouter } from 'vue-router'
+  import { ref, reactive, provide } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
   import useStore from '@/store/index'
   import Contacts from './children/contacts/index.vue'
   import { getContactsList, getGroupsList } from '@/api/contacts'
   import { ContactsListType } from '@/types/contacts'
 
   const router = useRouter()
+  const route = useRoute()
   const store = useStore()
 
   const isShow = ref<boolean>(false)

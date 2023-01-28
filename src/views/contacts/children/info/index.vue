@@ -8,21 +8,21 @@
       <div v-if="type === 'friend'" class="info-show-interaction-friend">
         <div class="item message">
           <el-tooltip content="发送消息" placement="top">
-            <svg class="icon" aria-hidden="true">
+            <svg class="icon" aria-hidden="true" @click="listenNavigateToChat">
               <use xlink:href="#icon-send-message"></use>
             </svg>
           </el-tooltip>
         </div>
         <div class="item pyq">
           <el-tooltip content="朋友圈" placement="top">
-            <svg class="icon" aria-hidden="true">
+            <svg class="icon" aria-hidden="true" @click="listenNavigateToPyq">
               <use xlink:href="#icon-show-pyq"></use>
             </svg>
           </el-tooltip>
         </div>
         <div class="item life">
           <el-tooltip content="生活圈" placement="top">
-            <svg class="icon" aria-hidden="true">
+            <svg class="icon" aria-hidden="true" @click="listenNavigateToLife">
               <use xlink:href="#icon-show-life"></use>
             </svg>
           </el-tooltip>
@@ -45,7 +45,7 @@
       <div v-else class="info-show-interaction-group">
         <div class="item message">
           <el-tooltip content="发送消息" placement="top">
-            <svg class="icon" aria-hidden="true">
+            <svg class="icon" aria-hidden="true" @click="listenNavigateToChat">
               <use xlink:href="#icon-send-message"></use>
             </svg>
           </el-tooltip>
@@ -167,12 +167,20 @@
 
 <script setup lang="ts">
   import { ref, computed, watch } from 'vue'
-  import { useRoute } from 'vue-router'
-  import { getFriendInfo, getGroupInfo } from '@/api/contacts'
-  import { GetContactsInfoType, GetGroupInfoType } from '@/types/contacts'
+  import { useRoute, useRouter } from 'vue-router'
+  import { getFriendInfo, getGroupInfo, updateContactsRemarks, updateGroupsRemarks } from '@/api/contacts'
+  import {
+    GetContactsInfoType,
+    GetGroupInfoType,
+    UpdateContactsRemarksType,
+    UpdateGroupsRemarksType,
+  } from '@/types/contacts'
   import useStore from '@/store/index'
   import { sessionStorage } from '@/utils/storage'
+  import { ElMessage } from 'element-plus'
+  import { TIP_TYPE } from '@/config'
 
+  const router = useRouter()
   const route = useRoute()
   const store = useStore()
   const storage = sessionStorage(`${store.user_id}`)
@@ -244,9 +252,83 @@
     isEdit.value = true
   }
 
+  // 修改联系人备注
+  const updateContactsRemarksData = async () => {
+    const remarksInfo: UpdateContactsRemarksType = {
+      userId: store.user_id,
+      friendId: id.value,
+      remarks: info.value.remarks,
+    }
+    const { data } = await updateContactsRemarks(remarksInfo)
+    if (data) {
+      ElMessage.success(TIP_TYPE.UPDATE_CONTACTS_REMARKS_SUCCESS)
+      const index = (storage.get('contactsInfo') || []).findIndex((item: any) => item.id === id.value)
+      if (index !== -1) {
+        storage.delete('contactsInfo', index)
+      }
+    } else {
+      ElMessage.error(TIP_TYPE.UPDATE_CONTACTS_REMARKS_FAIL)
+    }
+  }
+
+  // 修改用户群昵称
+  const updateGroupsRemarksData = async () => {
+    const remarksInfo: UpdateGroupsRemarksType = {
+      userId: store.user_id,
+      groupId: id.value,
+      remarks: info.value.remarks,
+    }
+    const { data } = await updateGroupsRemarks(remarksInfo)
+    if (data) {
+      ElMessage.success(TIP_TYPE.UPDATE_GROUPS_REMARKS_SUCCESS)
+      const index = (storage.get('groupsInfo') || []).findIndex((item: any) => item.id === id.value)
+      if (index !== -1) {
+        storage.delete('groupsInfo', index)
+      }
+    } else {
+      ElMessage.error(TIP_TYPE.UPDATE_GROUPS_REMARKS_FAIL)
+    }
+  }
+
   // 完成编辑
-  const listenConfirmEdit = () => {
+  const listenConfirmEdit = async () => {
     isEdit.value = false
+    if (type.value === 'friend') {
+      await updateContactsRemarksData()
+    } else {
+      await updateGroupsRemarksData()
+    }
+  }
+
+  // 跳转到聊天界面
+  const listenNavigateToChat = () => {
+    router.push({
+      name: 'message',
+      query: {
+        type: type.value,
+        id: id.value,
+      },
+    })
+  }
+
+  // 跳转到用户朋友圈
+  const listenNavigateToPyq = () => {
+    router.push({
+      name: 'pyq',
+      query: {
+        id: id.value,
+      },
+    })
+  }
+
+  // 跳转到用户生活圈
+  const listenNavigateToLife = () => {
+    router.push({
+      name: 'life',
+      query: {
+        id: id.value,
+      },
+    })
   }
 </script>
 
