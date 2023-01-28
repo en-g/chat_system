@@ -11,8 +11,10 @@ const request = (config: any) => {
     timeout: TIME_OUT,
   })
 
+  // 请求拦截
   instance.interceptors.request.use(
     (config: any) => {
+      // 携带 token
       const store = useStore()
       const storage = localStorage(`${store.user_id}`)
       const token = storage.get('token')
@@ -24,6 +26,7 @@ const request = (config: any) => {
     }
   )
 
+  // 响应拦截
   instance.interceptors.response.use((res: any) => {
     const { status, data } = res
     if (status === 200) {

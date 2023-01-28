@@ -58,9 +58,10 @@
 
   const emit = defineEmits(['cancle', 'confirm'])
   const props = defineProps<{
-    id: number
+    id: number // 用户 ID
   }>()
 
+  // 个人信息
   const selfInfo = reactive<AccountSelfInfoType>({
     userId: props.id,
     avatarUrl: '',
@@ -68,19 +69,22 @@
     sex: '',
     birthday: new Date(),
   })
-  const chooseId = ref<number>(-1)
+  const chooseId = ref<number>(-1) // 标记被选择的头像 ID
 
+  // 获取用户注册默认的头像列表
   const getUserRegisterDefaultAvatarList = async () => {
     const { data } = await getDefaultAvatarList()
     return data
   }
   const defaultAvatarList = await getUserRegisterDefaultAvatarList()
 
+  // 选择头像
   const listenChooseAvatar = (id: number, avatarUrl: string) => {
     chooseId.value = id
     selfInfo.avatarUrl = avatarUrl
   }
 
+  // 头像上传
   const listenAvatarChange = async (uploadFile: UploadFile) => {
     if (uploadFile.status === 'ready') {
       const res: any = await fileUpload.singleFileUpload('avatar', uploadFile.raw)
@@ -99,10 +103,12 @@
     }
   }
 
+  // 取消手动填写个人信息
   const listenCancleWriteInfo = () => {
     emit('cancle')
   }
 
+  // 确认填写个人信息，上传个人信息
   const listenConfirmWriteInfo = async () => {
     if (selfInfo.avatarUrl && selfInfo.birthday && selfInfo.nickname && selfInfo.sex) {
       const { data } = await writeUserRegisterInfo({

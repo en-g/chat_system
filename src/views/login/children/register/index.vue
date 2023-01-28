@@ -66,17 +66,19 @@
 
   const emit = defineEmits(['cancle', 'skip', 'write'])
 
+  // 注册必填信息
   const registerInfo = reactive<AccountRegisterInfoType>({
     email: '',
     username: '',
     password: '',
     verificationCode: '',
   })
-  const countDown = ref<number>(60)
-  const isSend = ref<boolean>(false)
-  const dialogVisible = ref<boolean>(false)
-  const registerId = ref<number>(-1)
+  const countDown = ref<number>(60) // 注册验证码倒计时
+  const isSend = ref<boolean>(false) // 标记是否点击发送验证码
+  const dialogVisible = ref<boolean>(false) // 标记是否提醒填写个人信息
+  const registerId = ref<number>(-1) // 用户注册后得到的 ID
 
+  // 邮箱验证
   const validateEmail = (rule: any, value: any, callback: any) => {
     const reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/
     if (reg.test(value)) {
@@ -86,6 +88,7 @@
     }
   }
 
+  // 注册信息验证
   const verificationRules = reactive<FormRules>({
     email: [
       { required: true, message: '邮箱不能为空', trigger: 'blur' },
@@ -103,7 +106,9 @@
     verificationCode: [{ required: true, message: '验证码不能为空', trigger: 'blur' }],
   })
 
+  // 发送注册的验证码
   const listenSendVerificationCode = async () => {
+    // 邮箱不能为空
     if (!registerInfo.email) {
       ElMessage.error(TIP_TYPE.EMAIL_NOT_NULL)
       return
@@ -135,10 +140,12 @@
     }
   }
 
+  // 取消注册
   const listenCancleRegister = () => {
     emit('cancle')
   }
 
+  // 确认注册
   const listenConfirmRegister = async () => {
     if (registerInfo.email && registerInfo.username && registerInfo.password && registerInfo.verificationCode) {
       const { data } = await userRegister(registerInfo)
@@ -169,11 +176,13 @@
     }
   }
 
+  // 跳过填写个人信息
   const listenSkipWriteInfo = () => {
     emit('skip', registerId.value)
     dialogVisible.value = false
   }
 
+  // 手动填写个人信息
   const listenChooseWriteInfo = () => {
     emit('write', registerId.value)
     dialogVisible.value = false

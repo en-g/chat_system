@@ -1,3 +1,4 @@
+// 路由规则
 const routes: Array<any> = [
   {
     path: '/',

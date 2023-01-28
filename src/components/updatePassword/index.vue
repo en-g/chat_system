@@ -66,6 +66,7 @@
 
   const emit = defineEmits(['cancle', 'confirm'])
 
+  // 修改密码必填信息
   const passInfo = reactive<PassInfoType>({
     email: '',
     username: '',
@@ -73,9 +74,10 @@
     confirmPass: '',
     verificationCode: '',
   })
-  const countDown = ref<number>(60)
-  const isSend = ref<boolean>(false)
+  const countDown = ref<number>(60) // 验证码倒计时
+  const isSend = ref<boolean>(false) // 标记是否点击发送验证码
 
+  // 邮箱验证规则
   const validateEmail = (rule: any, value: any, callback: any) => {
     const reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/
     if (reg.test(value)) {
@@ -85,6 +87,7 @@
     }
   }
 
+  // 密码验证规则
   const validatePassword = (rule: any, value: any, callback: any) => {
     if (value !== passInfo.newPass) {
       callback(new Error('确认密码必须与新密码相同'))
@@ -93,6 +96,7 @@
     }
   }
 
+  // 表单验证规则
   const verificationRules = reactive<FormRules>({
     email: [
       { required: true, message: '邮箱不能为空', trigger: 'blur' },
@@ -115,7 +119,9 @@
     verificationCode: [{ required: true, message: '验证码不能为空', trigger: 'blur' }],
   })
 
+  // 发送修改密码验证码
   const listenSendVerificationCode = async () => {
+    // 邮箱不能为空
     if (!passInfo.email) {
       ElMessage.error(TIP_TYPE.EMAIL_NOT_NULL)
       return
@@ -150,10 +156,12 @@
     }
   }
 
+  // 取消修改密码
   const listenCancleUpdate = () => {
     emit('cancle')
   }
 
+  // 确定修改密码
   const listenConfirmUpdate = async () => {
     const info: updatePassType = {
       email: passInfo.email,
@@ -161,6 +169,7 @@
       newPass: passInfo.newPass,
       verificationCode: passInfo.verificationCode,
     }
+    // 信息完整
     if (info.email && info.username && info.newPass && info.verificationCode) {
       const { data } = await updatePassword(info)
       switch (data.status) {
@@ -179,6 +188,7 @@
           break
       }
     } else {
+      // 信息不完整
       ElMessage.error(TIP_TYPE.PASS_INFO_ERROR)
     }
   }

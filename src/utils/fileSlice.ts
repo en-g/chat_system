@@ -3,7 +3,7 @@ import { FileSliceType } from '@/types/file'
 const fileSlice = (file: any): Promise<FileSliceType> => {
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL('../worker/fileWorker', import.meta.url), { type: 'module' })
-    const defauktChunkSize = 5 * 1024 * 1024
+    const defauktChunkSize = 5 * 1024 * 1024 // 文件分块默认大小
     worker.onmessage = function (e) {
       worker.terminate()
       resolve(e.data)

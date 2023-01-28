@@ -87,6 +87,7 @@
   const { data: groups } = await getGroupsListData()
   const groupsList = reactive<ContactsListType[]>(groups)
 
+  // 跳转到好友验证助手
   const listenNavigateToFriendAssistant = () => {
     isShow.value = true
     store.clickContactsType = ''
@@ -98,6 +99,7 @@
     })
   }
 
+  // 跳转到群聊验证助手
   const listenNavigateToGroupAssistant = () => {
     isShow.value = true
     store.clickContactsType = ''
@@ -109,6 +111,7 @@
     })
   }
 
+  // 显示联系人/群聊信息
   const listenShowContactsInfo = () => {
     isShow.value = true
   }

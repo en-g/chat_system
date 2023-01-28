@@ -10,11 +10,18 @@ const router = createRouter({
   routes,
 })
 
+// 全局前置路由守卫
 router.beforeEach((to, from, next) => {
+  // 跳转到登录界面，直接跳转
   if (to.path === '/login') {
     next()
     return
   }
+  /**
+   * 本地保存用户 ID
+   * 每次路由跳转都确保 store.user_id 有值（包括刷新页面）
+   * 本地保存的 ID 不存在时，跳转到登录界面
+   */
   const store = useStore()
   const storage = localStorage()
   const user_id = storage.get('userId')

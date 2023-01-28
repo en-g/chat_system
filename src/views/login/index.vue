@@ -96,10 +96,12 @@
   const router = useRouter()
   const store = useStore()
 
+  // 登录必填信息
   const loginInfo = reactive<UserLoginType>({
     username: '',
     password: '',
   })
+  // 登录信息验证
   const verificationRules = reactive<FormRules>({
     username: [
       { required: true, message: '账号不能为空', trigger: 'blur' },
@@ -111,12 +113,13 @@
       { min: 6, max: 20, message: '长度必须为6~20', trigger: 'blur' },
     ],
   })
-  const isRemember = ref<boolean>(false)
-  const isUpdate = ref<boolean>(false)
-  const isRegister = ref<boolean>(false)
-  const isWrite = ref<boolean>(false)
-  const registerId = ref<number>(-1)
+  const isRemember = ref<boolean>(false) // 标记是否记住密码
+  const isUpdate = ref<boolean>(false) // 标记是否点击修改密码
+  const isRegister = ref<boolean>(false) // 标记是否点击注册
+  const isWrite = ref<boolean>(false) // 标记注册后是否填写个人信息
+  const registerId = ref<number>(-1) // 用户注册之后得到的用户 ID
 
+  // 初始化登录信息，若记住密码会自动获取
   const initLoginInfo = () => {
     const storage = localStorage()
     const username = storage.get('username')
@@ -129,17 +132,21 @@
   }
   initLoginInfo()
 
+  // 用户登录
   const listenUserLogin = async () => {
     if (loginInfo.username && loginInfo.password) {
+      // 查询用户是否存在
       const res = await searchUser(loginInfo)
       if (!res.data) {
         ElMessage.error(TIP_TYPE.LOGIN_INFO_ERROR)
       } else {
         const { data } = await userLogin(loginInfo)
         ElMessage.success(TIP_TYPE.LOGIN_SUCCESS)
+        // 用户 ID 缓存
         store.user_id = data.id
         let storage = localStorage()
         storage.set('userId', data.id)
+        // 若记住密码，缓存到本地（后续再进行密码加密）
         if (isRemember.value) {
           storage.set('username', loginInfo.username)
           storage.set('password', loginInfo.password)
@@ -148,6 +155,7 @@
           storage.remove('password')
         }
         storage = localStorage(data.id)
+        // 缓存 token
         storage.set('token', data.access_token)
         router.push({ name: 'contacts' })
       }
@@ -156,27 +164,33 @@
     }
   }
 
+  // 修改密码
   const listenUpdatePassword = () => {
     isUpdate.value = true
   }
 
-  const listenUserRegister = () => {
-    isRegister.value = true
-  }
-
+  // 取消修改密码
   const listenCancleUpdate = () => {
     isUpdate.value = false
   }
 
+  // 确定修改密码
   const listenConfirmUpdate = () => {
     isUpdate.value = false
     loginInfo.password = ''
   }
 
+  // 注册
+  const listenUserRegister = () => {
+    isRegister.value = true
+  }
+
+  // 取消注册
   const listenCancleRegister = () => {
     isRegister.value = false
   }
 
+  // 注册后跳过填写个人信息，后端自动生成
   const listenSkipWriteInfo = async (id: number) => {
     registerId.value = id
     const { data } = await randomUserRegisterInfo({
@@ -190,12 +204,14 @@
     isRegister.value = false
   }
 
+  // 选择手动填写个人信息
   const listenChooseWriteInfo = (id: number) => {
     registerId.value = id
     isWrite.value = true
     isRegister.value = false
   }
 
+  // 取消手动填写个人信息，后端自动生成
   const listenCancleWriteInfo = async () => {
     const { data } = await randomUserRegisterInfo({
       userId: registerId.value,
@@ -208,6 +224,7 @@
     isWrite.value = false
   }
 
+  // 确定个人信息
   const listenConfirmWriteInfo = () => {
     isWrite.value = false
   }

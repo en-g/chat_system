@@ -46,22 +46,25 @@
   const emit = defineEmits(['showContactsInfo'])
 
   const props = defineProps<{
-    type: string
-    contactsList: ContactsListType[]
+    type: string // 列表类型
+    contactsList: ContactsListType[] // 列表数据
   }>()
 
-  const openList: string[] = []
-  const clickContactsId = ref<number>(-1)
+  const openList: string[] = [] // 保存被点击下拉的分组
+  const clickContactsId = ref<number>(-1) // 查看的联系人或群聊 ID
 
+  // 点击下拉分组
   const listenOpenMenu = (index: string) => {
     openList.push(index)
   }
 
+  // 关闭下拉分组
   const listenCloseMenu = (index: string) => {
     const i = openList.findIndex((item: string) => item === index)
     openList.splice(i, 1)
   }
 
+  // 跳转查看联系人或群聊信息
   const listenNavigateToContactsInfo = (id: number) => {
     emit('showContactsInfo')
     clickContactsId.value = id
@@ -75,6 +78,7 @@
     })
   }
 
+  // 添加好友/加入群聊
   const listenAddFriendOrGroup = () => {
     console.log('add')
   }

@@ -177,14 +177,17 @@
   const store = useStore()
   const storage = sessionStorage(`${store.user_id}`)
 
+  // 联系人/群聊 ID
   const id = computed((): number => {
     return parseInt(route.query.id as string)
   })
-  const isEdit = ref<boolean>(false)
+  const isEdit = ref<boolean>(false) // 标记是否点击编辑备注/群昵称
   const type = computed((): string => {
+    // 列表类型
     return route.query.type as string
   })
 
+  // 获取联系人信息，做 sessionStorage 缓存
   const getContactsInfoData = async () => {
     const contactsInfo = storage.get('contactsInfo') || []
     const info = contactsInfo.find((item: any) => item.id === id.value)
@@ -202,6 +205,7 @@
     return data
   }
 
+  // 获取群聊信息，做 sessionStorage 缓存
   const getGroupsInfoData = async () => {
     const groupsInfo = storage.get('groupsInfo') || []
     const info = groupsInfo.find((item: any) => item.id === id.value)
@@ -230,14 +234,17 @@
   }
   const info = ref<any>(await getInfo())
 
+  // 监听联系人和群聊、不同联系人、不同群聊间的切换，重新请求数据
   watch([type, id], async () => {
     info.value = await getInfo()
   })
 
+  // 点击编辑备注/群昵称
   const listenEditRemarks = () => {
     isEdit.value = true
   }
 
+  // 完成编辑
   const listenConfirmEdit = () => {
     isEdit.value = false
   }

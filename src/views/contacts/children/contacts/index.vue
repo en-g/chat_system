@@ -14,11 +14,12 @@
   const emit = defineEmits(['showContactsInfo'])
 
   const props = defineProps<{
-    title: string
-    type: string
-    contactsList: ContactsListType[]
+    title: string // 列表标题
+    type: string // 列表类型（联系人/群聊）
+    contactsList: ContactsListType[] // 列表数据
   }>()
 
+  // 显示联系人/群聊信息
   const listenShowContactsInfo = () => {
     emit('showContactsInfo')
   }

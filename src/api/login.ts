@@ -3,11 +3,11 @@ import {
   RegisterInfoType,
   UserLoginType,
   RegisterCodeInfoType,
-  AccountSelfInfoType,
   AccountRandomSelfInfoType,
   AccountSelfInfoUploadType,
 } from '@/types/login'
 
+// 用户登录
 const userLogin = (info: UserLoginType) => {
   return Promise.resolve(
     post({
@@ -19,6 +19,7 @@ const userLogin = (info: UserLoginType) => {
   )
 }
 
+// 查询用户是否存在
 const searchUser = (info: UserLoginType) => {
   return Promise.resolve(
     get({

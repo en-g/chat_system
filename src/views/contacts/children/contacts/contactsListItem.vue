@@ -16,7 +16,7 @@
   import { ContactsListItemType } from '@/types/contacts'
 
   const props = defineProps<{
-    contactsListItem: ContactsListItemType
+    contactsListItem: ContactsListItemType // 联系人或分组基本信息
   }>()
 </script>
 

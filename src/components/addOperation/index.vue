@@ -9,6 +9,7 @@
 <script setup lang="ts">
   import { Plus } from '@element-plus/icons-vue'
 
+  // 显示添加操作菜单
   const listenShowAddMenu = () => {
     console.log('显示添加操作菜单')
   }

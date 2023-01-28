@@ -12,22 +12,24 @@ class FileUpload {
     }
     // 文件分块
     const sliceRes: any = await fileSlice(file)
+    // 分块失败
     if (sliceRes.status === 0) {
       return {
         status: sliceRes.status,
       }
     }
     const suffix = file.name.substring(file.name.lastIndexOf('.'))
+    // 查询要上传的文件是否存在
     const { data } = await searchUploadFileIsExist({ fileHash: sliceRes.fileHash as string })
     if (data.status === 1) {
-      // 文件存在
+      // 文件存在，秒传
       console.log('秒传')
       return {
         status: 1,
         fileInfo: data.fileInfo,
       }
     } else if (data.status === 2) {
-      // 断点续传
+      // 文件部分分块存在，断点续传
       console.log('断点续传')
       const requestArr: any[] = []
       sliceRes.chunkList
@@ -47,7 +49,7 @@ class FileUpload {
         })
       const uploadRes = await Promise.all(requestArr)
       if ((!Array.isArray(uploadRes) && uploadRes) || uploadRes.filter((item) => item).length === uploadRes.length) {
-        // 文件合并
+        // 文件分块上传完毕，合并文件
         const { data } = await uploadFileChunkMerge({
           fileHash: sliceRes.fileHash,
           model,
@@ -62,7 +64,7 @@ class FileUpload {
         }
       }
     } else if (data.status === 0) {
-      // 分片上传
+      // 文件未上传，分片上传
       console.log('分片上传')
       const requestArr: any[] = []
       sliceRes.chunkList.forEach((chunk: any) => {
@@ -83,7 +85,7 @@ class FileUpload {
         (!Array.isArray(uploadRes) && uploadRes && sliceRes.chunkList.length === 1) ||
         uploadRes.filter((item) => item).length === sliceRes.chunkList.length
       ) {
-        // 文件合并
+        // 文件分块上传完毕，合并文件
         const { data } = await uploadFileChunkMerge({
           fileHash: sliceRes.fileHash,
           model,
