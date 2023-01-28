@@ -1,7 +1,10 @@
-import { get, put } from '@/request/index'
+import { del, get, post, put } from '@/request/index'
 import {
+  AddFriendGroupsType,
+  DeleteFriendGroupsIdsType,
   GetContactsInfoType,
   GetContactsListType,
+  GetFriendGroupListType,
   GetGroupInfoType,
   UpdateContactsRemarksType,
   UpdateGroupsRemarksType,
@@ -57,4 +60,39 @@ const updateGroupsRemarks = (info: UpdateGroupsRemarksType) => {
   )
 }
 
-export { getContactsList, getGroupsList, getFriendInfo, getGroupInfo, updateContactsRemarks, updateGroupsRemarks }
+// 获取分组列表
+const getFriendGroupList = (id: GetFriendGroupListType) => {
+  return Promise.resolve(get({ url: `friendGroups/list/${id.userId}` }))
+}
+
+// 添加分组
+const addFriendGroup = (info: AddFriendGroupsType) => {
+  return Promise.resolve(
+    post({
+      url: 'friendGroups/add',
+      data: info,
+    })
+  )
+}
+
+// 删除分组
+const deleteFriendGroup = (ids: DeleteFriendGroupsIdsType) => {
+  return Promise.resolve(
+    del({
+      url: 'friendGroups/delete',
+      data: ids,
+    })
+  )
+}
+
+export {
+  getContactsList,
+  getGroupsList,
+  getFriendInfo,
+  getGroupInfo,
+  updateContactsRemarks,
+  updateGroupsRemarks,
+  getFriendGroupList,
+  addFriendGroup,
+  deleteFriendGroup,
+}

@@ -3,7 +3,7 @@
     <div class="contacts-menu">
       <el-scrollbar class="contacts-menu-scrollbar">
         <div class="contacts-edit-friend-group">
-          <div class="contacts-edit-friend-group-content">编辑分组</div>
+          <div class="contacts-edit-friend-group-content" @click="listenEditFriendGroups">编辑分组</div>
         </div>
         <div class="contacts-system-assistant">
           <div class="contacts-system-assistant-title">系统助手</div>
@@ -51,42 +51,132 @@
       </div>
       <div v-show="!isShow" class="fill"></div>
     </div>
+    <el-dialog
+      v-model="isEdit"
+      width="350px"
+      class="contacts-edit-friend-group-dialog"
+      title="编辑分组"
+      @close="listenDialogClose"
+    >
+      <div class="add-friend-group">
+        <el-input v-model="friendGroupName" maxlength="10" placeholder="请输入分组名称" type="text" size="default" />
+        <svg class="icon" aria-hidden="true" @click="listenAddFriendGroup">
+          <use xlink:href="#icon-add"></use>
+        </svg>
+      </div>
+      <div class="friend-group-list">
+        <el-scrollbar class="friend-group-list-scroll">
+          <div v-for="item in friendGroupsList" :key="item.id" class="friend-group-list-item">
+            <div class="name">
+              <svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-friendGroup"></use>
+              </svg>
+              {{ `${item.name}(${item.total})` }}
+            </div>
+            <div class="delete">
+              <svg class="icon" aria-hidden="true" @click="listenDeleteFriendGroup(item)">
+                <use xlink:href="#icon-delete"></use>
+              </svg>
+            </div>
+          </div>
+        </el-scrollbar>
+        <el-dialog v-model="isChoose" title="将联系人移至" width="250px" top="30vh">
+          <el-select v-model="newId" placeholder="选择分组" size="default">
+            <el-option v-for="item in canChooseList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+          <template #footer>
+            <span class="dialog-footer">
+              <el-button type="primary" @click="listenMoveContacts"> 确定 </el-button>
+            </span>
+          </template>
+        </el-dialog>
+      </div>
+      <div class="choose-friend-group"></div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" size="default" @click="listenConfirmEditFriendGroup"> 确定 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, provide } from 'vue'
-  import { useRouter, useRoute } from 'vue-router'
+  import { ref, reactive } from 'vue'
+  import { useRouter } from 'vue-router'
   import useStore from '@/store/index'
   import Contacts from './children/contacts/index.vue'
-  import { getContactsList, getGroupsList } from '@/api/contacts'
-  import { ContactsListType } from '@/types/contacts'
+  import { addFriendGroup, deleteFriendGroup, getContactsList, getFriendGroupList, getGroupsList } from '@/api/contacts'
+  import {
+    AddFriendGroupsType,
+    ContactsListType,
+    DeleteFriendGroupsIdsType,
+    FriendGroupsListType,
+  } from '@/types/contacts'
+  import { ElMessage } from 'element-plus'
+  import { TIP_TYPE } from '@/config'
+  import { sessionStorage } from '@/utils/storage'
 
   const router = useRouter()
-  const route = useRoute()
   const store = useStore()
+  const storage = sessionStorage(`${store.user_id}`)
 
   const isShow = ref<boolean>(false)
+  const isEdit = ref<boolean>(false) // 标记是否显示编辑分组弹出框
+  const isChoose = ref<boolean>(false) // 标记是否显示选择分组弹出框
+  const isUpdate = ref<boolean>(false) // 分组列表是否被修改
+  const friendGroupName = ref<string>('') // 新增分组名称
+  const chooseId = ref<number>(-1) // 被删除的分组 ID
+  const newId = ref<number | null>(null) // 要移动到的分组 ID
+  const canChooseList = ref<FriendGroupsListType[]>([]) // 可选择的分组列表
 
   // 获取联系人列表
   const getContactsListData = async () => {
-    const result = await getContactsList({
+    const list = storage.get('contactsList')
+    if (list) {
+      return list
+    }
+    const { data } = await getContactsList({
       userId: store.user_id,
     })
-    return result
+    storage.set('contactsList', data)
+    return data
   }
-  const { data: friends } = await getContactsListData()
+  const friends = await getContactsListData()
   const friendsList = reactive<ContactsListType[]>(friends)
 
   // 获取群聊列表
   const getGroupsListData = async () => {
-    const result = await getGroupsList({
+    const list = storage.get('groupsList')
+    if (list) {
+      return list
+    }
+    const { data } = await getGroupsList({
       userId: store.user_id,
     })
-    return result
+    storage.set('groupsList', data)
+    return data
   }
-  const { data: groups } = await getGroupsListData()
+  const groups = await getGroupsListData()
   const groupsList = reactive<ContactsListType[]>(groups)
+
+  // 获取分组列表
+  const getFriendGroupListData = async () => {
+    const { data } = await getFriendGroupList({
+      userId: store.user_id,
+    })
+    return data
+  }
+  const friendGroupsList = reactive<FriendGroupsListType[]>([])
+
+  // 显示编辑分组弹出框
+  const listenEditFriendGroups = async () => {
+    if (friendGroupsList.length === 0) {
+      const friendGroups = await getFriendGroupListData()
+      friendGroupsList.push(...friendGroups)
+    }
+    isEdit.value = true
+  }
 
   // 跳转到好友验证助手
   const listenNavigateToFriendAssistant = () => {
@@ -119,6 +209,97 @@
 
   const listenClickBack = () => {
     isShow.value = false
+  }
+
+  // 添加分组
+  const listenAddFriendGroup = async () => {
+    const info: AddFriendGroupsType = {
+      userId: store.user_id,
+      name: friendGroupName.value,
+    }
+    const { data } = await addFriendGroup(info)
+    switch (data.status) {
+      case 0:
+        ElMessage.error(TIP_TYPE.ADD_FRIEND_GROUP_FAIL)
+        break
+      case 1:
+        ElMessage.success(TIP_TYPE.ADD_FRIEND_GROUP_SUCCESS)
+        friendGroupsList.push({
+          id: data.id,
+          name: friendGroupName.value,
+          total: 0,
+        })
+        friendGroupName.value = ''
+        isUpdate.value = true
+        break
+      case 2:
+        ElMessage.error(TIP_TYPE.FRIEND_GROUP_HAS_EXIST)
+    }
+  }
+
+  // 删除分组
+  const listenDeleteFriendGroup = async (info: FriendGroupsListType) => {
+    if (friendGroupsList.length === 1) {
+      ElMessage.error(TIP_TYPE.FRIEND_GROUP_IS_LAST_ONE)
+      return
+    }
+    if (info.total > 0) {
+      chooseId.value = info.id
+      canChooseList.value = friendGroupsList.filter((item: FriendGroupsListType) => item.id !== info.id)
+      isChoose.value = true
+      return
+    }
+    const ids: DeleteFriendGroupsIdsType = {
+      userId: store.user_id,
+      friendGroupId: info.id,
+      newId: -1,
+    }
+    const { data } = await deleteFriendGroup(ids)
+    if (data) {
+      ElMessage.success(TIP_TYPE.DELETE_FRIEND_GROUP_SUCCESS)
+      const index = friendGroupsList.findIndex((item: FriendGroupsListType) => item.id === info.id)
+      friendGroupsList.splice(index, 1)
+      isUpdate.value = true
+    } else {
+      ElMessage.error(TIP_TYPE.DELETE_FRIEND_GROUP_FAIL)
+    }
+  }
+
+  // 将联系人移到其他分组
+  const listenMoveContacts = async () => {
+    const ids: DeleteFriendGroupsIdsType = {
+      userId: store.user_id,
+      friendGroupId: chooseId.value,
+      newId: newId.value as number,
+    }
+    const { data } = await deleteFriendGroup(ids)
+    if (data) {
+      ElMessage.success(TIP_TYPE.DELETE_FRIEND_GROUP_SUCCESS)
+      const index = friendGroupsList.findIndex((item: FriendGroupsListType) => item.id === chooseId.value)
+      const info: any = friendGroupsList.find((item: FriendGroupsListType) => item.id === newId.value)
+      info.total += friendGroupsList[index].total
+      friendGroupsList.splice(index, 1)
+      isChoose.value = false
+      isUpdate.value = true
+    } else {
+      ElMessage.error(TIP_TYPE.DELETE_FRIEND_GROUP_FAIL)
+    }
+  }
+
+  // 确定编辑分组
+  const listenConfirmEditFriendGroup = () => {
+    isEdit.value = false
+  }
+
+  // 编辑分组弹出框消失，更新数据
+  const listenDialogClose = async () => {
+    if (isUpdate.value) {
+      const data = await getContactsListData()
+      friendsList.splice(0, friendsList.length)
+      friendsList.push(...data)
+      storage.set('contactsList', data)
+      isUpdate.value = false
+    }
   }
 </script>
 
@@ -214,5 +395,36 @@
         background-color: #fff;
       }
     }
+    .contacts-edit-friend-group-dialog {
+      .add-friend-group {
+        display: flex;
+        align-items: center;
+        .icon {
+          margin-left: 10px;
+        }
+      }
+      .friend-group-list {
+        .friend-group-list-scroll {
+          max-height: 200px;
+          padding: 10px 0;
+          box-sizing: border-box;
+          .friend-group-list-item {
+            padding: 10px 30px 10px 0;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            .name {
+              display: flex;
+              align-items: center;
+            }
+          }
+        }
+      }
+      .choose-friend-group {
+      }
+    }
+  }
+  :deep(.el-dialog__body) {
+    padding: 10px 20px;
   }
 </style>

@@ -39,3 +39,24 @@ export interface UpdateGroupsRemarksType {
   groupId: number
   remarks: string
 }
+
+export interface GetFriendGroupListType {
+  userId: number
+}
+
+export interface FriendGroupsListType {
+  id: number
+  name: string
+  total: number
+}
+
+export interface AddFriendGroupsType {
+  userId: number
+  name: string
+}
+
+export interface DeleteFriendGroupsIdsType {
+  userId: number
+  friendGroupId: number
+  newId: number
+}
