@@ -213,6 +213,10 @@
 
   // 添加分组
   const listenAddFriendGroup = async () => {
+    if (!friendGroupName.value) {
+      ElMessage.error(TIP_TYPE.FRIEND_GROUP_IS_NOT_NULL)
+      return
+    }
     const info: AddFriendGroupsType = {
       userId: store.user_id,
       name: friendGroupName.value,
@@ -300,6 +304,7 @@
       storage.set('contactsList', data)
       isUpdate.value = false
     }
+    friendGroupName.value = ''
   }
 </script>
 

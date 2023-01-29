@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import { ref, watch } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
 
   const router = useRouter()
@@ -35,6 +35,14 @@
     currentActive.value = index
     router.replace(`/${navbarDefaultList[index].split('-')[1]}`)
   }
+
+  // 监听路由改变
+  watch(
+    () => route.path,
+    () => {
+      currentActive.value = navbarDefaultList.findIndex((item: string) => item.includes(route.path.split('/')[1]))
+    }
+  )
 </script>
 
 <style scoped lang="less">

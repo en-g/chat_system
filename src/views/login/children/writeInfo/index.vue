@@ -33,7 +33,14 @@
             </el-select>
           </el-form-item>
           <el-form-item class="write-info-main-form-item" label="选择出生日期">
-            <el-date-picker v-model="selfInfo.birthday" type="date" placeholder="请选择出生日期" size="default" />
+            <el-date-picker
+              v-model="selfInfo.birthday"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              type="date"
+              placeholder="请选择出生日期"
+              size="default"
+            />
           </el-form-item>
         </el-form>
         <div class="write-info-main-button">
@@ -67,7 +74,7 @@
     avatarUrl: '',
     nickname: '',
     sex: '',
-    birthday: new Date(),
+    birthday: '',
   })
   const chooseId = ref<number>(-1) // 标记被选择的头像 ID
 
@@ -111,13 +118,7 @@
   // 确认填写个人信息，上传个人信息
   const listenConfirmWriteInfo = async () => {
     if (selfInfo.avatarUrl && selfInfo.birthday && selfInfo.nickname && selfInfo.sex) {
-      const { data } = await writeUserRegisterInfo({
-        userId: selfInfo.userId,
-        nickname: selfInfo.nickname,
-        avatarUrl: selfInfo.avatarUrl,
-        sex: selfInfo.sex,
-        birthday: selfInfo.birthday.toLocaleDateString(),
-      })
+      const { data } = await writeUserRegisterInfo(selfInfo)
       if (data) {
         ElMessage.success(TIP_TYPE.WRITE_SELF_INFO_SUCCESS)
         emit('confirm')

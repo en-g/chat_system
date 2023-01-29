@@ -39,10 +39,13 @@ const TIP_TYPE = {
   UPDATE_GROUPS_REMARKS_FAIL: '修改群昵称失败，请检查网络是否通畅！',
   ADD_FRIEND_GROUP_SUCCESS: '添加分组成功！',
   ADD_FRIEND_GROUP_FAIL: '添加分组失败，请检查网络是否通畅！',
+  FRIEND_GROUP_IS_NOT_NULL: '添加的分组不能为空，请重新输入！',
   FRIEND_GROUP_HAS_EXIST: '该分组已存在，请重新添加其他分组！',
   DELETE_FRIEND_GROUP_SUCCESS: '删除分组成功！',
   DELETE_FRIEND_GROUP_FAIL: '删除分组失败，请检查网络是否通畅！',
   FRIEND_GROUP_IS_LAST_ONE: '当前只剩下一个分组，无法继续删除！',
+  UPDATE_PERSONAL_INFO_SUCCESS: '修改个人信息成功！',
+  UPDATE_PERSONAL_INFO_FAIL: '修改个人信息失败！',
 }
 
 export { BASE_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

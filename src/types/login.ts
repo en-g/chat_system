@@ -27,7 +27,7 @@ export interface AccountSelfInfoType {
   nickname: string
   avatarUrl: string
   sex: string
-  birthday: Date
+  birthday: string
 }
 
 export interface AccountSelfInfoUploadType {
