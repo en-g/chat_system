@@ -188,6 +188,7 @@
     router.replace('/login')
   }
 
+  // 上传头像
   const listenAvatarChange = async (uploadFile: UploadFile) => {
     if (uploadFile.status === 'ready') {
       const res: any = await fileUpload.singleFileUpload('avatar', uploadFile.raw)
