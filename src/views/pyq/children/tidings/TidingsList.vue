@@ -11,11 +11,13 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, onMounted } from 'vue'
+  import { ref, reactive, onMounted, watch } from 'vue'
+  import { useRoute } from 'vue-router'
   import { PyqTidingsType } from '@/types/pyq'
   import TidingsListItem from './TidingsListItem.vue'
   import { createVirtualList } from '@/utils/virtualList'
 
+  const route = useRoute()
   const props = defineProps<{
     tidingsList: Array<PyqTidingsType>
   }>()
@@ -23,7 +25,7 @@
   const tidingsListRef = ref<any>(null)
   const scrollbarRef = ref<any>()
   const estimatedItemHeight = 254 // 动态默认最小高度
-  const virtualList = createVirtualList(props.tidingsList.length, estimatedItemHeight)
+  let virtualList = createVirtualList(props.tidingsList.length, estimatedItemHeight)
 
   const startOffset = ref<number>(0) // 列表 padding-top
   const endOffset = ref<number>(0) // 列表 padding-bottom
@@ -93,6 +95,16 @@
 
   onMounted(() => {
     initVisibleList()
+
+    // 监听数据变化，刷新虚拟列表
+    watch(
+      () => props.tidingsList,
+      () => {
+        scrollbarRef.value.setScrollTop(0)
+        virtualList = createVirtualList(props.tidingsList.length, estimatedItemHeight)
+        initVisibleList()
+      }
+    )
   })
 </script>
 

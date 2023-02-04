@@ -3,7 +3,6 @@ html,
 body {
   font-size: 13px;
   user-select: none;
-  font-weight: var(--title-font-weight);
 }
 .el-container,
 .el-header,

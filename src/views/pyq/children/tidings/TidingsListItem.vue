@@ -9,7 +9,7 @@
         <div class="tidings-list-item-content">{{ props.tidingsInfo.content }}</div>
         <div class="tidings-list-item-pictures" :class="props.tidingsInfo.pictures.length > 3 ? 'tworow' : 'onerow'">
           <div v-for="item in props.tidingsInfo.pictures" :key="item.id" class="tidings-list-item-pictures-item">
-            <el-image class="image" :src="item.url" fit="cover">
+            <el-image class="image" :src="item.url" :preview-src-list="previewList" fit="cover">
               <template #placeholder>
                 <div class="image-slot">Loading<span class="dot">...</span></div>
               </template>
@@ -17,7 +17,7 @@
           </div>
         </div>
         <div class="tidings-list-item-time-thumbs">
-          <div class="time">{{ props.tidingsInfo.createTime }}</div>
+          <div class="time">{{ props.tidingsInfo.createTime.replace('T', ' ').split('.')[0] }}</div>
           <div class="thumbs-comments">
             <svg class="icon" aria-hidden="true">
               <use xlink:href="#icon-thumbs"></use>
@@ -34,11 +34,18 @@
           </div>
           <div class="comments">
             <div v-for="item in props.tidingsInfo.comments" :key="item.id" class="comments-item">
-              <span class="name" @click="listenReplyContacts(item.userId, item.fromName)">{{ item.fromName }}</span>
-              回复
-              <span class="name" @click="listenReplyContacts(item.toId, item.toName)">{{ item.toName }}</span>
-              <span class="quotes"> :&ensp;</span>
-              {{ item.content }}
+              <span v-if="item.toId">
+                <span class="name" @click="listenReplyContacts(item.userId, item.fromName)">{{ item.fromName }}</span>
+                回复
+                <span class="name" @click="listenReplyContacts(item.toId, item.toName)">{{ item.toName }}</span>
+                <span class="quotes"> :&ensp;</span>
+                {{ item.content }}
+              </span>
+              <span v-else>
+                <span class="name" @click="listenReplyContacts(item.userId, item.fromName)">{{ item.fromName }}</span>
+                <span class="quotes"> :&ensp;</span>
+                {{ item.content }}
+              </span>
             </div>
           </div>
           <div class="input">
@@ -65,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, reactive, computed, onMounted } from 'vue'
   import { PyqTidingsThumbsType, PyqTidingsType } from '@/types/pyq'
   import useStore from '@/store/index'
 
@@ -79,6 +86,14 @@
   const comment = ref<string>('') // 评论
   const toName = ref<string>('') // 被回复方昵称
   const tidingsItemRef = ref<HTMLElement | null>(null)
+  const previewList = reactive<string[]>([]) // 图片预览列表
+
+  const initPreviewList = () => {
+    props.tidingsInfo.pictures.forEach((item) => {
+      previewList.push(item.url)
+    })
+  }
+  initPreviewList()
 
   // 点赞信息
   const thumbsUpinfo = computed(() => {

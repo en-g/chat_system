@@ -16,7 +16,7 @@ export interface PyqTidingsPictureType {
 }
 
 export interface PyqTidingsThumbsType {
-  id: number
+  userId: number
   nickname: string
 }
 
@@ -27,4 +27,19 @@ export interface PyqTidingsCommentsType {
   fromName: string
   toName: string
   content: string
+}
+
+export interface PyqTidingsListIdType {
+  userId: number
+}
+
+export interface ContactPyqTidingsListIdType {
+  userId: number
+  contactId: number
+}
+
+export interface PyqTidingsInfoType {
+  userId: number
+  content: string
+  pictureIds: Array<number>
 }

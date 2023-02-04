@@ -26,6 +26,8 @@ const TIP_TYPE = {
   VERIFICATION_CODE_EMAIL_ERROR: '输入的邮箱或用户名无效，请输入正确的信息！',
   UPLOAD_AVATAR_FAIL: '上传头像失败，请重新上传！',
   UPLOAD_AVATAR_SUCCESS: '上传头像成功！',
+  UPLOAD_IMAGE_FAIL: '上传图片失败，请重新上传！',
+  UPLOAD_IMAGE_SUCCESS: '上传图片成功！',
   IMAGE_MIMETYPE_ERROR: '不支持的图片类型，请重新上传',
   WRITE_SELF_INFO_SUCCESS: '个人信息上传成功！',
   WRITE_SELF_INFO_FAIL: '个人信息上传失败',
@@ -46,6 +48,9 @@ const TIP_TYPE = {
   FRIEND_GROUP_IS_LAST_ONE: '当前只剩下一个分组，无法继续删除！',
   UPDATE_PERSONAL_INFO_SUCCESS: '修改个人信息成功！',
   UPDATE_PERSONAL_INFO_FAIL: '修改个人信息失败！',
+  TIDING_CONTENT_IS_NOT_NULL: '动态内容不能为空，请重新输入！',
+  RELEASE_TIDING_SUCCESS: '发布动态成功！',
+  RELEASE_TIDING_FAIL: '发布动态失败，请检查网络是否通畅！',
 }
 
 export { BASE_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }
