@@ -5,6 +5,7 @@ export interface PyqTidingsType {
   avatarUrl: string
   content: string
   createTime: string
+  isThumbsUp: number
   pictures: Array<PyqTidingsPictureType>
   thumbs: Array<PyqTidingsThumbsType>
   comments: Array<PyqTidingsCommentsType>
@@ -23,9 +24,9 @@ export interface PyqTidingsThumbsType {
 export interface PyqTidingsCommentsType {
   id: number
   userId: number
-  toId: number
+  toId: number | null
   fromName: string
-  toName: string
+  toName: string | null
   content: string
 }
 
@@ -46,4 +47,20 @@ export interface PyqTidingsInfoType {
   userId: number
   content: string
   pictureIds: Array<number>
+}
+
+export interface ThumbsUpPyqTidingsIdsType {
+  userId: number
+  pyqTidingId: number
+}
+
+export interface SendPyqTidingsCommentInfoType {
+  pyqTidingId: number
+  userId: number
+  toId?: number
+  content: string
+}
+
+export interface DeletePyqTidingsIdType {
+  pyqTidingId: number
 }

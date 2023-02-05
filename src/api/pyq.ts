@@ -1,5 +1,12 @@
-import { get, post } from '@/request/index'
-import { ContactPyqTidingsListInfoType, PyqTidingsInfoType, PyqTidingsListInfoType } from '@/types/pyq'
+import { get, post, del } from '@/request/index'
+import {
+  ContactPyqTidingsListInfoType,
+  DeletePyqTidingsIdType,
+  PyqTidingsInfoType,
+  PyqTidingsListInfoType,
+  SendPyqTidingsCommentInfoType,
+  ThumbsUpPyqTidingsIdsType,
+} from '@/types/pyq'
 
 // 获取朋友圈动态列表
 const getPyqTidingsList = (info: PyqTidingsListInfoType) => {
@@ -34,4 +41,52 @@ const releasePyqTiding = (info: PyqTidingsInfoType) => {
   )
 }
 
-export { getPyqTidingsList, getContactPyqTidingsList, releasePyqTiding }
+// 点赞动态
+const thumbsUpPyqTiding = (ids: ThumbsUpPyqTidingsIdsType) => {
+  return Promise.resolve(
+    post({
+      url: 'pyq/thumbs',
+      data: ids,
+    })
+  )
+}
+
+// 点赞动态
+const cancleThumbsUpPyqTiding = (ids: ThumbsUpPyqTidingsIdsType) => {
+  return Promise.resolve(
+    del({
+      url: 'pyq/thumbs',
+      data: ids,
+    })
+  )
+}
+
+// 发送评论
+const sendPyqTidingComment = (info: SendPyqTidingsCommentInfoType) => {
+  return Promise.resolve(
+    post({
+      url: 'pyq/comment',
+      data: info,
+    })
+  )
+}
+
+// 删除动态
+const deletePyqTiding = (id: DeletePyqTidingsIdType) => {
+  return Promise.resolve(
+    del({
+      url: 'pyq',
+      data: id,
+    })
+  )
+}
+
+export {
+  getPyqTidingsList,
+  getContactPyqTidingsList,
+  releasePyqTiding,
+  thumbsUpPyqTiding,
+  cancleThumbsUpPyqTiding,
+  sendPyqTidingComment,
+  deletePyqTiding,
+}

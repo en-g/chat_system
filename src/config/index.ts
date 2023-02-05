@@ -51,6 +51,10 @@ const TIP_TYPE = {
   TIDING_CONTENT_IS_NOT_NULL: '动态内容不能为空，请重新输入！',
   RELEASE_TIDING_SUCCESS: '发布动态成功！',
   RELEASE_TIDING_FAIL: '发布动态失败，请检查网络是否通畅！',
+  COMMENT_IS_NOT_NULL: '评论不能为空，请重新输入！',
+  SEND_TIDING_COMMENT_FAIL: '发送朋友圈动态评论失败，请检查网络是否通畅！',
+  DELETE_PYQ_TIDING_SUCCESS: '删除朋友圈动态成功！',
+  DELETE_PYQ_TIDING_FAIL: '删除朋友圈动态失败，请检查网络是否通畅！',
 }
 
 export { BASE_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

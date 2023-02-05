@@ -13,5 +13,6 @@
   --pyq-name-color: #2b75d6;
   --pyq-name-font-size: 16px;
   --pyq-comments-background-color: #f6f6f6;
-  --pyq-comments-user-color: #2765b7be;
+  --pyq-comments-user-color: #2b74d4be;
+  --pyq-null-font-size: 30px;
 }

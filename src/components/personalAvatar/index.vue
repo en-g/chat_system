@@ -104,23 +104,29 @@
   import { PersonalInfoType, UpdatePersonalInfoType } from '@/types/user'
   import { ElMessage } from 'element-plus'
   import { TIP_TYPE } from '@/config'
-  import { localStorage } from '@/utils/storage'
+  import { localStorage, sessionStorage } from '@/utils/storage'
   import type { UploadFile } from 'element-plus'
   import fileUpload from '@/utils/fileUpload'
 
   const router = useRouter()
   const store = useStore()
   const storage = localStorage(`${store.user_id}`)
+  const sStorage = sessionStorage(`${store.user_id}`)
 
   const isShow = ref<boolean>(false) // 标记是否显示个人信息
   const isEdit = ref<boolean>(false) // 标记是否点击编辑个人信息
 
   // 获取个人信息
   const getPersonalInfoData = async () => {
+    const info = sStorage.get('personalInfo')
+    if (info) {
+      return info
+    }
     const { data } = await getPersonalInfo({
       userId: store.user_id,
     })
     data.birthday = data.birthday.split('T')[0]
+    sStorage.set('personalInfo', data)
     return data
   }
   const data = await getPersonalInfoData()
@@ -150,6 +156,7 @@
     const { data } = await updatePersonalInfo(info)
     if (data) {
       ElMessage.success(TIP_TYPE.UPDATE_PERSONAL_INFO_SUCCESS)
+      sStorage.set('personalInfo', personalInfo.value)
     } else {
       ElMessage.error(TIP_TYPE.UPDATE_PERSONAL_INFO_FAIL)
     }

@@ -15,7 +15,7 @@
       </div>
     </div>
     <div class="pyq-main">
-      <el-scrollbar class="pyq-tidings-list-scroll">
+      <el-scrollbar v-if="!!tidingsList.length" class="pyq-tidings-list-scroll">
         <div class="pyq-tidings-list">
           <Tidings :tidings-list="tidingsList" />
         </div>
@@ -33,9 +33,10 @@
           />
         </div>
       </el-scrollbar>
+      <div v-else class="tidings-null">TA目前暂未发布过动态</div>
     </div>
     <div class="pyq-release">
-      <svg class="icon" aria-hidden="true" @click="listenReleaseTidings">
+      <svg v-show="id === store.user_id || id === -1" class="icon" aria-hidden="true" @click="listenReleaseTidings">
         <use xlink:href="#icon-release"></use>
       </svg>
     </div>
@@ -83,34 +84,45 @@
 </template>
 
 <script setup lang="ts">
-  import { reactive, computed, watch, ref } from 'vue'
+  import { reactive, computed, watch, ref, provide } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import Tidings from './children/tidings/index.vue'
-  import { PyqTidingsInfoType, PyqTidingsType } from '@/types/pyq'
+  import { PyqTidingsInfoType, PyqTidingsThumbsType, PyqTidingsType, SendPyqTidingsCommentInfoType } from '@/types/pyq'
   import useStore from '@/store'
-  import { getContactPyqTidingsList, getPyqTidingsList, releasePyqTiding } from '@/api/pyq'
+  import {
+    getContactPyqTidingsList,
+    getPyqTidingsList,
+    releasePyqTiding,
+    cancleThumbsUpPyqTiding,
+    thumbsUpPyqTiding,
+    sendPyqTidingComment,
+    deletePyqTiding,
+  } from '@/api/pyq'
   import { Plus } from '@element-plus/icons-vue'
   import { ElMessage } from 'element-plus'
   import type { UploadProps, UploadFile } from 'element-plus'
   import fileUpload from '@/utils/fileUpload'
   import { TIP_TYPE } from '@/config'
+  import { sessionStorage } from '@/utils/storage'
 
   const router = useRouter()
   const route = useRoute()
   const store = useStore()
+  const storage = sessionStorage(`${store.user_id}`)
 
-  const isRelease = ref<boolean>(false)
+  const isRelease = ref<boolean>(false) // 标记是否显示发布动态
+  // 待发布的动态信息
   const tidingInfo = reactive<PyqTidingsInfoType>({
     userId: store.user_id,
     content: '',
     pictureIds: [],
   })
-  const prePictureList = reactive<Array<{ uid: number; id: number }>>([])
-  const previewUrl = ref('')
-  const isPreview = ref(false)
-  const pageNum = ref<number>(1)
-  const pageSize = ref<number>(10)
-  const total = ref<number>(0)
+  const prePictureList = reactive<Array<{ uid: number; id: number }>>([]) // 动态可预览图片列表
+  const previewUrl = ref('') // 当前预览的图片 URL
+  const isPreview = ref(false) // 标记是否显示图片预览
+  const pageNum = ref<number>(1) // 当前页数
+  const pageSize = ref<number>(10) // 当前每页条数
+  const total = ref<number>(0) // 朋友圈动态总条数
 
   // 获取要查看的联系人的 ID
   const id = computed(() => {
@@ -254,6 +266,77 @@
       ElMessage.error(TIP_TYPE.RELEASE_TIDING_FAIL)
     }
   }
+
+  // 点赞/取消点赞动态
+  const thumbsUpTiding = async (id: number) => {
+    const tiding = tidingsList.value.find((item: PyqTidingsType) => item.id === id)
+    const nickname = storage.get('personalInfo').nickname
+    if (tiding) {
+      if (tiding.isThumbsUp === 1) {
+        tiding.isThumbsUp = 0
+        const index = tiding.thumbs.findIndex((item: PyqTidingsThumbsType) => item.userId === store.user_id)
+        tiding.thumbs.splice(index, 1)
+        await cancleThumbsUpPyqTiding({
+          userId: store.user_id,
+          pyqTidingId: id,
+        })
+      } else {
+        tiding.isThumbsUp = 1
+        tiding.thumbs.unshift({ userId: store.user_id, nickname })
+        await thumbsUpPyqTiding({
+          userId: store.user_id,
+          pyqTidingId: id,
+        })
+      }
+    }
+  }
+  provide('thumbsUpTiding', thumbsUpTiding)
+
+  // 发送评论
+  const sendTidingComment = async (info: SendPyqTidingsCommentInfoType, toName?: string) => {
+    const { data } = await sendPyqTidingComment(info)
+    if (data.status) {
+      const tiding = tidingsList.value.find((item: PyqTidingsType) => item.id === info.pyqTidingId)
+      const nickname = storage.get('personalInfo').nickname
+      if (info.toId) {
+        tiding?.comments.push({
+          id: data.id,
+          userId: store.user_id,
+          toId: info.toId,
+          fromName: nickname,
+          toName: toName as string,
+          content: info.content,
+        })
+      } else {
+        tiding?.comments.push({
+          id: data.id,
+          userId: store.user_id,
+          toId: null,
+          fromName: nickname,
+          toName: null,
+          content: info.content,
+        })
+      }
+    } else {
+      ElMessage.error(TIP_TYPE.SEND_TIDING_COMMENT_FAIL)
+    }
+  }
+  provide('sendTidingComment', sendTidingComment)
+
+  // 删除动态
+  const deleteTiding = async (id: number) => {
+    const { data } = await deletePyqTiding({
+      pyqTidingId: id,
+    })
+    if (data) {
+      ElMessage.success(TIP_TYPE.DELETE_PYQ_TIDING_SUCCESS)
+      const index = tidingsList.value.findIndex((item: PyqTidingsType) => item.id === id)
+      tidingsList.value.splice(index, 1)
+    } else {
+      ElMessage.error(TIP_TYPE.DELETE_PYQ_TIDING_FAIL)
+    }
+  }
+  provide('deleteTiding', deleteTiding)
 </script>
 
 <style scoped lang="less">
@@ -302,6 +385,16 @@
           display: flex;
           justify-content: flex-end;
         }
+      }
+      .tidings-null {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: 10%;
+        font-size: var(--pyq-null-font-size);
+        color: var(--desc-color);
+        font-family: '楷体';
       }
     }
     .pyq-release {
