@@ -29,13 +29,17 @@ export interface PyqTidingsCommentsType {
   content: string
 }
 
-export interface PyqTidingsListIdType {
+export interface PyqTidingsListInfoType {
   userId: number
+  pageNum: number
+  pageSize: number
 }
 
-export interface ContactPyqTidingsListIdType {
+export interface ContactPyqTidingsListInfoType {
   userId: number
   contactId: number
+  pageNum: number
+  pageSize: number
 }
 
 export interface PyqTidingsInfoType {

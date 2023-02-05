@@ -72,16 +72,14 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, computed, onMounted } from 'vue'
+  import { ref, reactive, computed } from 'vue'
   import { PyqTidingsThumbsType, PyqTidingsType } from '@/types/pyq'
   import useStore from '@/store/index'
 
   const store = useStore()
   const props = defineProps<{
     tidingsInfo: PyqTidingsType
-    selfIndex: number
   }>()
-  const emit = defineEmits(['ready'])
 
   const comment = ref<string>('') // 评论
   const toName = ref<string>('') // 被回复方昵称
@@ -115,12 +113,6 @@
   const listenCancleReplyUser = () => {
     toName.value = ''
   }
-
-  onMounted(() => {
-    setTimeout(() => {
-      emit('ready', tidingsItemRef.value, props.selfIndex)
-    }, 100)
-  })
 </script>
 
 <style scoped lang="less">

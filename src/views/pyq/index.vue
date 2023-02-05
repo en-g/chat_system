@@ -15,7 +15,24 @@
       </div>
     </div>
     <div class="pyq-main">
-      <Tidings :tidings-list="tidingsList" />
+      <el-scrollbar class="pyq-tidings-list-scroll">
+        <div class="pyq-tidings-list">
+          <Tidings :tidings-list="tidingsList" />
+        </div>
+        <div class="pyq-tidings-pagination">
+          <el-pagination
+            v-model:current-page="pageNum"
+            v-model:page-size="pageSize"
+            :page-sizes="[2, 5, 10]"
+            :small="true"
+            :background="true"
+            layout="sizes, prev, pager, next"
+            :total="total"
+            @size-change="listenPaginationChange"
+            @current-change="listenPaginationChange"
+          />
+        </div>
+      </el-scrollbar>
     </div>
     <div class="pyq-release">
       <svg class="icon" aria-hidden="true" @click="listenReleaseTidings">
@@ -91,6 +108,9 @@
   const prePictureList = reactive<Array<{ uid: number; id: number }>>([])
   const previewUrl = ref('')
   const isPreview = ref(false)
+  const pageNum = ref<number>(1)
+  const pageSize = ref<number>(10)
+  const total = ref<number>(0)
 
   // 获取要查看的联系人的 ID
   const id = computed(() => {
@@ -104,8 +124,11 @@
   const getPyqTidingsListData = async () => {
     const { data } = await getPyqTidingsList({
       userId: store.user_id,
+      pageNum: pageNum.value,
+      pageSize: pageSize.value,
     })
-    return data
+    total.value = data.total
+    return data.list
   }
 
   // 获取联系人的动态列表
@@ -113,8 +136,11 @@
     const { data } = await getContactPyqTidingsList({
       userId: store.user_id,
       contactId: id.value,
+      pageNum: pageNum.value,
+      pageSize: pageSize.value,
     })
-    return data
+    total.value = data.total
+    return data.list
   }
 
   // 获取动态列表
@@ -129,6 +155,13 @@
   }
   const data = await getTidingsList()
   const tidingsList = ref<PyqTidingsType[]>(data) // 朋友圈动态列表
+
+  // pageNum、pageSize 变化，重新请求列表数据
+  const listenPaginationChange = async () => {
+    const data = await getTidingsList()
+    tidingsList.value = data
+    console.log(total.value)
+  }
 
   // 更新朋友圈动态列表数据
   watch(id, async () => {
@@ -256,6 +289,20 @@
       height: calc(100vh - 60px);
       border-left: 1px solid var(--border-color);
       border-right: 1px solid var(--border-color);
+      .pyq-tidings-list-scroll {
+        width: 100%;
+        height: 100%;
+        .pyq-tidings-list {
+          width: 100%;
+        }
+        .pyq-tidings-pagination {
+          width: 100%;
+          padding: 40px 30px;
+          box-sizing: border-box;
+          display: flex;
+          justify-content: flex-end;
+        }
+      }
     }
     .pyq-release {
       flex: 1;
