@@ -45,6 +45,11 @@ const routes: Array<any> = [
         name: 'life',
         component: () => import('@/views/life/index.vue'),
       },
+      {
+        path: 'lifeDetail/:id',
+        name: 'lifeDetail',
+        component: () => import('@/views/lifeDetail/index.vue'),
+      },
     ],
   },
   // 功能测试路由

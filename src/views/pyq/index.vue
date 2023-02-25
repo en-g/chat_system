@@ -359,7 +359,7 @@
         margin-top: 10px;
         margin-right: 10px;
         font-weight: bold;
-        color: #515151;
+        color: var(--theme-color);
         cursor: pointer;
         .active {
           color: var(--nav-active-color);
