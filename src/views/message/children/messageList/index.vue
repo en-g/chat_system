@@ -1,7 +1,7 @@
 <template>
   <div class="index-container">
     <div class="index-message-list">
-      <MessageList :message-list="props.messageList" />
+      <MessageList :message-list="props.messageList" @chat="listenChatToContact" />
     </div>
   </div>
 </template>
@@ -13,6 +13,12 @@
   const props = defineProps<{
     messageList: MessageListItemInfoType[]
   }>()
+  const emit = defineEmits(['chat'])
+
+  // 监听点好好友聊天
+  const listenChatToContact = (id: number, type: string) => {
+    emit('chat', id, type)
+  }
 </script>
 
 <style scoped lang="less">

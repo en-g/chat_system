@@ -1,7 +1,12 @@
 <template>
   <div class="message-list-container">
     <div class="message-list-wrap">
-      <div v-for="item in props.messageList" :key="item.id" class="message-list-item">
+      <div
+        v-for="item in props.messageList"
+        :key="item.id"
+        class="message-list-item"
+        @click="listenChatToContact(item.userId)"
+      >
         <MessageListItem :message-list-item="item" />
       </div>
     </div>
@@ -15,6 +20,12 @@
   const props = defineProps<{
     messageList: MessageListItemInfoType[]
   }>()
+  const emit = defineEmits(['chat'])
+
+  // 监听点好好友聊天
+  const listenChatToContact = (id: number) => {
+    emit('chat', id, 'friend')
+  }
 </script>
 
 <style scoped lang="less">

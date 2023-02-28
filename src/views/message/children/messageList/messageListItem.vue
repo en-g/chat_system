@@ -27,7 +27,7 @@
 <style scoped lang="less">
   .message-list-item-container {
     width: 100%;
-    padding: 10px;
+    padding: 12px 10px;
     box-sizing: border-box;
     &:hover {
       cursor: pointer;
@@ -60,7 +60,7 @@
     display: block;
   }
   :deep(.el-badge__content.is-fixed) {
-    top: -5px;
+    top: -7px;
     right: 0;
     transform: translateX(-1%);
   }
