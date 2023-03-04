@@ -7,7 +7,7 @@
         </div>
         <div class="message-list-item-content">
           <div class="message-list-item-nicknme">
-            {{ props.messageListItem.remarks || props.messageListItem.nickname }}
+            {{ props.messageListItem.remarks || props.messageListItem.name }}
           </div>
           <div class="message-list-item-last-message">{{ props.messageListItem.lastMessage }}</div>
         </div>

@@ -1,7 +1,12 @@
 <template>
   <div class="personal-avatar-container">
-    <el-avatar class="personal-avatar" :size="45" :src="personalInfo.avatarUrl" @click="listenShowPersonalInfo" />
-    <div v-if="isShow" class="personal-avatar-info">
+    <el-avatar class="personal-avatar" :size="45" :src="personalInfo.avatarUrl" @mouseenter="listenShowPersonalInfo" />
+    <div
+      v-if="isShow || isEdit"
+      class="personal-avatar-info"
+      @mouseenter="listenReenterPersonalInfo"
+      @mouseleave="listenHidePersonalInfo"
+    >
       <div class="personal-avatar-info-top">
         <div class="info-avatar">
           <el-upload :show-file-list="false" :auto-upload="false" :on-change="listenAvatarChange">
@@ -32,11 +37,6 @@
           <div v-show="!isEdit" class="item" @click="listenEditPersonalInfo">编辑</div>
           <div v-show="isEdit" class="item" @click="listenCancleEditPersonalInfo">取消</div>
           <div v-show="isEdit" class="item" @click="listenSavePersonalInfo">保存</div>
-        </div>
-        <div class="show-hide">
-          <svg class="icon" aria-hidden="true" @click="isShow = false">
-            <use xlink:href="#icon-hide"></use>
-          </svg>
         </div>
       </div>
       <div class="personal-avatar-info-bottom">
@@ -169,6 +169,16 @@
     isEdit.value = false
   }
 
+  // 重新进入个人信息
+  const listenReenterPersonalInfo = () => {
+    isShow.value = true
+  }
+
+  // 隐藏个人信息
+  const listenHidePersonalInfo = () => {
+    isShow.value = false
+  }
+
   // 跳转到个人朋友圈
   const listenNavigateToPyq = () => {
     router.push({
@@ -270,11 +280,6 @@
             cursor: pointer;
             margin-left: 10px;
           }
-        }
-        .show-hide {
-          position: absolute;
-          top: 10px;
-          left: 10px;
         }
       }
       .personal-avatar-info-bottom {

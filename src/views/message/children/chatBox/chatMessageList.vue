@@ -4,9 +4,8 @@
       <div class="chat-message-list" :style="`padding-top: ${startOffset}px; padding-bottom: ${endOffset}px;`">
         <div v-for="(item, index) in visibleList" :key="item.id" class="chat-message-list-item">
           <ChatMessageListItem
-            :type="props.type"
             :self-index="startIndex + index"
-            :message-list-item="item"
+            :chat-message-item="item"
             @ready="listenChatMessageItemReady"
           />
         </div>
@@ -16,20 +15,20 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, onMounted, watch } from 'vue'
+  import { ref, onMounted, watch } from 'vue'
   import ChatMessageListItem from './chatMessageListItem.vue'
-  import { FriendChatMessageInfoType } from '@/types/message'
+  import { ChatMessageItemType } from '@/types/message'
   import { createVirtualList } from '@/utils/virtualList'
 
   const props = defineProps<{
-    type: string
-    friendChatMessageList: FriendChatMessageInfoType[]
+    chatMessageList: ChatMessageItemType[]
+    isSend: boolean
   }>()
 
   const chatMessageListRef = ref<any>(null)
   const scrollbarRef = ref<any>(null)
   const estimatedItemHeight = 95 // 动态默认最小高度
-  let virtualList = createVirtualList(props.friendChatMessageList.length, estimatedItemHeight)
+  let virtualList = createVirtualList(props.chatMessageList.length, estimatedItemHeight)
 
   const startOffset = ref<number>(0) // 列表 padding-top
   const endOffset = ref<number>(0) // 列表 padding-bottom
@@ -39,14 +38,14 @@
   const visualEndIndex = ref<number>(0) // 可视区域的列表数据的结束下标
   const visibleCount = ref<number>(0) // 要渲染的列表数据条数
   const bufferCount = ref<number>(6) // 缓存数据条数
-  const visibleList = ref<FriendChatMessageInfoType[]>([]) // 实际渲染的列表数据
+  const visibleList = ref<ChatMessageItemType[]>([]) // 实际渲染的列表数据
   const pageScrollY = ref<number>(0) // 滚动高度
 
   // 更新实际渲染的列表数据以及列表的 padding-top 和 padding-bottom
   const updateVisibleList = () => {
     startOffset.value = virtualList.getSectionSum(startIndex.value)
     endOffset.value = virtualList.getTatolHeight() - virtualList.getSectionSum(endIndex.value + 1)
-    const data = props.friendChatMessageList.slice(startIndex.value, endIndex.value + 1)
+    const data = props.chatMessageList.slice(startIndex.value, endIndex.value + 1)
     visibleList.value = data
     // console.log(visibleList.length, startIndex.value, endIndex.value)
   }
@@ -54,8 +53,8 @@
   // 初始化数据
   const initVisibleList = () => {
     visibleCount.value = Math.ceil(chatMessageListRef.value.offsetHeight / virtualList.defaultHeight)
-    visualEndIndex.value = props.friendChatMessageList.length - 1
-    endIndex.value = props.friendChatMessageList.length - 1
+    visualEndIndex.value = props.chatMessageList.length - 1
+    endIndex.value = props.chatMessageList.length - 1
     visualStartIndex.value = Math.max(visualEndIndex.value - visibleCount.value + 1, 0)
     startIndex.value = Math.max(visualStartIndex.value - bufferCount.value, 0)
     updateVisibleList()
@@ -69,8 +68,8 @@
     // 超过缓冲区一半之后再更新
     visualStartIndex.value = index
     startIndex.value = Math.max(visualStartIndex.value - bufferCount.value, 0)
-    visualEndIndex.value = Math.min(visualStartIndex.value + visibleCount.value, props.friendChatMessageList.length - 1)
-    endIndex.value = Math.min(visualEndIndex.value + bufferCount.value, props.friendChatMessageList.length - 1)
+    visualEndIndex.value = Math.min(visualStartIndex.value + visibleCount.value, props.chatMessageList.length - 1)
+    endIndex.value = Math.min(visualEndIndex.value + bufferCount.value, props.chatMessageList.length - 1)
     updateVisibleList()
   }
 
@@ -85,7 +84,7 @@
     // console.log(index, chatMessageItem.offsetHeight)
     if (virtualList.vis[index + 1]) return
     virtualList.vis[index + 1] = true
-    if (index == props.friendChatMessageList.length - 1) {
+    if (index == props.chatMessageList.length - 1) {
       chatMessageItem.scrollIntoView()
     } else if (pageScrollY.value) {
       const changeHeight = chatMessageItem.offsetHeight - virtualList.defaultHeight
@@ -102,20 +101,25 @@
     scrollbarRef.value?.update()
   }
 
+  // 监听数据变化，刷新虚拟列表
+  watch(props.chatMessageList, () => {
+    /**
+     * 新增消息和切换聊天对象都会导致 props.chatMessageList 发送变化
+     * 使用 prop.isSend 来标记当前是发送消息还是切换聊天对象
+     */
+    if (props.isSend) {
+      // 发送消息
+      virtualList.update(props.chatMessageList.length - 1, estimatedItemHeight * 2)
+      initVisibleList()
+    } else {
+      // 切换聊天对象
+      virtualList = createVirtualList(props.chatMessageList.length, estimatedItemHeight)
+      initVisibleList()
+    }
+  })
+
   onMounted(() => {
     initVisibleList()
-
-    // 监听数据变化，刷新虚拟列表
-    watch(
-      () => props.friendChatMessageList,
-      () => {
-        // visibleList.value = []
-        // setTimeout(() => {
-        virtualList = createVirtualList(props.friendChatMessageList.length, estimatedItemHeight)
-        initVisibleList()
-        // }, 100)
-      }
-    )
   })
 </script>
 

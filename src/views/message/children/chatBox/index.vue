@@ -9,21 +9,64 @@
       </div>
     </div>
     <div class="chat-box-main">
-      <ChatMessageList :type="props.type" :friend-chat-message-list="props.friendChatMessageList" />
+      <ChatMessageList :chat-message-list="props.chatMessageList" :is-send="props.isSend" />
     </div>
-    <div class="chat-box-input"></div>
+    <div class="chat-box-input">
+      <div class="chat-box-input-function">
+        <svg class="icon" aria-hidden="true">
+          <use xlink:href="#icon-emoji"></use>
+        </svg>
+        <svg class="icon" aria-hidden="true">
+          <use xlink:href="#icon-image"></use>
+        </svg>
+      </div>
+      <div class="chat-box-input-content">
+        <el-input v-model="chatMessage" class="input" type="textarea" placeholder="请输入内容" />
+        <el-tooltip
+          v-model:visible="isContentEmpty"
+          effect="light"
+          content="输入的内容不能为空"
+          placement="bottom-start"
+        >
+          <div v-show="isContentEmpty" class="blank-box"></div>
+        </el-tooltip>
+      </div>
+      <div class="chat-box-input-send">
+        <el-button type="primary" @click="listenSendChatMessage">发送</el-button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+  import { ref } from 'vue'
   import ChatMessageList from './chatMessageList.vue'
-  import { FriendChatMessageInfoType } from '@/types/message'
+  import { ChatMessageItemType } from '@/types/message'
 
   const props = defineProps<{
-    type: string
     chatName: string
-    friendChatMessageList: FriendChatMessageInfoType[]
+    chatMessageList: ChatMessageItemType[]
+    isSend: boolean
   }>()
+  const emit = defineEmits(['send'])
+
+  const chatMessage = ref<string>('')
+  const isContentEmpty = ref<boolean>(false)
+
+  // 监听发送消息
+  const listenSendChatMessage = () => {
+    if (!chatMessage.value) {
+      isContentEmpty.value = true
+      let timer: any = setTimeout(() => {
+        isContentEmpty.value = false
+        clearTimeout(timer)
+        timer = null
+      }, 1500)
+      return
+    }
+    emit('send', chatMessage.value)
+    chatMessage.value = ''
+  }
 </script>
 
 <style scoped lang="less">
@@ -56,8 +99,48 @@
     .chat-box-input {
       width: 100%;
       height: 25%;
+      padding: 10px 0;
       box-sizing: border-box;
-      border-top: 1px solid var(--border-color);
+      .chat-box-input-function {
+        height: 15%;
+        padding: 0 20px;
+        box-sizing: border-box;
+        .icon {
+          margin-right: 20px;
+        }
+      }
+      .chat-box-input-content {
+        height: 70%;
+        box-sizing: border-box;
+        padding: 5px 10px 10px 10px;
+        box-sizing: border-box;
+        position: relative;
+        .input {
+          width: 100%;
+          height: 100%;
+        }
+        .blank-box {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+        }
+      }
+      .chat-box-input-send {
+        height: 15%;
+        padding: 0 20px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: flex-end;
+      }
     }
+  }
+  :deep(.el-textarea__inner) {
+    height: 100%;
+    padding: 0 11px;
+    font-size: 13px;
+  }
+  :deep(.el-textarea__inner, .el-textarea:focus, .el-textarea:active) {
+    resize: none;
+    box-shadow: none;
   }
 </style>
