@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-  import { reactive, ref, watch } from 'vue'
+  import { ref, watch } from 'vue'
   import { FriendChatMessageInfoType, MessageListItemInfoType } from '@/types/message'
   import MessageList from './children/messageList/index.vue'
   import ChatBox from './children/chatBox/index.vue'
@@ -183,16 +183,192 @@
         url: '',
         createTime: new Date().toISOString(),
       },
+      {
+        id: 7,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 8,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 9,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 10,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 11,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 12,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 13,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 14,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 15,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 16,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 17,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 19,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 20,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 21,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 22,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
+      {
+        id: 23,
+        fromId: 1,
+        toId: 2,
+        fromName: myInfo.nickname,
+        fromAvatarUrl: myInfo.avatarUrl,
+        type: 1,
+        message: '1111',
+        url: '',
+        createTime: new Date().toISOString(),
+      },
     ]
     return chatMessageList
   }
-  const chatMessageList = reactive<FriendChatMessageInfoType[]>([])
+  const chatMessageList = ref<FriendChatMessageInfoType[]>([])
 
   // 切换聊天对象，更新聊天列表数据
   watch(chatId, () => {
     const data = getChatMessageList()
-    chatMessageList.splice(0, chatMessageList.length, ...data)
-    console.log(chatMessageList)
+    chatMessageList.value = data
+    // console.log(chatMessageList)
   })
 
   // 监听点击好友聊天

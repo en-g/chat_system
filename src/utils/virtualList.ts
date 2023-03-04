@@ -51,7 +51,6 @@ class VirtualList implements BinaryIndexTree {
   }
 
   update(index: number, realHeight: number): void {
-    // index = index + 1
     realHeight -= this.defaultHeight // 减去初始化时的 defaultHeight
     this.tatolHeight += realHeight // 更新总高度
     // 更新树状数组
@@ -65,7 +64,6 @@ class VirtualList implements BinaryIndexTree {
   }
 
   getSectionSum(index: number): number {
-    // index = index + 1
     let sectionHeight = 0
     while (index > 0) {
       sectionHeight += +this.BITree[index]

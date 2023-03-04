@@ -9,9 +9,7 @@
       </div>
     </div>
     <div class="chat-box-main">
-      <el-scrollbar class="chat-box-scrollbar">
-        <ChatMessageList :type="props.type" :friend-chat-message-list="props.friendChatMessageList" />
-      </el-scrollbar>
+      <ChatMessageList :type="props.type" :friend-chat-message-list="props.friendChatMessageList" />
     </div>
     <div class="chat-box-input"></div>
   </div>
@@ -54,11 +52,6 @@
     .chat-box-main {
       width: 100%;
       height: 67%;
-      box-sizing: border-box;
-      .chat-box-scrollbar {
-        width: 100%;
-        height: 100%;
-      }
     }
     .chat-box-input {
       width: 100%;
