@@ -15,6 +15,7 @@
     "element-plus": "^2.2.28",
     "pinia": "^2.0.28",
     "reset-css": "^5.0.1",
+    "socket.io-client": "^4.6.1",
     "spark-md5": "^3.0.2",
     "swiper": "^8.4.6",
     "vue": "^3.2.45",
@@ -46,7 +47,10 @@
   },
   "eslintConfig": {
     "rules": {
-      "vue/no-multiple-template-root": "off"
+      "vue/no-multiple-template-root": "off",
+      "@typescript-eslint/no-explicit-any": [
+        "off"
+      ]
     }
   },
   "config": {

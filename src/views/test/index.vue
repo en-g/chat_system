@@ -10,7 +10,9 @@
         :on-change="beforeAvatarUpload"
       >
         <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-        <el-icon v-else class="icon"><Plus /></el-icon>
+        <el-icon v-else class="icon">
+          <Plus />
+        </el-icon>
       </el-upload>
     </div>
   </div>

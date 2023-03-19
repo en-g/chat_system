@@ -4,6 +4,7 @@ import useStore from '@/store/index'
 import { localStorage } from '@/utils/storage'
 import { ElMessage } from 'element-plus'
 import { ERROR_TYPE } from '@/config/index'
+import websocket from '@/websocket'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -14,6 +15,10 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   // 跳转到登录界面，直接跳转
   if (to.path === '/login') {
+    // 跳转到登录界面，websocket断开连接
+    if (websocket.isConnected()) {
+      websocket?.close()
+    }
     next()
     return
   }
@@ -31,6 +36,10 @@ router.beforeEach((to, from, next) => {
     return
   } else if (store.user_id === -1) {
     store.user_id = user_id
+  }
+  // 判断 websocket 是否连接，如果未连接，则进行连接
+  if (!websocket.isConnected()) {
+    websocket.init()
   }
   next()
 })

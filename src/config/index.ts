@@ -1,4 +1,5 @@
 const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : 'http://114.132.237.200:3000/'
+const WEBSOCKET_URL = process.env.NODE_ENV === 'development' ? 'ws://localhost:3002/' : 'ws://114.132.237.200:3002/'
 const TIME_OUT = 10000
 
 // 请求错误类型
@@ -57,4 +58,4 @@ const TIP_TYPE = {
   DELETE_PYQ_TIDING_FAIL: '删除朋友圈动态失败，请检查网络是否通畅！',
 }
 
-export { BASE_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }
+export { BASE_URL, WEBSOCKET_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }
