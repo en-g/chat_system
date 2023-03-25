@@ -9,6 +9,7 @@ import {
   UpdateContactsRemarksType,
   UpdateGroupsRemarksType,
 } from '@/types/contacts'
+import { SearchContactOrGroupType } from '@/types/navbar'
 
 // 获取联系人列表
 const getContactsList = (id: GetContactsListType) => {
@@ -85,6 +86,16 @@ const deleteFriendGroup = (ids: DeleteFriendGroupsIdsType) => {
   )
 }
 
+// 搜索联系人或群聊
+const searchContactsOrGroups = (info: SearchContactOrGroupType) => {
+  return Promise.resolve(
+    get({
+      url: 'friends/groups/search',
+      params: info,
+    })
+  )
+}
+
 export {
   getContactsList,
   getGroupsList,
@@ -95,4 +106,5 @@ export {
   getFriendGroupList,
   addFriendGroup,
   deleteFriendGroup,
+  searchContactsOrGroups,
 }
