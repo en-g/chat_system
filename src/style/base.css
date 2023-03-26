@@ -37,6 +37,9 @@ body {
 .el-link__inner {
   font-size: 12px;
 }
+.el-dialog {
+  border-radius: 8px !important;
+}
 @media screen and (min-width: 1000px) {
   .contacts-container .contacts-content {
     flex: 5;

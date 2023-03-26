@@ -51,24 +51,89 @@
         </div>
       </div>
     </el-dialog>
+    <el-dialog v-model="addVaalidateVisible" title="请填写申请信息" width="30%">
+      <div class="add-apply-info">
+        <div class="add-apply-contact">
+          <div class="avatar">
+            <el-avatar :size="40" :src="applicationObject?.avatarUrl" />
+          </div>
+          <div class="info">
+            <div class="name">{{ applicationObject?.name }}</div>
+            <div v-if="applicationObject?.signature" class="signature">{{ applicationObject?.signature }}</div>
+          </div>
+        </div>
+        <div class="add-apply-verification">
+          <div class="title">验证人需要验证您的身份，请输入您的请求信息</div>
+          <div class="verification-info">
+            <el-input
+              v-model="verificationInfo"
+              :rows="3"
+              maxlength="100"
+              show-word-limit
+              resize="none"
+              type="textarea"
+              size="default"
+              placeholder="请输入请求信息"
+            />
+          </div>
+        </div>
+        <div v-if="!applicationObject?.isGroup" class="add-apply-group">
+          <div class="label">分组：</div>
+          <div class="select">
+            <el-select v-model="applyGroup" size="default" clearable placeholder="请选择分组">
+              <el-option v-for="item in friendGroups" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </div>
+        </div>
+        <div v-if="!applicationObject?.isGroup" class="add-apply-remarks">
+          <div class="label">备注：</div>
+          <div class="input">
+            <el-input
+              v-model="applyRemarks"
+              size="default"
+              maxlength="10"
+              placeholder="请输入备注"
+              clearable
+              type="text"
+            />
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <span class="button">
+          <el-button class="item" size="default" @click="addVaalidateVisible = false">取消</el-button>
+          <el-button class="item" size="default" type="primary" @click="listenSendAddApplication"> 发送 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
   import { ref, reactive } from 'vue'
   import { Plus } from '@element-plus/icons-vue'
-  import { ContactOrGroupResultType } from '@/types/navbar'
+  import { AddContactApplicationInfoType, AddGroupApplicationInfoType, ContactOrGroupResultType } from '@/types/navbar'
   import { debounce } from '@/utils/utils'
-  import { searchContactsOrGroups } from '@/api/contacts'
+  import { getFriendGroupList, searchContactsOrGroups } from '@/api/contacts'
   import useStore from '@/store'
+  import { FriendGroupsListType } from '@/types/contacts'
+  import { ElMessage } from 'element-plus'
+  import { TIP_TYPE } from '@/config'
+  import websocket from '@/websocket'
 
   const store = useStore()
 
   const isShowMenu = ref<boolean>(false) // 标记菜单是否显示
   const addContactOrGroupVisible = ref<boolean>(false) // 标记是否显示添加联系人或群聊的 dialog
+  const addVaalidateVisible = ref<boolean>(false) // 标记是否显示添加申请的 dialog
   const searchKeyword = ref<string>('') // 搜索联系人/群组的关键字
+  const verificationInfo = ref<string>('') // 申请验证信息
+  const applyGroup = ref<number>(-1) // 申请验证的分组
+  const applyRemarks = ref<string>('') // 申请验证的备注
+  const friendGroups = reactive<FriendGroupsListType[]>([]) // 好友分组列表
 
   const searchContactOrGroupResult = reactive<ContactOrGroupResultType[]>([])
+  let applicationObject: ContactOrGroupResultType | null = null // 申请对象
 
   // 显示添加操作菜单
   const listenShowAddMenu = () => {
@@ -102,8 +167,49 @@
   })
 
   // 点击请求添加联系人/群聊
-  const listenRequestAddContactOrGroup = (id: number) => {
-    console.log(id)
+  const listenRequestAddContactOrGroup = async (id: number) => {
+    const info = searchContactOrGroupResult.find((item) => item.id === id)
+    if (info) {
+      if (!info.isGroup) {
+        // 获取分组列表
+        const { data } = await getFriendGroupList({
+          userId: store.user_id,
+        })
+        friendGroups.splice(0, friendGroups.length, ...data)
+        if (friendGroups.length === 0) {
+          ElMessage.error(TIP_TYPE.FRIEND_GROUP_IS_NLL)
+          return
+        }
+        applyGroup.value = friendGroups[0].id
+      }
+      applicationObject = info
+      addContactOrGroupVisible.value = false
+      addVaalidateVisible.value = true
+    }
+  }
+
+  // 添加联系人/群聊申请
+  const listenSendAddApplication = () => {
+    if (applicationObject?.isGroup) {
+      const info: AddGroupApplicationInfoType = {
+        fromId: store.user_id,
+        toId: applicationObject.leaderId as number,
+        groupId: applicationObject?.groupId as number,
+        type: 'add',
+        message: verificationInfo.value,
+      }
+      websocket.send('addGroup', info)
+    } else {
+      const info: AddContactApplicationInfoType = {
+        fromId: store.user_id,
+        toId: applicationObject?.userId as number,
+        type: 'add',
+        message: verificationInfo.value,
+        friendGroupId: applyGroup.value,
+        remarks: applyRemarks.value,
+      }
+      websocket.send('addContact', info)
+    }
   }
 </script>
 
@@ -212,8 +318,63 @@
         }
       }
     }
+    .add-apply-info {
+      .add-apply-contact {
+        display: flex;
+        margin-bottom: 20px;
+        .avatar {
+        }
+        .info {
+          height: 40px;
+          margin-left: 15px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          .name {
+            height: 20px;
+            line-height: 20px;
+            font-weight: bold;
+          }
+          .signature {
+            height: 20px;
+            line-height: 20px;
+            font-size: var(--small-desc-size);
+            color: var(--desc-color);
+          }
+        }
+      }
+      .add-apply-verification {
+        margin-bottom: 10px;
+        .title {
+          margin-bottom: 10px;
+        }
+        .verification-info {
+          font-size: 18px;
+        }
+      }
+      .add-apply-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        .label {
+        }
+        .select {
+        }
+      }
+      .add-apply-remarks {
+        display: flex;
+        align-items: center;
+        .label {
+        }
+        .input {
+        }
+      }
+    }
   }
   :deep(.el-dialog__body) {
     padding: 10px 20px 20px;
+  }
+  :deep(.el-button) {
+    margin-left: 10px !important;
   }
 </style>

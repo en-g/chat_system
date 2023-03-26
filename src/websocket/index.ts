@@ -1,6 +1,7 @@
 import { io } from 'socket.io-client'
 import { WEBSOCKET_URL } from '@/config'
 import useStore from '@/store'
+import { onAddContactNotice, onAddGroupNotice } from './contactNotice'
 
 interface WebSocketControllerType {
   url: string
@@ -75,6 +76,7 @@ class WebSocketController implements WebSocketControllerType {
       }
     })
     this.websocket = websocket
+    initListenEvent(this)
   }
 
   // 监听
@@ -140,6 +142,14 @@ class WebSocketController implements WebSocketControllerType {
   isConnected() {
     return !!this.websocket?.connected
   }
+}
+
+// 初始化 websocket 的事件监听
+const initListenEvent = (websocket: any) => {
+  // 添加联系人的通知
+  websocket.listen('addContactNotice', onAddContactNotice)
+  // 添加群聊的通知
+  websocket.listen('addGroupNotice', onAddGroupNotice)
 }
 
 const websocket = new WebSocketController(WEBSOCKET_URL)

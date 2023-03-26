@@ -9,5 +9,5 @@ import 'element-plus/theme-chalk/el-message.css'
 import 'element-plus/theme-chalk/el-message-box.css'
 
 const app = createApp(App)
-app.use(router).use(createPinia()).use(ElementPlus, { size: 'small', zIndex: 3000 })
+app.use(router).use(createPinia()).use(ElementPlus, { size: 'default', zIndex: 3000 })
 app.mount('#app')

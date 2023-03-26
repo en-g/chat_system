@@ -56,6 +56,7 @@ const TIP_TYPE = {
   SEND_TIDING_COMMENT_FAIL: '发送朋友圈动态评论失败，请检查网络是否通畅！',
   DELETE_PYQ_TIDING_SUCCESS: '删除朋友圈动态成功！',
   DELETE_PYQ_TIDING_FAIL: '删除朋友圈动态失败，请检查网络是否通畅！',
+  FRIEND_GROUP_IS_NLL: '当前用户没有好友分组，请先添加好友分组！',
 }
 
 export { BASE_URL, WEBSOCKET_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }
