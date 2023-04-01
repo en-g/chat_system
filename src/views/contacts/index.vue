@@ -70,17 +70,19 @@
       </div>
       <div class="friend-group-list">
         <el-scrollbar class="friend-group-list-scroll">
-          <div v-for="item in friendGroupsList" :key="item.id" class="friend-group-list-item">
-            <div class="name">
-              <svg class="icon" aria-hidden="true">
-                <use xlink:href="#icon-friendGroup"></use>
-              </svg>
-              {{ `${item.name}(${item.total})` }}
-            </div>
-            <div class="delete">
-              <svg class="icon" aria-hidden="true" @click="listenDeleteFriendGroup(item)">
-                <use xlink:href="#icon-delete"></use>
-              </svg>
+          <div class="friend-group-list-wrap">
+            <div v-for="item in friendGroupsList" :key="item.id" class="friend-group-list-item">
+              <div class="name">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-friendGroup"></use>
+                </svg>
+                {{ `${item.name}(${item.total})` }}
+              </div>
+              <div class="delete">
+                <svg class="icon" aria-hidden="true" @click="listenDeleteFriendGroup(item)">
+                  <use xlink:href="#icon-delete"></use>
+                </svg>
+              </div>
             </div>
           </div>
         </el-scrollbar>
@@ -327,10 +329,7 @@
   // 编辑分组弹出框消失，更新数据
   const listenDialogClose = async () => {
     if (isUpdate.value) {
-      const data = await getContactsListData()
-      friendsList.splice(0, friendsList.length)
-      friendsList.push(...data)
-      storage.set('contactsList', data)
+      await updateContactList()
       isUpdate.value = false
     }
     friendGroupName.value = ''
@@ -439,17 +438,19 @@
       }
       .friend-group-list {
         .friend-group-list-scroll {
-          max-height: 200px;
+          height: 200px;
           padding: 10px 0;
           box-sizing: border-box;
-          .friend-group-list-item {
-            padding: 10px 30px 10px 0;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: space-between;
-            .name {
+          .friend-group-list-wrap {
+            .friend-group-list-item {
+              padding: 10px 30px 10px 0;
+              box-sizing: border-box;
               display: flex;
-              align-items: center;
+              justify-content: space-between;
+              .name {
+                display: flex;
+                align-items: center;
+              }
             }
           }
         }

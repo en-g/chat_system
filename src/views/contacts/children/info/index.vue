@@ -57,7 +57,7 @@
             </svg>
           </el-tooltip>
         </div>
-        <div class="item message">
+        <div v-if="info.isLeader === 1" class="item message">
           <el-tooltip content="解散群聊" placement="top">
             <svg class="icon" aria-hidden="true">
               <use xlink:href="#icon-delete"></use>

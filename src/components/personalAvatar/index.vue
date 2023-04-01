@@ -53,14 +53,21 @@
             <div class="title">昵称</div>
             <div class="content">
               <span v-if="!isEdit">{{ personalInfo.nickname }}</span>
-              <el-input v-else v-model="personalInfo.nickname" maxlength="10" placeholder="请输入昵称" type="text" />
+              <el-input
+                v-else
+                v-model="personalInfo.nickname"
+                size="small"
+                maxlength="10"
+                placeholder="请输入昵称"
+                type="text"
+              />
             </div>
           </div>
           <div class="info-item">
             <div class="title">性别</div>
             <div class="content">
               <span v-if="!isEdit">{{ personalInfo.sex }}</span>
-              <el-select v-else v-model="personalInfo.sex" placeholder="请选择性别">
+              <el-select v-else v-model="personalInfo.sex" size="small" placeholder="请选择性别">
                 <el-option label="男" value="男" />
                 <el-option label="女" value="女" />
               </el-select>
@@ -73,6 +80,7 @@
               <el-date-picker
                 v-else
                 v-model="personalInfo.birthday"
+                size="small"
                 type="date"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD"
@@ -84,7 +92,7 @@
             <div class="title">邮箱</div>
             <div class="content">
               <span v-if="!isEdit">{{ personalInfo.email }}</span>
-              <el-input v-else v-model="personalInfo.email" placeholder="请输入邮箱" type="text" />
+              <el-input v-else v-model="personalInfo.email" size="small" placeholder="请输入邮箱" type="text" />
             </div>
           </div>
         </div>
