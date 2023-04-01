@@ -68,7 +68,7 @@
             <el-input
               v-model="verificationInfo"
               :rows="3"
-              maxlength="100"
+              maxlength="50"
               show-word-limit
               resize="none"
               type="textarea"
@@ -183,6 +183,8 @@
         applyGroup.value = friendGroups[0].id
       }
       applicationObject = info
+      verificationInfo.value = ''
+      applyRemarks.value = ''
       addContactOrGroupVisible.value = false
       addVaalidateVisible.value = true
     }
@@ -210,6 +212,8 @@
       }
       websocket.send('addContact', info)
     }
+    ElMessage.success(TIP_TYPE.APPLY_SUCCESS)
+    addVaalidateVisible.value = false
   }
 </script>
 

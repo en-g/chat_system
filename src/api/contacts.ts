@@ -1,11 +1,18 @@
 import { del, get, post, put } from '@/request/index'
 import {
   AddFriendGroupsType,
+  AgreeAddContactInfoType,
+  AgreeAddGroupIdType,
   DeleteFriendGroupsIdsType,
   GetContactsInfoType,
   GetContactsListType,
   GetFriendGroupListType,
   GetGroupInfoType,
+  GetNoticeListInfoType,
+  ReadNoticeIdType,
+  RefseAddContactInfoType,
+  RefseAddGroupIdType,
+  UnHandleNoticesInfoType,
   UpdateContactsRemarksType,
   UpdateGroupsRemarksType,
 } from '@/types/contacts'
@@ -96,6 +103,86 @@ const searchContactsOrGroups = (info: SearchContactOrGroupType) => {
   )
 }
 
+// 获取好友通知列表
+const getContactNoticeList = (info: GetNoticeListInfoType) => {
+  return Promise.resolve(
+    get({
+      url: 'notice/contact',
+      params: info,
+    })
+  )
+}
+
+// 获取群聊通知列表
+const getGroupNoticeList = (info: GetNoticeListInfoType) => {
+  return Promise.resolve(
+    get({
+      url: 'notice/group',
+      params: info,
+    })
+  )
+}
+
+// 同意添加联系人
+const agreeAddContact = (info: AgreeAddContactInfoType) => {
+  return Promise.resolve(
+    post({
+      url: 'friends/agree',
+      data: info,
+    })
+  )
+}
+
+// 拒绝添加联系人
+const refuseAddContact = (id: RefseAddContactInfoType) => {
+  return Promise.resolve(
+    put({
+      url: 'friends/refuse',
+      data: id,
+    })
+  )
+}
+
+// 获取未处理通知
+const getUnHandleNotices = (info: UnHandleNoticesInfoType) => {
+  return Promise.resolve(
+    get({
+      url: 'notice/unHandle',
+      params: info,
+    })
+  )
+}
+
+// 同意进群
+const agreeAddGroup = (id: AgreeAddGroupIdType) => {
+  return Promise.resolve(
+    post({
+      url: 'groups/agree',
+      data: id,
+    })
+  )
+}
+
+// 拒绝进群
+const refuseAddGrop = (id: RefseAddGroupIdType) => {
+  return Promise.resolve(
+    put({
+      url: 'groups/refuse',
+      data: id,
+    })
+  )
+}
+
+// 通知已阅读
+const readNotice = (id: ReadNoticeIdType) => {
+  return Promise.resolve(
+    put({
+      url: 'notice/read',
+      data: id,
+    })
+  )
+}
+
 export {
   getContactsList,
   getGroupsList,
@@ -107,4 +194,12 @@ export {
   addFriendGroup,
   deleteFriendGroup,
   searchContactsOrGroups,
+  getContactNoticeList,
+  getGroupNoticeList,
+  agreeAddContact,
+  refuseAddContact,
+  getUnHandleNotices,
+  agreeAddGroup,
+  refuseAddGrop,
+  readNotice,
 }

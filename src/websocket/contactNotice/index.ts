@@ -1,22 +1,19 @@
 import useStore from '@/store'
-import { sessionStorage } from '@/utils/storage'
 
 // 添加联系人通知
 const onAddContactNotice = (notice: any) => {
   const store = useStore()
-  const storage = sessionStorage(`${store.user_id}`)
-  const contactNotices: Array<any> = storage.get('contactNotices') || []
-  contactNotices.unshift(notice)
-  storage.set('contactNotices', contactNotices)
+  // 添加未处理通知
+  const id = store.contactUnHandleNoticeIds.find((id) => id === notice.id)
+  if (!id) {
+    store.contactUnHandleNoticeIds.push(notice.id)
+  }
 }
 
-// 添加群聊通知
-const onAddGroupNotice = (notice: any) => {
-  const store = useStore()
-  const storage = sessionStorage(`${store.user_id}`)
-  const groupNotices: Array<any> = storage.get('groupNotices') || []
-  groupNotices.unshift(notice)
-  storage.set('groupNotices', groupNotices)
+// 更新联系人列表
+const onUpdatecontactList = () => {
+  // TODO 如何访问到组件中的方法
+  console.log('onUpdatecontactList')
 }
 
-export { onAddContactNotice, onAddGroupNotice }
+export { onAddContactNotice, onUpdatecontactList }

@@ -9,15 +9,19 @@
           <div class="contacts-system-assistant-title">系统助手</div>
           <div class="contacts-system-assistant-content">
             <div class="contacts-system-assistant-content-item" @click="listenNavigateToFriendAssistant">
-              <svg class="icon" aria-hidden="true">
-                <use xlink:href="#icon-friend-assistant"></use>
-              </svg>
+              <el-badge :hidden="unHandleContactNotice === 0" :value="unHandleContactNotice" :max="99">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-friend-assistant"></use>
+                </svg>
+              </el-badge>
               <span>好友验证助手</span>
             </div>
             <div class="contacts-system-assistant-content-item" @click="listenNavigateToGroupAssistant">
-              <svg class="icon" aria-hidden="true">
-                <use xlink:href="#icon-group-assistant"></use>
-              </svg>
+              <el-badge :hidden="unHandleGroupNotice === 0" :value="unHandleGroupNotice" :max="99">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-group-assistant"></use>
+                </svg>
+              </el-badge>
               <span>群聊验证助手</span>
             </div>
           </div>
@@ -102,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive } from 'vue'
+  import { ref, reactive, provide, computed } from 'vue'
   import { useRouter } from 'vue-router'
   import useStore from '@/store/index'
   import Contacts from './children/contacts/index.vue'
@@ -129,6 +133,19 @@
   const chooseId = ref<number>(-1) // 被删除的分组 ID
   const newId = ref<number | null>(null) // 要移动到的分组 ID
   const canChooseList = ref<FriendGroupsListType[]>([]) // 可选择的分组列表
+  const unHandleContactNotice = computed(() => {
+    return store.contactUnHandleNoticeIds.length
+  })
+  const unHandleGroupNotice = computed(() => {
+    return store.groupUnHandleNoticeIds.length
+  })
+
+  // 获取未处理通知
+  const getUnHandleNotices = async () => {
+    await store.initContactNoticeIds()
+    await store.initGrouptNoticeIds()
+  }
+  await getUnHandleNotices()
 
   // 获取联系人列表
   const getContactsListData = async () => {
@@ -145,6 +162,12 @@
   const friends = await getContactsListData()
   const friendsList = reactive<ContactsListType[]>(friends)
 
+  // 更新联系人列表
+  const updateContactList = async () => {
+    await store.updateContactList(friendsList)
+  }
+  provide('updateContactList', updateContactList)
+
   // 获取群聊列表
   const getGroupsListData = async () => {
     const list = storage.get('groupsList')
@@ -159,6 +182,12 @@
   }
   const groups = await getGroupsListData()
   const groupsList = reactive<ContactsListType[]>(groups)
+
+  // 更新群聊列表
+  const updateGroupList = async () => {
+    await store.updateGroupList(groupsList)
+  }
+  provide('updateGroupList', updateGroupList)
 
   // 获取分组列表
   const getFriendGroupListData = async () => {
@@ -431,5 +460,13 @@
   }
   :deep(.el-dialog__body) {
     padding: 10px 20px;
+  }
+  :deep(.el-badge) {
+    display: block;
+  }
+  :deep(.el-badge__content.is-fixed) {
+    top: -7px;
+    right: 0;
+    transform: translateX(10%);
   }
 </style>

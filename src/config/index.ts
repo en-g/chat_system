@@ -57,6 +57,19 @@ const TIP_TYPE = {
   DELETE_PYQ_TIDING_SUCCESS: '删除朋友圈动态成功！',
   DELETE_PYQ_TIDING_FAIL: '删除朋友圈动态失败，请检查网络是否通畅！',
   FRIEND_GROUP_IS_NLL: '当前用户没有好友分组，请先添加好友分组！',
+  ADD_CONTACT_SUCCESS: '添加联系人成功！',
+  ADD_CONTACT_FAIL: '添加联系人失败，请检查网络是否通畅！',
+  APPLY_SUCCESS: '申请成功，请等待回复！',
+  REFUSE_ADD_CONTACT_SUCCESS: '已拒绝添加该联系人！',
+  REFUSE_ADD_CONTACT_FAIL: '拒绝添加该联系人失败，请检查网络是否通畅！',
+  ADD_GROUP_SUCCESS: '加入群聊成功！',
+  ADD_GROUP_FAIL: '加入群聊失败，请检查网络是否通畅！',
+  AGREE_ADD_GROUP_SUCCESS: '已同意该用户进入群聊！',
+  AGREE_ADD_GROUP_FAIL: '同意该用户加入群聊失败，请检查网络是否通畅！',
+  REFSE_GROUP_SUCCESS: '已拒绝加入该群聊！',
+  REFUSE_GROUP_FAIL: '拒绝加入该群聊失败，请检查网络是否通畅！',
+  REFUSE_AGREE_ADD_GROUP_SUCCESS: '已拒绝该用户进入群聊！',
+  REFUSE_AGREE_ADD_GROUP_FAIL: '拒绝该用户加入群聊失败，请检查网络是否通畅！',
 }
 
 export { BASE_URL, WEBSOCKET_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

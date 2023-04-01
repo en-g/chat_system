@@ -35,10 +35,10 @@
 </template>
 
 <script setup lang="ts">
-  import { inject, reactive, ref } from 'vue'
+  import { reactive, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import ContactsListItem from './contactsListItem.vue'
-  import { ContactsListItemType, ContactsListType } from '@/types/contacts'
+  import { ContactsListType } from '@/types/contacts'
   import useStore from '@/store/index'
 
   const router = useRouter()

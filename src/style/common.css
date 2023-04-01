@@ -7,6 +7,7 @@
   --title-font-size: 18px;
   --title-font-weight: 600;
   --small-desc-size: 12px;
+  --middle-font-size: 16px;
   --desc-color: rgba(0, 0, 0, 0.4);
   --friend-info-background-color: rgba(170, 211, 255, 0.5);
   --avatar-active-border-color: #2ccb53;
@@ -17,4 +18,5 @@
   --pyq-null-font-size: 30px;
   --theme-color: #515151;
   --chat-bubble-color: rgba(237, 237, 237, 0.5);
+  --notice-source-color: #1aadf9;
 }

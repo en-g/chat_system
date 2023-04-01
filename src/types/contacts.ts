@@ -60,3 +60,51 @@ export interface DeleteFriendGroupsIdsType {
   friendGroupId: number
   newId: number
 }
+
+export interface NoticeListItemType {
+  id: number
+  fromId: number
+  toId: number
+  groupId?: number
+  groupName?: string
+  fromName: string
+  fromAvatarUrl: string
+  fromSignature: string
+  type: string
+  message: string
+  status: number
+  createTime: string
+}
+
+export interface GetNoticeListInfoType {
+  userId: number
+  pageNum: number
+  pageSize: number
+}
+
+export interface AgreeAddContactInfoType {
+  noticeId: number
+  friendGroupId: number
+  remarks: string
+}
+
+export interface RefseAddContactInfoType {
+  noticeId: number
+}
+
+export interface UnHandleNoticesInfoType {
+  userId: number
+  type: string
+}
+
+export interface AgreeAddGroupIdType {
+  noticeId: number
+}
+
+export interface RefseAddGroupIdType {
+  noticeId: number
+}
+
+export interface ReadNoticeIdType {
+  noticeId: number
+}

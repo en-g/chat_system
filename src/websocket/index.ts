@@ -1,7 +1,8 @@
 import { io } from 'socket.io-client'
 import { WEBSOCKET_URL } from '@/config'
 import useStore from '@/store'
-import { onAddContactNotice, onAddGroupNotice } from './contactNotice'
+import { onAddContactNotice, onUpdatecontactList } from './contactNotice'
+import { onAddGroupNotice, onUpdateGroupList } from './groupNotice'
 
 interface WebSocketControllerType {
   url: string
@@ -150,6 +151,10 @@ const initListenEvent = (websocket: any) => {
   websocket.listen('addContactNotice', onAddContactNotice)
   // 添加群聊的通知
   websocket.listen('addGroupNotice', onAddGroupNotice)
+  // 更新联系人列表
+  websocket.listen('updateContactList', onUpdatecontactList)
+  // 更新群聊列表
+  websocket.listen('updateGroupList', onUpdateGroupList)
 }
 
 const websocket = new WebSocketController(WEBSOCKET_URL)
