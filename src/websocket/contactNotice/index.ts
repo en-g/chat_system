@@ -12,8 +12,8 @@ const onAddContactNotice = (notice: any) => {
 
 // 更新联系人列表
 const onUpdatecontactList = () => {
-  // TODO 如何访问到组件中的方法
-  console.log('onUpdatecontactList')
+  const store = useStore()
+  store.isUpdateContactList = true
 }
 
 export { onAddContactNotice, onUpdatecontactList }

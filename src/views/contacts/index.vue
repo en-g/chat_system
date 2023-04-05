@@ -108,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, provide, computed } from 'vue'
+  import { ref, reactive, provide, computed, watch } from 'vue'
   import { useRouter } from 'vue-router'
   import useStore from '@/store/index'
   import Contacts from './children/contacts/index.vue'
@@ -166,7 +166,11 @@
 
   // 更新联系人列表
   const updateContactList = async () => {
-    await store.updateContactList(friendsList)
+    const { data } = await getContactsList({
+      userId: store.user_id,
+    })
+    storage.set('contactsList', data)
+    friendsList.splice(0, friendsList.length, ...data)
   }
   provide('updateContactList', updateContactList)
 
@@ -187,7 +191,11 @@
 
   // 更新群聊列表
   const updateGroupList = async () => {
-    await store.updateGroupList(groupsList)
+    const { data } = await getGroupsList({
+      userId: store.user_id,
+    })
+    storage.set('groupsList', data)
+    groupsList.splice(0, groupsList.length, ...data)
   }
   provide('updateGroupList', updateGroupList)
 
@@ -334,6 +342,26 @@
     }
     friendGroupName.value = ''
   }
+
+  // 监听是否更新联系人或群聊
+  watch(
+    () => store.isUpdateContactList,
+    async () => {
+      if (store.isUpdateContactList === true) {
+        await updateContactList()
+        store.isUpdateContactList = false
+      }
+    }
+  )
+  watch(
+    () => store.isUpdateGroupList,
+    async () => {
+      if (store.isUpdateGroupList === true) {
+        await updateGroupList()
+        store.isUpdateGroupList = false
+      }
+    }
+  )
 </script>
 
 <style scoped lang="less">

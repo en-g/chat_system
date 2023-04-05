@@ -18,8 +18,8 @@ const onAddGroupNotice = (notice: any) => {
 
 // 更新群聊列表
 const onUpdateGroupList = async () => {
-  // TODO 如何访问到组件中的方法
-  console.log('onUpdateGroupList')
+  const store = useStore()
+  store.isUpdateGroupList = true
 }
 
 export { onAddGroupNotice, onUpdateGroupList }

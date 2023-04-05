@@ -134,7 +134,7 @@
 
   // 监听同意操作
   const listenAgree = async () => {
-    if (props.type === 'contact') {
+    if (props.type === 'friend') {
       // 获取分组列表
       const { data } = await getFriendGroupList({
         userId: store.user_id,
@@ -185,7 +185,7 @@
 
   // 监听拒绝操作
   const listenRefuse = async () => {
-    if (props.type === 'contact') {
+    if (props.type === 'friend') {
       const { data } = await refuseAddContact({
         noticeId: props.noticeListItem.id,
       })
