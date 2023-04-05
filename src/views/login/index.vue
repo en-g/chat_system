@@ -92,7 +92,6 @@
   import UpdatePassword from '@/components/updatePassword/index.vue'
   import Register from './children/register/index.vue'
   import WriteInfo from './children/writeInfo/index.vue'
-  import websocket from '@/websocket'
 
   const router = useRouter()
   const store = useStore()

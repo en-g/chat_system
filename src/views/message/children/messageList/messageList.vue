@@ -5,9 +5,9 @@
         v-for="item in props.messageList"
         :key="item.id"
         class="message-list-item"
-        @click="listenChatToContact(item.type, item.type === 'contact' ? item.contactId : item.groupId)"
+        @click="listenChatToContact(item.type, item.type === 'friend' ? item.contactId : item.groupId)"
       >
-        <MessageListItem :message-list-item="item" />
+        <MessageListItem :message-list-item="item" :chat-id="props.chatId" :chat-type="props.chatType" />
       </div>
     </div>
   </div>
@@ -19,6 +19,8 @@
 
   const props = defineProps<{
     messageList: MessageListItemInfoType[]
+    chatId: number
+    chatType: string
   }>()
   const emit = defineEmits(['chat'])
 

@@ -2,7 +2,7 @@ export interface MessageListItemInfoType {
   id: number
   contactId?: number
   groupId?: number
-  type: 'contact' | 'group'
+  type: string
   name: string
   remarks?: string
   avatarUrl: string
@@ -34,10 +34,19 @@ export interface ChatMessageItemType {
   id: number
   fromId: number
   toId?: number
-  fromName: string
-  fromAvatarUrl: string
+  groupId?: number
   type: number
   message: string
   url: string
   createTime: string
+}
+
+export interface ChatMessageNoticeType {
+  fromId: number
+  toId?: number
+  groupId?: number
+  type: number
+  message?: string
+  url?: string
+  isContact: boolean
 }

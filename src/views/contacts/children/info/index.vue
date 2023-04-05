@@ -176,14 +176,16 @@
     UpdateGroupsRemarksType,
   } from '@/types/contacts'
   import useStore from '@/store/index'
-  import { sessionStorage } from '@/utils/storage'
+  import { sessionStorage, localStorage } from '@/utils/storage'
   import { ElMessage } from 'element-plus'
   import { TIP_TYPE } from '@/config'
+  import { MessageListItemInfoType } from '@/types/message'
 
   const router = useRouter()
   const route = useRoute()
   const store = useStore()
   const storage = sessionStorage(`${store.user_id}`)
+  const lStorage = localStorage(`${store.user_id}`)
 
   // 联系人/群聊 ID
   const id = computed((): number => {
@@ -302,6 +304,40 @@
 
   // 跳转到聊天界面
   const listenNavigateToChat = () => {
+    const chatMessageList: MessageListItemInfoType[] = lStorage.get('chatMessageList') || []
+    const index = chatMessageList.findIndex((item) => item.contactId === id.value && item.type === type.value)
+    if (index !== -1) {
+      const chatMessage: MessageListItemInfoType[] = chatMessageList.splice(index, 1)
+      chatMessageList.unshift(chatMessage[0])
+    } else {
+      if (type.value === 'friend') {
+        const chatMessage: MessageListItemInfoType = {
+          id: chatMessageList.length + 1,
+          contactId: id.value,
+          type: 'friend',
+          name: info.value.nickname,
+          remarks: info.value.remarks,
+          avatarUrl: info.value.avatarUrl,
+          lastMessage: '',
+          unRead: 0,
+        }
+        chatMessageList.unshift(chatMessage)
+      } else {
+        const chatMessage: MessageListItemInfoType = {
+          id: chatMessageList.length + 1,
+          groupId: id.value,
+          type: 'group',
+          name: info.value.name,
+          remarks: info.value.remarks,
+          avatarUrl: info.value.avatarUrl,
+          lastMessage: '',
+          unRead: 0,
+        }
+        chatMessageList.unshift(chatMessage)
+      }
+    }
+    lStorage.set('chatMessageList', chatMessageList)
+
     router.push({
       name: 'message',
       query: {

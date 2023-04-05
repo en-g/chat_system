@@ -39,9 +39,10 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import { ref, onMounted } from 'vue'
   import ChatMessageList from './chatMessageList.vue'
-  import { ChatMessageItemType } from '@/types/message'
+  import { ChatMessageItemType, ChatMessageNoticeType } from '@/types/message'
+  import websocket from '@/websocket'
 
   const props = defineProps<{
     chatName: string
@@ -50,8 +51,8 @@
   }>()
   const emit = defineEmits(['send'])
 
-  const chatMessage = ref<string>('')
-  const isContentEmpty = ref<boolean>(false)
+  const chatMessage = ref<string>('') // 要发送的消息
+  const isContentEmpty = ref<boolean>(false) // 标记内容是否为空
 
   // 监听发送消息
   const listenSendChatMessage = () => {
@@ -67,6 +68,13 @@
     emit('send', chatMessage.value)
     chatMessage.value = ''
   }
+
+  onMounted(() => {
+    // 更新页面聊天数据，只有处于当前组件中时，才采用实时页面数据更新
+    websocket.listen('chat', (info: ChatMessageNoticeType) => {
+      console.log('更新页面聊天记录')
+    })
+  })
 </script>
 
 <style scoped lang="less">

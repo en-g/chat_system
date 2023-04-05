@@ -3,6 +3,7 @@ import { WEBSOCKET_URL } from '@/config'
 import useStore from '@/store'
 import { onAddContactNotice, onUpdatecontactList } from './contactNotice'
 import { onAddGroupNotice, onUpdateGroupList } from './groupNotice'
+import { onChat } from './chatMessage'
 
 interface WebSocketControllerType {
   url: string
@@ -155,6 +156,8 @@ const initListenEvent = (websocket: any) => {
   websocket.listen('updateContactList', onUpdatecontactList)
   // 更新群聊列表
   websocket.listen('updateGroupList', onUpdateGroupList)
+  // 聊天
+  websocket.listen('chat', onChat)
 }
 
 const websocket = new WebSocketController(WEBSOCKET_URL)

@@ -1,7 +1,12 @@
 <template>
   <div class="index-container">
     <div class="index-message-list">
-      <MessageList :message-list="props.messageList" @chat="listenChatToContact" />
+      <MessageList
+        :message-list="props.messageList"
+        :chat-id="props.chatId"
+        :chat-type="props.chatType"
+        @chat="listenChatToContact"
+      />
     </div>
   </div>
 </template>
@@ -12,6 +17,8 @@
 
   const props = defineProps<{
     messageList: MessageListItemInfoType[]
+    chatId: number
+    chatType: string
   }>()
   const emit = defineEmits(['chat'])
 

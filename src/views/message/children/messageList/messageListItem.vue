@@ -1,13 +1,24 @@
 <template>
-  <div class="message-list-item-container">
-    <el-badge :value="props.messageListItem.unRead" :max="99">
+  <div
+    class="message-list-item-container"
+    :class="{
+      active:
+        (props.chatId === props.messageListItem.contactId && props.messageListItem.type === props.chatType) ||
+        (props.chatId === props.messageListItem.groupId && props.messageListItem.type === props.chatType),
+    }"
+  >
+    <el-badge :hidden="props.messageListItem.unRead <= 0" :value="props.messageListItem.unRead" :max="99">
       <div class="message-list-item-wrap">
         <div class="message-list-item-avatar">
           <el-avatar :size="50" :src="props.messageListItem.avatarUrl" />
         </div>
         <div class="message-list-item-content">
           <div class="message-list-item-nicknme">
-            {{ props.messageListItem.remarks || props.messageListItem.name }}
+            {{
+              props.messageListItem.type === 'friend'
+                ? props.messageListItem.remarks || props.messageListItem.name
+                : props.messageListItem.name
+            }}
           </div>
           <div class="message-list-item-last-message">{{ props.messageListItem.lastMessage }}</div>
         </div>
@@ -21,6 +32,8 @@
 
   const props = defineProps<{
     messageListItem: MessageListItemInfoType
+    chatId: number
+    chatType: string
   }>()
 </script>
 
@@ -55,6 +68,9 @@
         }
       }
     }
+  }
+  .active {
+    background-color: var(--mouse-hover-active);
   }
   :deep(.el-badge) {
     display: block;
