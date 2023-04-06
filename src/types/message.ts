@@ -36,8 +36,8 @@ export interface ChatMessageItemType {
   toId?: number
   groupId?: number
   type: number
-  message: string
-  url: string
+  message?: string
+  url?: string
   createTime: string
 }
 

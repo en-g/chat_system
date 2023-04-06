@@ -50,10 +50,11 @@
   const emit = defineEmits(['ready'])
 
   const chatMessageRef = ref<any>(null)
-  const chatName = ref<string>('') // 对方名称
-  const chatAvatarUrl = ref<string>('') // 对方头像
+  const chatName = ref<string>('') // 名称
+  const chatAvatarUrl = ref<string>('') // 头像
 
   const getChatObjInfo = () => {
+    const myInfo = storage.get('personalInfo')
     if (props.chatMessageItem.groupId) {
       const groupsInfo = storage.get('groupsInfo') || []
       groupsInfo.forEach((group: any) => {
@@ -65,14 +66,13 @@
       })
     } else {
       const contactsInfo = storage.get('contactsInfo') || []
-      const info = contactsInfo.find(
-        (item: any) =>
-          item.id ===
-          (props.chatMessageItem.fromId === store.user_id ? props.chatMessageItem.toId : props.chatMessageItem.fromId)
-      )
+      const info = contactsInfo.find((item: any) => item.id === props.chatMessageItem.fromId)
       if (info) {
         chatName.value = info.nickname
         chatAvatarUrl.value = info.avatarUrl
+      } else {
+        chatName.value = myInfo.nickname
+        chatAvatarUrl.value = myInfo.avatarUrl
       }
     }
   }

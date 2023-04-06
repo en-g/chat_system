@@ -11,6 +11,8 @@
           :chat-message-list="chatMessageList"
           :chat-name="chatName"
           :is-send="isSend"
+          :chat-id="chatId"
+          :chat-type="chatType"
           @send="listenSendChatMessage"
         />
       </div>
@@ -19,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, onMounted } from 'vue'
+  import { ref, reactive, onMounted, provide } from 'vue'
   import { useRoute } from 'vue-router'
   import { ChatMessageItemType, ChatMessageNoticeType, MessageListItemInfoType } from '@/types/message'
   import MessageList from './children/messageList/index.vue'
@@ -27,8 +29,9 @@
   import useStore from '@/store'
   import { localStorage, sessionStorage } from '@/utils/storage'
   import websocket from '@/websocket'
-  import { actualUpdateChatMessageList } from '@/websocket/chatMessage'
+  import { actualUpdateChatMessageList, updateChatMessageList } from '@/websocket/chatMessage'
   import { getFriendInfo, getGroupInfo } from '@/api/contacts'
+  import idb from '@/utils/indexedDB'
 
   const route = useRoute()
   const store = useStore()
@@ -49,8 +52,25 @@
   }
   getMessageList()
 
+  // 获取好友聊天记录
+  const getContactChatMessageList = async (id: number) => {
+    const fromChatList =
+      <Array<any>>await idb.getDataByIndex('friendChatMessages', 'chatIds', [store.user_id, id]) || []
+    const toChatList = <Array<any>>await idb.getDataByIndex('friendChatMessages', 'chatIds', [id, store.user_id]) || []
+    fromChatList.push(...toChatList)
+    fromChatList.sort((m1: any, m2: any) => m1.id - m2.id)
+    chatMessageList.splice(0, chatMessageList.length, ...fromChatList)
+  }
+
+  // 获取群聊聊天记录
+  const getGroupChatMessageList = async (id: number) => {
+    const chatList = <Array<any>>await idb.getDataByIndex('groupChatMessages', 'groupId', id) || []
+    console.log(chatList)
+    chatMessageList.splice(0, chatMessageList.length, ...chatList)
+  }
+
   // 获取聊天记录列表数据
-  const getChatMessageInfo = (id: number, type: string) => {
+  const getChatMessageInfo = async (id: number, type: string) => {
     chatId.value = id
     chatType.value = type
     const chatObj = messageList.find(
@@ -59,6 +79,11 @@
     chatName.value = type === 'friend' ? chatObj?.remarks || chatObj?.name : chatObj?.name
 
     // Todo 获取聊天记录
+    if (type === 'friend') {
+      await getContactChatMessageList(id)
+    } else {
+      await getGroupChatMessageList(id)
+    }
   }
 
   // 初始化聊天信息
@@ -69,6 +94,33 @@
     }
   }
   initChatInfo()
+
+  // 更新聊天记录
+  const updateAllChatMessageList = (info: ChatMessageNoticeType) => {
+    // TODO 消息的时间需要统一
+    if (info.isContact) {
+      chatMessageList.push({
+        id: (chatMessageList[chatMessageList.length - 1]?.id || 0) + 1,
+        fromId: info.fromId,
+        toId: info.toId,
+        type: info.type,
+        message: info.message,
+        url: info.url,
+        createTime: new Date().toLocaleString(),
+      })
+    } else {
+      chatMessageList.push({
+        id: (chatMessageList[chatMessageList.length - 1]?.id || 0) + 1,
+        fromId: info.fromId,
+        groupId: info.groupId,
+        type: info.type,
+        message: info.message,
+        url: info.url,
+        createTime: new Date().toLocaleString(),
+      })
+    }
+  }
+  provide('updateAllChatMessageList', updateAllChatMessageList)
 
   // 监听点击好友聊天
   const listenChatToContact = async (type: string, id: number) => {
@@ -82,7 +134,7 @@
           userId: store.user_id,
           friendId: id,
         })
-        data.createTime = data.createTime.split('T')[0]
+        data.birthday = data.birthday.split('T')[0]
         contactsInfo.push(data)
         storage.set('contactsInfo', contactsInfo)
       }
@@ -104,44 +156,55 @@
   }
 
   // 发送消息
-  const listenSendChatMessage = (chatMessage: string) => {
+  const listenSendChatMessage = async (type: number, message: string, url: string) => {
     isSend.value = true
     if (chatType.value === 'friend') {
+      const chatMessage = {
+        fromId: store.user_id,
+        toId: chatId.value,
+        type,
+        message,
+        url,
+      }
+      const createTime = new Date().toLocaleString()
+      const id = (chatMessageList[chatMessageList.length - 1]?.id || 0) + 1
+      // 更新左侧聊天列表
+      actualUpdateChatMessageList(messageList, { ...chatMessage, isContact: true }, true, true)
+      // 更新本地缓存中的聊天列表
+      updateChatMessageList({ ...chatMessage, isContact: true }, true, true)
+      // 更新聊天记录
       chatMessageList.push({
-        id: chatMessageList.length + 1,
-        fromId: store.user_id,
-        toId: chatId.value,
-        type: 1,
-        message: chatMessage,
-        url: '',
-        createTime: new Date().toISOString(),
+        id,
+        ...chatMessage,
+        createTime,
       })
-      websocket.send('chat', {
-        fromId: store.user_id,
-        toId: chatId.value,
-        type: 1,
-        message: chatMessage,
-        url: '',
-        isContact: true,
-      })
+      // 保存到 indexedDB
+      await idb.addData('friendChatMessages', { ...chatMessage, createTime })
+      // 发送到 websocket 服务器
+      websocket.send('chat', { ...chatMessage, isContact: true })
     } else {
+      const chatMessage = {
+        fromId: store.user_id,
+        groupId: chatId.value,
+        type,
+        message,
+        url,
+      }
+      const createTime = new Date().toDateString()
+      // 更新左侧聊天列表
+      actualUpdateChatMessageList(messageList, { ...chatMessage, isContact: false }, true, true)
+      // 更新本地缓存中的聊天列表
+      updateChatMessageList({ ...chatMessage, isContact: false }, true, true)
+      // 更新聊天记录
       chatMessageList.push({
-        id: chatMessageList.length + 1,
-        fromId: store.user_id,
-        groupId: chatId.value,
-        type: 1,
-        message: chatMessage,
-        url: '',
-        createTime: new Date().toISOString(),
+        id: (chatMessageList[chatMessageList.length - 1]?.id || 0) + 1,
+        ...chatMessage,
+        createTime,
       })
-      websocket.send('chat', {
-        fromId: store.user_id,
-        groupId: chatId.value,
-        type: 1,
-        message: chatMessage,
-        url: '',
-        isContact: false,
-      })
+      // 保存到 indexedDB
+      await idb.addData('groupChatMessages', { ...chatMessage, createTime })
+      // 发送到 websocket 服务器
+      websocket.send('chat', { ...chatMessage, isContact: false })
     }
   }
 
@@ -149,7 +212,17 @@
     // 更新页面聊天数据，只有处于当前组件中时，才采用实时页面数据更新
     websocket.listen('chat', async (info: ChatMessageNoticeType) => {
       // 更新聊天列表
-      await actualUpdateChatMessageList(messageList, info)
+      if (info.fromId === chatId.value && chatType.value === 'friend' && info.isContact) {
+        await actualUpdateChatMessageList(messageList, info, false, true)
+        // 更新本地缓存中的聊天列表
+        await updateChatMessageList(info, false, true)
+      } else if (info.groupId === chatId.value && chatType.value === 'group' && !info.isContact) {
+        await actualUpdateChatMessageList(messageList, info, false, true)
+        // 更新本地缓存中的聊天列表
+        await updateChatMessageList(info, false, true)
+      } else {
+        await actualUpdateChatMessageList(messageList, info)
+      }
     })
   })
 </script>

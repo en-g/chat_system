@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, inject } from 'vue'
   import ChatMessageList from './chatMessageList.vue'
   import { ChatMessageItemType, ChatMessageNoticeType } from '@/types/message'
   import websocket from '@/websocket'
@@ -48,14 +48,25 @@
     chatName: string
     chatMessageList: ChatMessageItemType[]
     isSend: boolean
+    chatId: number
+    chatType: string
   }>()
   const emit = defineEmits(['send'])
+  const updateAllChatMessageList: any = inject('updateAllChatMessageList')
 
   const chatMessage = ref<string>('') // 要发送的消息
+  const chatUrl = ref<string>('') // 要发送的表情包url
   const isContentEmpty = ref<boolean>(false) // 标记内容是否为空
+  const messageType = ref<number>(1) // 消息类型 1: 文本 2: 图片
 
-  // 监听发送消息
+  // 文本消息
   const listenSendChatMessage = () => {
+    messageType.value = 1
+    sendChatMessage()
+  }
+
+  // 发送消息
+  const sendChatMessage = () => {
     if (!chatMessage.value) {
       isContentEmpty.value = true
       let timer: any = setTimeout(() => {
@@ -65,14 +76,22 @@
       }, 1500)
       return
     }
-    emit('send', chatMessage.value)
+    emit('send', messageType.value, chatMessage.value, chatUrl.value)
     chatMessage.value = ''
+    chatUrl.value = ''
   }
 
   onMounted(() => {
     // 更新页面聊天数据，只有处于当前组件中时，才采用实时页面数据更新
     websocket.listen('chat', (info: ChatMessageNoticeType) => {
-      console.log('更新页面聊天记录')
+      console.log(info)
+      if (info.fromId === props.chatId && props.chatType === 'friend' && info.isContact) {
+        updateAllChatMessageList(info)
+      }
+      if (info.groupId === props.chatId && props.chatType === 'group' && !info.isContact) {
+        console.log('=====')
+        updateAllChatMessageList(info)
+      }
     })
   })
 </script>
