@@ -31,7 +31,7 @@
   }
 
   const beforeAvatarUpload = async (uploadFile: UploadFile) => {
-    const res = await fileUpload.singleFileUpload('pyq', uploadFile.raw)
+    const res = await fileUpload.singleFileUpload('defaultGroupAvatar', uploadFile.raw)
     console.log(res)
   }
 </script>

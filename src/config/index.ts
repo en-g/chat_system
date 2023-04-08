@@ -70,6 +70,10 @@ const TIP_TYPE = {
   REFUSE_GROUP_FAIL: '拒绝加入该群聊失败，请检查网络是否通畅！',
   REFUSE_AGREE_ADD_GROUP_SUCCESS: '已拒绝该用户进入群聊！',
   REFUSE_AGREE_ADD_GROUP_FAIL: '拒绝该用户加入群聊失败，请检查网络是否通畅！',
+  GROUP_AVATAR_IS_NOT_NULL: '群聊头像不能为空，请添加群聊头像！',
+  GROUP_NAME_IS_NOT_NULL: '群聊名称不能为空，请添加群聊名称！',
+  CREATE_GROUP_SUCCESS: '创建群聊成功！',
+  CREATE_GROUP_ERROR: '创建群聊失败，请检查网络是否通畅！',
 }
 
 export { BASE_URL, WEBSOCKET_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

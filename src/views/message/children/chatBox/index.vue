@@ -84,12 +84,10 @@
   onMounted(() => {
     // 更新页面聊天数据，只有处于当前组件中时，才采用实时页面数据更新
     websocket.listen('chat', (info: ChatMessageNoticeType) => {
-      console.log(info)
       if (info.fromId === props.chatId && props.chatType === 'friend' && info.isContact) {
         updateAllChatMessageList(info)
       }
       if (info.groupId === props.chatId && props.chatType === 'group' && !info.isContact) {
-        console.log('=====')
         updateAllChatMessageList(info)
       }
     })
