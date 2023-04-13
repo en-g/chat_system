@@ -112,6 +112,7 @@
       invite: '邀请您加入群聊',
       exit: '退出了群聊',
       dismiss: '解散了群聊',
+      create: '创建了群聊并邀请您加入',
     },
   }
   const agreeAddVisible = ref<boolean>(false) // 标记是否显示添加好友的dialog
@@ -119,9 +120,14 @@
   const reamrks = ref<string>('')
   const friendGroups = reactive<FriendGroupsListType[]>([]) // 好友分组列表
 
-  // 群聊通知 type 为 exit、dismiss 的，直接变成已读
+  // 群聊通知 type 为 exit、dismiss、create 的，直接变成已读
   const handleGroupNotice = async () => {
-    if (props.noticeListItem.type === 'exit' || props.noticeListItem.type === 'dismiss') {
+    if (
+      (props.noticeListItem.type === 'exit' ||
+        props.noticeListItem.type === 'dismiss' ||
+        props.noticeListItem.type === 'create') &&
+      props.noticeListItem.status === 0
+    ) {
       const { data } = await readNotice({
         noticeId: props.noticeListItem.id,
       })
@@ -164,8 +170,18 @@
             websocket.send('updateGroupList', {
               userId: props.noticeListItem.fromId,
             })
+            // 告诉websocket服务器谁进群
+            websocket.send('enterGroup', {
+              userId: props.noticeListItem.fromId,
+              groupId: props.noticeListItem.groupId,
+            })
           } else {
             ElMessage.success(TIP_TYPE.ADD_GROUP_SUCCESS)
+            // 告诉websocket服务器我进群
+            websocket.send('enterGroup', {
+              userId: props.noticeListItem.toId,
+              groupId: props.noticeListItem.groupId,
+            })
             // 更新群聊列表
             await updateGroupList()
           }

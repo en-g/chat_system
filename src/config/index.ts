@@ -74,6 +74,10 @@ const TIP_TYPE = {
   GROUP_NAME_IS_NOT_NULL: '群聊名称不能为空，请添加群聊名称！',
   CREATE_GROUP_SUCCESS: '创建群聊成功！',
   CREATE_GROUP_ERROR: '创建群聊失败，请检查网络是否通畅！',
+  UPDATE_CONTACT_FRIEND_GROUP_SCCESS: '修改用户新分组成功！',
+  UPDATE_CONTACT_FRIEND_GROUP_FAIL: '修改用户新分组失败，请检查网络是否通畅！',
+  DELETE_CONTACT_SUCCESS: '删除联系人成功！',
+  DELETE_CONTACT_FAIL: '删除联系人失败，请检查网络是否通畅！',
 }
 
 export { BASE_URL, WEBSOCKET_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

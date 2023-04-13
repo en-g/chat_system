@@ -3,6 +3,7 @@ import {
   AddFriendGroupsType,
   AgreeAddContactInfoType,
   AgreeAddGroupIdType,
+  DeleteContactType,
   DeleteFriendGroupsIdsType,
   GetContactsInfoType,
   GetContactsListType,
@@ -13,6 +14,7 @@ import {
   RefseAddContactInfoType,
   RefseAddGroupIdType,
   UnHandleNoticesInfoType,
+  UpdateContactFriendGroupType,
   UpdateContactsRemarksType,
   UpdateGroupsRemarksType,
 } from '@/types/contacts'
@@ -183,6 +185,26 @@ const readNotice = (id: ReadNoticeIdType) => {
   )
 }
 
+// 修改联系人所在分组
+const updateContactFriendGroup = (ids: UpdateContactFriendGroupType) => {
+  return Promise.resolve(
+    put({
+      url: 'friendGroups/contact',
+      data: ids,
+    })
+  )
+}
+
+// 删除联系人
+const deleteContact = (ids: DeleteContactType) => {
+  return Promise.resolve(
+    del({
+      url: 'friends',
+      data: ids,
+    })
+  )
+}
+
 export {
   getContactsList,
   getGroupsList,
@@ -202,4 +224,6 @@ export {
   agreeAddGroup,
   refuseAddGrop,
   readNotice,
+  updateContactFriendGroup,
+  deleteContact,
 }

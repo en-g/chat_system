@@ -246,6 +246,11 @@
   const listenCreateGroup = async () => {
     await getDefaultAvatarList()
     await getllContactList()
+    // 初始化群聊信息
+    chooseAvatarId.value = -1
+    createGroupInfo.name = ''
+    createGroupInfo.avatarUrl = ''
+    createGroupInfo.members.splice(0, createGroupInfo.members.length)
     isShowMenu.value = false
     createGroupVisible.value = true
   }
@@ -358,15 +363,17 @@
       // 自己也是群成员，要加入
       createGroupInfo.members.unshift(store.user_id)
       const { data } = await createGroup(createGroupInfo)
-      if (data) {
+      if (data.status) {
         ElMessage.success(TIP_TYPE.CREATE_GROUP_SUCCESS)
         createGroupVisible.value = false
         // 更新群聊列表
         store.isUpdateGroupList = true
-        // TODO 发送到websocket服务器
-        if (createGroupInfo.members.length > 1) {
-          console.log('websocket')
-        }
+        // 发送到websocket服务器
+        websocket.send('createGroup', {
+          userId: createGroupInfo.leaderId,
+          groupId: data.groupId,
+          members: createGroupInfo.members,
+        })
       } else {
         ElMessage.error(TIP_TYPE.CREATE_GROUP_ERROR)
       }
@@ -376,10 +383,6 @@
   // 取消创建群聊
   const listenCancleCreteGroup = () => {
     createGroupVisible.value = false
-    chooseAvatarId.value = -1
-    createGroupInfo.name = ''
-    createGroupInfo.avatarUrl = ''
-    createGroupInfo.members.splice(0, createGroupInfo.members.length)
   }
 </script>
 

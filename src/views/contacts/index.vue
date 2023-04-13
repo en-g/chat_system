@@ -351,7 +351,8 @@
         await updateContactList()
         store.isUpdateContactList = false
       }
-    }
+    },
+    { immediate: true }
   )
   watch(
     () => store.isUpdateGroupList,
@@ -360,7 +361,8 @@
         await updateGroupList()
         store.isUpdateGroupList = false
       }
-    }
+    },
+    { immediate: true }
   )
 </script>
 

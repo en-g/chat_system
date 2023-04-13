@@ -3,9 +3,10 @@
     <div class="chat-box-title">
       <div class="chat-box-object">{{ props.chatName }}</div>
       <div class="chat-box-setting">
-        <svg class="icon" aria-hidden="true">
+        <svg class="icon" aria-hidden="true" @click="listenShowSetting">
           <use xlink:href="#icon-chat-setting"></use>
         </svg>
+        <ContactGroupDetail :id="props.chatId" :type="props.chatType" :visible="isSetting" @hide="isSetting = false" />
       </div>
     </div>
     <div class="chat-box-main">
@@ -43,6 +44,7 @@
   import ChatMessageList from './chatMessageList.vue'
   import { ChatMessageItemType, ChatMessageNoticeType } from '@/types/message'
   import websocket from '@/websocket'
+  import ContactGroupDetail from '@/components/contactGroupDetail/index.vue'
 
   const props = defineProps<{
     chatName: string
@@ -57,6 +59,7 @@
   const chatMessage = ref<string>('') // 要发送的消息
   const chatUrl = ref<string>('') // 要发送的表情包url
   const isContentEmpty = ref<boolean>(false) // 标记内容是否为空
+  const isSetting = ref<boolean>(false) // 是否显示设置
   const messageType = ref<number>(1) // 消息类型 1: 文本 2: 图片
 
   // 文本消息
@@ -79,6 +82,11 @@
     emit('send', messageType.value, chatMessage.value, chatUrl.value)
     chatMessage.value = ''
     chatUrl.value = ''
+  }
+
+  // 显示设置
+  const listenShowSetting = () => {
+    isSetting.value = !isSetting.value
   }
 
   onMounted(() => {

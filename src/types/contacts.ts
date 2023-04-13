@@ -108,3 +108,14 @@ export interface RefseAddGroupIdType {
 export interface ReadNoticeIdType {
   noticeId: number
 }
+
+export interface UpdateContactFriendGroupType {
+  userId: number
+  friendId: number
+  friendGroupId: number
+}
+
+export interface DeleteContactType {
+  userId: number
+  friendId: number
+}
