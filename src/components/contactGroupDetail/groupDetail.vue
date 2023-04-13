@@ -27,7 +27,7 @@
         </div>
         <div class="name">{{ item.remarks || item.nickname }}</div>
       </div>
-      <div class="invite">
+      <div class="invite" @click="listenInviteContact">
         <el-icon class="icon"><Plus /></el-icon>
       </div>
     </div>
@@ -84,6 +84,39 @@
     <div class="group-detail-back">
       <el-button class="botton" @click="listenBack">返回</el-button>
     </div>
+    <el-dialog v-model="inviteGropVisible" title="邀请进群" width="30%">
+      <el-scrollbar height="300px">
+        <div class="contact-list">
+          <div
+            v-for="item in contactList"
+            :key="item.userId"
+            class="contact-list-item"
+            :class="{ active: item.isMember || inviteIds.includes(item.userId), cursor: !item.isMember }"
+            @click="listenChooseContact(item.userId)"
+          >
+            <div class="avatar">
+              <el-avatar :size="30" :src="item.avatarUrl" />
+            </div>
+            <div class="name">{{ item.name }}</div>
+            <div class="member">
+              <span v-if="item.isMember" class="added">已加入</span>
+              <span v-if="!item.isMember && inviteIds.includes(item.userId)" class="icon">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-agree"></use>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </el-scrollbar>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="inviteGropVisible = false">取消</el-button>
+          <el-button type="primary" @click="listenConfirmInvite"> 确定 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -97,6 +130,9 @@
   import { TIP_TYPE } from '@/config'
   import websocket from '@/websocket'
   import { Plus } from '@element-plus/icons-vue'
+  import { dismissGroup, exitGroup } from '@/api/groups'
+  import { getContactListAboutGroup, getGroupInfo } from '@/api/contacts'
+  import { ContactListAboutGroupType, GetGroupInfoType } from '@/types/contacts'
 
   const store = useStore()
   const storage = sessionStorage(`${store.user_id}`)
@@ -108,12 +144,74 @@
   const groupInfo = reactive<any>({}) // 群聊信息
   const isUpdateRemarks = ref<boolean>(false) // 标记是否修改群昵称
   const isUpdateGroupNotice = ref<boolean>(false) // 标记是否修改群公告
+  const inviteGropVisible = ref<boolean>(false) // 标记是否显示邀请进群的 dialog
+  const contactList = reactive<ContactListAboutGroupType[]>([]) // 联系人列表
+  const inviteIds = reactive<Array<number>>([]) // 要邀请进群的id
 
   // 获取群聊设置信息
   const getgroupSetting = () => {
     const groupsInfo = storage.get('groupsInfo') || []
     const info = groupsInfo.find((item: any) => item.id === props.groupId)
     Object.assign(groupInfo, info)
+  }
+
+  // 获取联系人列表与群聊的关系
+  const getContactListAboutGroupData = async () => {
+    const { data } = await getContactListAboutGroup({
+      userId: store.user_id,
+      groupId: groupInfo.id,
+    })
+    contactList.splice(0, contactList.length, ...data)
+  }
+
+  // 邀请好友进群
+  const listenInviteContact = async () => {
+    await getContactListAboutGroupData()
+    inviteIds.splice(0, inviteIds.length)
+    inviteGropVisible.value = true
+  }
+
+  // 邀请好友
+  const listenChooseContact = (id: number) => {
+    const contact = contactList.find((item) => item.userId === id)
+    if (contact?.isMember) return
+    if (inviteIds.includes(id)) {
+      const index = inviteIds.findIndex((userId) => userId === id)
+      inviteIds.splice(index, 1)
+    } else {
+      inviteIds.push(id)
+    }
+  }
+
+  // 确定邀请
+  const listenConfirmInvite = async () => {
+    if (inviteIds.length === 0) {
+      ElMessage.error(TIP_TYPE.INVITE_GROUP_IS_NOT_NULL)
+      return
+    }
+    websocket.send('inviteGroup', {
+      userId: store.user_id,
+      groupId: groupInfo.id,
+      inviteIds,
+    })
+    // TODO 更新群聊信息
+    ElMessage.success(TIP_TYPE.INVITE_GROUP_SCCESS)
+    inviteGropVisible.value = false
+  }
+
+  // 更新群聊信息
+  const updateGroupInfo = async () => {
+    const groupsInfo = storage.get('groupsInfo') || []
+    const index = groupsInfo.findIndex((item: any) => item.id === groupInfo.id)
+    const ids: GetGroupInfoType = {
+      userId: store.user_id,
+      groupId: groupInfo.id,
+    }
+    const { data } = await getGroupInfo(ids)
+    data.createTime = data.createTime.split('T')[0]
+    Object.assign(groupInfo, data)
+    groupsInfo.splice(index, 1, data)
+    storage.set('groupsInfo', groupsInfo)
   }
 
   // 修改备注
@@ -146,7 +244,9 @@
 
   // 修改群公告
   const listenUpdateGroupNotice = () => {
-    isUpdateGroupNotice.value = true
+    if (groupInfo.isLeader) {
+      isUpdateGroupNotice.value = true
+    }
   }
 
   // 确认修改群公告
@@ -166,12 +266,58 @@
 
   // 解散群聊
   const listenDismissGroup = () => {
-    console.log('dismiss')
+    ElMessageBox.confirm('您正在解散该群聊，请确认！', '解散群聊', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(async () => {
+      const { data } = await dismissGroup({
+        leaderId: store.user_id,
+        groupId: groupInfo.id,
+      })
+      if (data) {
+        ElMessage.success(TIP_TYPE.DISMISS_GROUP_SUCCESS)
+        // 更新群聊列表
+        store.isUpdateGroupList = true
+        // 对群成员发送解散群聊通知
+        websocket.send('dismissGroup', {
+          fromId: store.user_id,
+          toId: -1,
+          groupId: groupInfo.id,
+          type: 'dismiss',
+        })
+      } else {
+        ElMessage.success(TIP_TYPE.DISMISS_GROUP_FAIL)
+      }
+    })
   }
 
   // 退出群聊
   const listenExitGroup = () => {
-    console.log('exit')
+    ElMessageBox.confirm('您正在退出该群聊，请确认！', '退出群聊', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(async () => {
+      const { data } = await exitGroup({
+        userId: store.user_id,
+        groupId: groupInfo.id,
+      })
+      if (data) {
+        ElMessage.success(TIP_TYPE.EXIT_GROUP_SUCCESS)
+        // 更新群聊列表
+        store.isUpdateGroupList = true
+        // 对群主发送退群通知, 通知群成员更新群聊信息
+        websocket.send('exitGroup', {
+          fromId: store.user_id,
+          toId: groupInfo.leaderId,
+          groupId: groupInfo.id,
+          type: 'exit',
+        })
+      } else {
+        ElMessage.success(TIP_TYPE.EXIT_GROUP_FAIL)
+      }
+    })
   }
 
   // 返回
@@ -317,6 +463,38 @@
         border-radius: 0;
       }
     }
+    .contact-list {
+      .contact-list-item {
+        display: flex;
+        align-items: center;
+        padding: 5px 10px;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+        .avatar {
+          margin-right: 15px;
+        }
+        .name {
+          flex: 1;
+          font-weight: bold;
+          font-size: var(--middle-font-size);
+        }
+        .member {
+          width: 60px;
+          text-align: right;
+          .added {
+            font-size: var(--small-desc-size);
+          }
+          .icon {
+          }
+        }
+        &.active {
+          background-color: var(--mouse-hover-active);
+        }
+        &.cursor {
+          cursor: pointer;
+        }
+      }
+    }
   }
   :deep(.el-input__wrapper.is-focus),
   :deep(.el-input__wrapper),
@@ -330,5 +508,8 @@
   }
   :deep(.el-textarea__inner) {
     padding: 0 !important;
+  }
+  :deep(.el-dialog__body) {
+    padding: 10px 20px 20px;
   }
 </style>

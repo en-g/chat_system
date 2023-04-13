@@ -206,8 +206,12 @@
         store.isUpdateContactList = true
         // 通知对方更新联系人列表
         websocket.send('updateContactList', { userId: props.userId })
-        // TODO 将联系人从聊天列表中删除
-        // TODO 也要通知对方从聊天列表中删除
+        // 将联系人从聊天列表中删除
+        // 也要通知对方从聊天列表中删除
+        websocket.send('deleteContact', {
+          userId: store.user_id,
+          friendId: props.userId,
+        })
         // TODO 后面看看聊天记录要不要删
       } else {
         ElMessage.error(TIP_TYPE.DELETE_CONTACT_FAIL)

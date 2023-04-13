@@ -50,3 +50,8 @@ export interface ChatMessageNoticeType {
   url?: string
   isContact: boolean
 }
+
+export interface DeleteChatMessageListItemType {
+  id: number
+  type: string
+}

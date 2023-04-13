@@ -14,12 +14,16 @@
     </div>
     <div class="chat-box-input">
       <div class="chat-box-input-function">
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-emoji"></use>
-        </svg>
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-image"></use>
-        </svg>
+        <Emoji @emoji="listenClickEmoji">
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-emoji"></use>
+          </svg>
+        </Emoji>
+        <Emotion @emotion="listenSendEmotion">
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-image"></use>
+          </svg>
+        </Emotion>
       </div>
       <div class="chat-box-input-content">
         <el-input v-model="chatMessage" class="input" type="textarea" placeholder="请输入内容" />
@@ -45,6 +49,8 @@
   import { ChatMessageItemType, ChatMessageNoticeType } from '@/types/message'
   import websocket from '@/websocket'
   import ContactGroupDetail from '@/components/contactGroupDetail/index.vue'
+  import Emoji from '@/components/emoji/index.vue'
+  import Emotion from '@/components/emotion/index.vue'
 
   const props = defineProps<{
     chatName: string
@@ -66,6 +72,16 @@
   const listenSendChatMessage = () => {
     messageType.value = 1
     sendChatMessage()
+  }
+
+  // 点击emoji
+  const listenClickEmoji = (emoji: string) => {
+    chatMessage.value += emoji
+  }
+
+  // 发送表情包
+  const listenSendEmotion = (url: string) => {
+    emit('send', 2, chatMessage.value, url)
   }
 
   // 发送消息
@@ -134,12 +150,13 @@
       height: 25%;
       padding: 10px 0;
       box-sizing: border-box;
+      border-top: 1px solid var(--border-color);
       .chat-box-input-function {
         height: 15%;
-        padding: 0 20px;
+        padding: 0 10px;
         box-sizing: border-box;
         .icon {
-          margin-right: 20px;
+          margin: 0 10px;
         }
       }
       .chat-box-input-content {

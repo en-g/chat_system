@@ -22,18 +22,28 @@
 
 <script setup lang="ts">
   import { ref, reactive, onMounted, provide } from 'vue'
-  import { useRoute } from 'vue-router'
-  import { ChatMessageItemType, ChatMessageNoticeType, MessageListItemInfoType } from '@/types/message'
+  import { useRoute, useRouter } from 'vue-router'
+  import {
+    ChatMessageItemType,
+    ChatMessageNoticeType,
+    DeleteChatMessageListItemType,
+    MessageListItemInfoType,
+  } from '@/types/message'
   import MessageList from './children/messageList/index.vue'
   import ChatBox from './children/chatBox/index.vue'
   import useStore from '@/store'
   import { localStorage, sessionStorage } from '@/utils/storage'
   import websocket from '@/websocket'
-  import { actualUpdateChatMessageList, updateChatMessageList } from '@/websocket/chatMessage'
+  import {
+    actualDeleteChatMessageListItem,
+    actualUpdateChatMessageList,
+    updateChatMessageList,
+  } from '@/websocket/chatMessage'
   import { getFriendInfo, getGroupInfo } from '@/api/contacts'
   import idb from '@/utils/indexedDB'
 
   const route = useRoute()
+  const router = useRouter()
   const store = useStore()
   const lStorage = localStorage(`${store.user_id}`)
   const storage = sessionStorage(`${store.user_id}`)
@@ -153,6 +163,13 @@
       }
     }
     getChatMessageInfo(id, type)
+    router.push({
+      name: 'message',
+      query: {
+        type,
+        id,
+      },
+    })
   }
 
   // 发送消息
@@ -223,6 +240,15 @@
       } else {
         await actualUpdateChatMessageList(messageList, info)
       }
+    })
+    // 删除聊天列表项
+    websocket.listen('deleteChatMessageItem', (info: DeleteChatMessageListItemType) => {
+      if (chatId.value === info.id && chatType.value === info.type) {
+        chatId.value = -1
+        chatType.value = ''
+        router.push({ name: 'message' })
+      }
+      actualDeleteChatMessageListItem(messageList, info)
     })
   })
 </script>

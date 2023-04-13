@@ -63,6 +63,7 @@
       })
       total.value = data.total
       noticeList.splice(0, noticeList.length, ...data.list)
+      console.log(noticeList)
     }
   }
   await getNoticeList()

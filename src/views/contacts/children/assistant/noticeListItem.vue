@@ -133,6 +133,11 @@
       })
       if (data) {
         readedNotice(props.noticeListItem.id)
+        // 未处理通知-1
+        const index = store.groupUnHandleNoticeIds.findIndex((id) => id === props.noticeListItem.id)
+        if (index !== -1) {
+          store.groupUnHandleNoticeIds.splice(index, 1)
+        }
       }
     }
   }
@@ -185,8 +190,6 @@
             // 更新群聊列表
             await updateGroupList()
           }
-          // TODO 之后还要在websocket服务器中添加群聊成员ID
-          // socket.send(...)
         } else {
           if (props.noticeListItem.type === 'add') {
             ElMessage.error(TIP_TYPE.AGREE_ADD_GROUP_FAIL)
@@ -208,9 +211,9 @@
       if (data) {
         refuseNotice(props.noticeListItem.id)
         // 未处理通知-1
-        const index = store.groupUnHandleNoticeIds.findIndex((id) => id === props.noticeListItem.id)
+        const index = store.contactUnHandleNoticeIds.findIndex((id) => id === props.noticeListItem.id)
         if (index !== -1) {
-          store.groupUnHandleNoticeIds.splice(index, 1)
+          store.contactUnHandleNoticeIds.splice(index, 1)
         }
         ElMessage.success(TIP_TYPE.REFUSE_ADD_CONTACT_SUCCESS)
       } else {
@@ -224,9 +227,9 @@
         if (data) {
           refuseNotice(props.noticeListItem.id)
           // 未处理通知-1
-          const index = store.contactUnHandleNoticeIds.findIndex((id) => id === props.noticeListItem.id)
+          const index = store.groupUnHandleNoticeIds.findIndex((id) => id === props.noticeListItem.id)
           if (index !== -1) {
-            store.contactUnHandleNoticeIds.splice(index, 1)
+            store.groupUnHandleNoticeIds.splice(index, 1)
           }
           if (props.noticeListItem.type === 'add') {
             ElMessage.success(TIP_TYPE.REFUSE_AGREE_ADD_GROUP_SUCCESS)

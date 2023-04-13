@@ -3,6 +3,7 @@ import {
   AddFriendGroupsType,
   AgreeAddContactInfoType,
   AgreeAddGroupIdType,
+  ContactListAboutGroupIdsType,
   DeleteContactType,
   DeleteFriendGroupsIdsType,
   GetContactsInfoType,
@@ -205,6 +206,16 @@ const deleteContact = (ids: DeleteContactType) => {
   )
 }
 
+// 获取联系人列表与群聊的关系
+const getContactListAboutGroup = (ids: ContactListAboutGroupIdsType) => {
+  return Promise.resolve(
+    get({
+      url: 'friends/about/list',
+      params: ids,
+    })
+  )
+}
+
 export {
   getContactsList,
   getGroupsList,
@@ -226,4 +237,5 @@ export {
   readNotice,
   updateContactFriendGroup,
   deleteContact,
+  getContactListAboutGroup,
 }

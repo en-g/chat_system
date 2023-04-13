@@ -1,6 +1,6 @@
 import useStore from '@/store'
 import { localStorage, sessionStorage } from '@/utils/storage'
-import { ChatMessageNoticeType, MessageListItemInfoType } from '@/types/message'
+import { ChatMessageNoticeType, DeleteChatMessageListItemType, MessageListItemInfoType } from '@/types/message'
 import { getFriendInfo, getGroupInfo } from '@/api/contacts'
 import idb from '@/utils/indexedDB'
 
@@ -28,6 +28,11 @@ const onChat = async (info: ChatMessageNoticeType) => {
       createTime: new Date().toLocaleString(),
     })
   }
+}
+
+// 删除聊天列表项
+const onDeleteChatMessageItem = (info: DeleteChatMessageListItemType) => {
+  deleteChatMessageListItem(info)
 }
 
 // 更新本地缓存的聊天列表
@@ -188,4 +193,57 @@ const actualUpdateChatMessageList = async (
   }
 }
 
-export { onChat, updateChatMessageList, actualUpdateChatMessageList }
+// 删除聊天列表项
+const deleteChatMessageListItem = (info: DeleteChatMessageListItemType) => {
+  const store = useStore()
+  const lStorage = localStorage(`${store.user_id}`)
+  const chatMessageList = lStorage.get('chatMessageList') || []
+  if (info.type === 'friend') {
+    const index = chatMessageList.findIndex(
+      (chatMessage: MessageListItemInfoType) => chatMessage.contactId === info.id && chatMessage.type === info.type
+    )
+    if (index !== -1) {
+      chatMessageList.splice(index, 1)
+      lStorage.set('chatMessageList', chatMessageList)
+    }
+  } else {
+    const index = chatMessageList.findIndex(
+      (chatMessage: MessageListItemInfoType) => chatMessage.groupId === info.id && chatMessage.type === info.type
+    )
+    if (index !== -1) {
+      chatMessageList.splice(index, 1)
+      lStorage.set('chatMessageList', chatMessageList)
+    }
+  }
+}
+
+// 实时删除页面的聊天列表项
+const actualDeleteChatMessageListItem = (
+  chatMessageList: MessageListItemInfoType[],
+  info: DeleteChatMessageListItemType
+) => {
+  if (info.type === 'friend') {
+    const index = chatMessageList.findIndex(
+      (chatMessage: MessageListItemInfoType) => chatMessage.contactId === info.id && chatMessage.type === info.type
+    )
+    if (index !== -1) {
+      chatMessageList.splice(index, 1)
+    }
+  } else {
+    const index = chatMessageList.findIndex(
+      (chatMessage: MessageListItemInfoType) => chatMessage.groupId === info.id && chatMessage.type === info.type
+    )
+    if (index !== -1) {
+      chatMessageList.splice(index, 1)
+    }
+  }
+}
+
+export {
+  onChat,
+  updateChatMessageList,
+  actualUpdateChatMessageList,
+  deleteChatMessageListItem,
+  actualDeleteChatMessageListItem,
+  onDeleteChatMessageItem,
+}

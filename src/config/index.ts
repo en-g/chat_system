@@ -78,6 +78,14 @@ const TIP_TYPE = {
   UPDATE_CONTACT_FRIEND_GROUP_FAIL: '修改用户新分组失败，请检查网络是否通畅！',
   DELETE_CONTACT_SUCCESS: '删除联系人成功！',
   DELETE_CONTACT_FAIL: '删除联系人失败，请检查网络是否通畅！',
+  EXIT_GROUP_SUCCESS: '退出群聊成功！',
+  EXIT_GROUP_FAIL: '退出群聊失败，请检查网络是否通畅！',
+  DISMISS_GROUP_SUCCESS: '解散群聊成功！',
+  DISMISS_GROUP_FAIL: '解散群聊失败，请检查网络是否通畅！',
+  INVITE_GROUP_IS_NOT_NULL: '请选择要邀请的联系人！',
+  INVITE_GROUP_SCCESS: '邀请成功，请等待回复！',
+  UPLOAD_EMOTION_SCCESS: '上传表情包成功！',
+  UPLOAD_EMOTION_FAIL: '上传表情包失败，请检查网络是否通畅！',
 }
 
 export { BASE_URL, WEBSOCKET_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

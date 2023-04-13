@@ -2,8 +2,15 @@ import { io } from 'socket.io-client'
 import { WEBSOCKET_URL } from '@/config'
 import useStore from '@/store'
 import { onAddContactNotice, onUpdatecontactList } from './contactNotice'
-import { onAddGroupNotice, onCreateGroupNotice, onUpdateGroupList } from './groupNotice'
-import { onChat } from './chatMessage'
+import {
+  onAddGroupNotice,
+  onCreateGroupNotice,
+  onDismissGroupNotice,
+  onExitGroupNotice,
+  onInviteGroupNotice,
+  onUpdateGroupList,
+} from './groupNotice'
+import { onChat, onDeleteChatMessageItem } from './chatMessage'
 
 interface WebSocketControllerType {
   url: string
@@ -154,10 +161,18 @@ const initListenEvent = (websocket: any) => {
   websocket.listen('addGroupNotice', onAddGroupNotice)
   // 创建群聊的通知
   websocket.listen('createGroupNotice', onCreateGroupNotice)
+  // 邀请进入群聊的通知
+  websocket.listen('inviteGroupNotice', onInviteGroupNotice)
+  // 退出群聊的通知
+  websocket.listen('exitGroupNotice', onExitGroupNotice)
+  // 解散群聊的通知
+  websocket.listen('dismissGroupNotice', onDismissGroupNotice)
   // 更新联系人列表
   websocket.listen('updateContactList', onUpdatecontactList)
   // 更新群聊列表
   websocket.listen('updateGroupList', onUpdateGroupList)
+  // 删除聊天列表项
+  websocket.listen('deleteChatMessageItem', onDeleteChatMessageItem)
   // 聊天
   websocket.listen('chat', onChat)
 }

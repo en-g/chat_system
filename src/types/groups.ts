@@ -19,3 +19,13 @@ export interface ContactListType {
 export interface GetAllContactType {
   userId: number
 }
+
+export interface ExitGroupType {
+  userId: number
+  groupId: number
+}
+
+export interface DismissGroupType {
+  leaderId: number
+  groupId: number
+}

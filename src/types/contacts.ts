@@ -119,3 +119,15 @@ export interface DeleteContactType {
   userId: number
   friendId: number
 }
+
+export interface ContactListAboutGroupIdsType {
+  userId: number
+  groupId: number
+}
+
+export interface ContactListAboutGroupType {
+  userId: number
+  name: string
+  avatarUrl: string
+  isMember: number
+}
