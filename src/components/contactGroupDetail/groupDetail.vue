@@ -394,6 +394,7 @@
           -o-text-overflow: ellipsis;
           color: var(--desc-color);
           font-size: var(--small-desc-size);
+          text-align: center;
         }
       }
       .invite {

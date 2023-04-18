@@ -108,9 +108,10 @@
     .tidings-list-item-wrap {
       width: 100%;
       display: flex;
-      padding: 30px;
+      padding: 10px;
       box-sizing: border-box;
       font-weight: normal;
+      margin-bottom: 30px;
       .tidings-list-item-avatar {
         margin-right: 10px;
         .avatar {

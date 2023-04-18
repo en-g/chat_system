@@ -8,7 +8,12 @@
             {{ props.chatMessageItem.message }}
           </div>
           <div v-else class="image">
-            <el-image :src="props.chatMessageItem.url" :preview-src-list="[props.chatMessageItem.url]" fit="cover" />
+            <el-image
+              class="item"
+              :src="props.chatMessageItem.url"
+              :preview-src-list="[props.chatMessageItem.url]"
+              fit="cover"
+            />
           </div>
         </div>
       </div>
@@ -27,7 +32,12 @@
             {{ props.chatMessageItem.message }}
           </div>
           <div v-else class="image">
-            <el-image :src="props.chatMessageItem.url" :preview-src-list="[props.chatMessageItem.url]" fit="cover" />
+            <el-image
+              class="item"
+              :src="props.chatMessageItem.url"
+              :preview-src-list="[props.chatMessageItem.url]"
+              fit="cover"
+            />
           </div>
         </div>
       </div>
@@ -113,7 +123,12 @@
             line-height: 25px;
           }
           .image {
-            width: 150px;
+            width: 180px;
+            height: 180px;
+            .item {
+              width: 100%;
+              height: 100%;
+            }
           }
         }
       }

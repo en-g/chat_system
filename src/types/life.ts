@@ -28,3 +28,21 @@ export interface LifeTidingsHotReviewType {
 export interface LifeTidingsDetailType {
   id: number
 }
+
+export interface PersonalCenterInfoType {
+  userId: number
+  name: string
+  avatarUrl: string
+  messages: Array<any>
+  regards: Array<any>
+  fans: number
+  like: number
+  comment: number
+  isRegard: number
+}
+
+export interface HotTidingsListItemType {
+  id: number
+  title: string
+  read: number
+}

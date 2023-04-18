@@ -1,44 +1,41 @@
 <template>
   <div class="life-container">
-    <div class="life-ascription">
-      <div class="life-current" @click="listenNavigateTolife">
-        <svg class="icon" aria-hidden="true">
-          <use :xlink:href="id === store.user_id ? '#icon-current-view' : '#icon-current-view-active'"></use>
-        </svg>
-        <span :class="{ active: id !== store.user_id }">生活圈</span>
-      </div>
-      <div class="life-mine" @click="listenNavigateToMylife">
-        <svg class="icon" aria-hidden="true">
-          <use :xlink:href="id === store.user_id ? '#icon-mine-active' : '#icon-mine'"></use>
-        </svg>
-        <span :class="{ active: id === store.user_id }">我的生活圈</span>
-      </div>
+    <div class="life-personal-center">
+      <PersonalCenter :personal-center-info="personalCenterInfo" @regard="listenRegard" @release="listenRelease" />
     </div>
-    <div class="life-main">
-      <el-scrollbar v-if="!!tidingsList.length" class="life-tidings-list-scroll">
-        <div class="life-tidings-list">
-          <Tidings :tidings-list="tidingsList" />
-        </div>
-        <div class="life-tidings-pagination">
-          <el-pagination
-            v-model:current-page="pageNum"
-            v-model:page-size="pageSize"
-            :page-sizes="[2, 5, 10]"
-            :small="true"
-            :background="true"
-            layout="sizes, prev, pager, next"
-            :total="total"
-            @size-change="listenPaginationChange"
-            @current-change="listenPaginationChange"
-          />
-        </div>
-      </el-scrollbar>
-      <div v-else class="tidings-null">TA目前暂未发布过动态</div>
+    <div class="life-hot-search">
+      <HotSearch :hot-tidings-list="hotTidingsList" />
     </div>
-    <div class="life-release">
-      <svg v-show="id === store.user_id || id === -1" class="icon" aria-hidden="true">
-        <use xlink:href="#icon-release"></use>
-      </svg>
+    <div class="life-content">
+      <el-card class="life-navbar-card">
+        <div class="life-navbar">
+          <div class="navbar-item" :class="{ active: isNew }" @click="listenShowNewTidings">最新</div>
+          <div class="navbar-item" :class="{ active: !isNew }" @click="listenShowHotTidings">热门</div>
+        </div>
+      </el-card>
+      <el-card class="life-main-card">
+        <div class="life-main">
+          <el-scrollbar v-if="!!tidingsList.length" class="life-tidings-list-scroll">
+            <div class="life-tidings-list">
+              <Tidings :tidings-list="tidingsList" />
+            </div>
+            <div class="life-tidings-pagination">
+              <el-pagination
+                v-model:current-page="pageNum"
+                v-model:page-size="pageSize"
+                :page-sizes="[2, 5, 10]"
+                :small="true"
+                :background="true"
+                layout="sizes, prev, pager, next"
+                :total="total"
+                @size-change="listenPaginationChange"
+                @current-change="listenPaginationChange"
+              />
+            </div>
+          </el-scrollbar>
+          <div v-else class="tidings-null">TA目前暂未发布过动态</div>
+        </div>
+      </el-card>
     </div>
     <el-dialog v-model="isRelease" title="发布动态" width="40%">
       <div class="life-release-main">
@@ -80,6 +77,9 @@
         </span>
       </template>
     </el-dialog>
+    <el-dialog id="detail" v-model="showDetailVisible" width="798px" :modal="false" :show-close="false" top="60px">
+      动态详情
+    </el-dialog>
   </div>
 </template>
 
@@ -94,7 +94,9 @@
   import fileUpload from '@/utils/fileUpload'
   import { TIP_TYPE } from '@/config'
   import { sessionStorage } from '@/utils/storage'
-  import { LifeTidingsType } from '@/types/life'
+  import { HotTidingsListItemType, LifeTidingsType, PersonalCenterInfoType } from '@/types/life'
+  import PersonalCenter from './children/personalCenter/index.vue'
+  import HotSearch from './children/hotSearch/index.vue'
 
   const router = useRouter()
   const route = useRoute()
@@ -102,6 +104,8 @@
   const storage = sessionStorage(`${store.user_id}`)
 
   const isRelease = ref<boolean>(false) // 标记是否显示发布动态
+  const isNew = ref<boolean>(true) // 标记是否为最新动态
+  const showDetailVisible = ref<boolean>(true) // 查看动态详情
   // // 待发布的动态信息
   // const tidingInfo = reactive<lifeTidingsInfoType>({
   //   userId: store.user_id,
@@ -157,6 +161,31 @@
       hotReview: { id: 1, content: '这功能开发得也太慢了吧', isThumbsUp: 1, thumbsUpCount: 1234 },
     },
   ])
+  // 个人中心信息
+  const personalCenterInfo = reactive<PersonalCenterInfoType>({
+    userId: 1,
+    name: '小明',
+    avatarUrl: 'http://localhost:3000/public/avatar/6cca5c0bf24c7e15ad056b26bce7da3a41858.webp',
+    messages: [],
+    regards: [],
+    fans: 1234,
+    like: 5621,
+    comment: 4556,
+    isRegard: 1,
+  })
+  // 热门动态列表
+  const hotTidingsList = reactive<HotTidingsListItemType[]>([
+    { id: 1, title: '成都大运会倒计时100天', read: 12345 },
+    { id: 2, title: '成都大运会倒计时100天', read: 12345 },
+    { id: 3, title: '成都大运会倒计时100天', read: 12345 },
+    { id: 4, title: '成都大运会倒计时100天', read: 12345 },
+    { id: 5, title: '成都大运会倒计时100天', read: 12345 },
+    { id: 6, title: '成都大运会倒计时100天', read: 12345 },
+    { id: 7, title: '成都大运会倒计时100天', read: 12345 },
+    { id: 8, title: '成都大运会倒计时100天', read: 12345 },
+    { id: 9, title: '成都大运会倒计时100天', read: 12345 },
+    { id: 10, title: '成都大运会倒计时100天', read: 12345 },
+  ])
 
   // 获取要查看的用户的 ID
   const id = computed(() => {
@@ -165,6 +194,26 @@
     }
     return -1
   })
+
+  // 点击关注
+  const listenRegard = (isRegard: boolean) => {
+    personalCenterInfo.isRegard = isRegard ? 0 : 1
+  }
+
+  // 发布动态
+  const listenRelease = () => {
+    isRelease.value = true
+  }
+
+  // 获取最新动态
+  const listenShowNewTidings = () => {
+    isNew.value = true
+  }
+
+  // 获取热门动态
+  const listenShowHotTidings = () => {
+    isNew.value = false
+  }
 
   // 跳转到生活圈界面
   const listenNavigateTolife = () => {
@@ -188,63 +237,70 @@
     height: 100%;
     display: flex;
     justify-content: center;
-    .life-ascription {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      .life-current,
-      .life-mine {
-        width: fit-content;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        margin-top: 10px;
-        margin-right: 10px;
-        font-weight: bold;
-        color: #515151;
-        cursor: pointer;
-        .active {
-          color: var(--nav-active-color);
-        }
-      }
+    background-color: var(--theme-backgrond-color);
+    .life-personal-center {
+      width: 250px;
+      position: fixed;
+      top: 60px;
+      left: 100px;
     }
-    .life-main {
-      // width: 50%;
-      width: 768px;
+    .life-hot-search {
+      width: 300px;
+      position: fixed;
+      top: 60px;
+      right: 50px;
+    }
+    .life-content {
+      width: 798px;
       height: calc(100vh - 60px);
-      border-left: 1px solid var(--border-color);
-      border-right: 1px solid var(--border-color);
-      .life-tidings-list-scroll {
+      .life-navbar-card {
         width: 100%;
-        height: 100%;
-        .life-tidings-list {
-          width: 100%;
-        }
-        .life-tidings-pagination {
-          width: 100%;
-          padding: 40px 30px;
-          box-sizing: border-box;
+        margin-bottom: 10px;
+        .life-navbar {
           display: flex;
-          justify-content: flex-end;
+          align-items: center;
+          .navbar-item {
+            margin-right: 30px;
+            font-size: var(--middle-font-size);
+            cursor: pointer;
+            &.active {
+              color: var(--nav-active-color);
+            }
+          }
         }
       }
-      .tidings-null {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        margin-top: 10%;
-        font-size: var(--life-null-font-size);
-        color: var(--desc-color);
-        font-family: '楷体';
-      }
-    }
-    .life-release {
-      flex: 1;
-      .icon {
-        margin-left: 10px;
-        margin-top: 10px;
+      .life-main-card {
+        .life-main {
+          // width: 50%;
+          width: 100%;
+          height: calc(100vh - 170px);
+          // border-left: 1px solid var(--border-color);
+          // border-right: 1px solid var(--border-color);
+          .life-tidings-list-scroll {
+            width: 100%;
+            height: 100%;
+            .life-tidings-list {
+              width: 100%;
+            }
+            .life-tidings-pagination {
+              width: 100%;
+              padding: 40px 30px;
+              box-sizing: border-box;
+              display: flex;
+              justify-content: flex-end;
+            }
+          }
+          .tidings-null {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 10%;
+            font-size: var(--life-null-font-size);
+            color: var(--desc-color);
+            font-family: '楷体';
+          }
+        }
       }
     }
     .life-release-main {
@@ -284,5 +340,11 @@
   :deep(.el-upload-list--picture-card .el-upload-list__item) {
     width: 100px;
     height: 100px;
+  }
+  :deep(#detail .el-dialog__header) {
+    display: none;
+  }
+  :deep(#detail.el-dialog) {
+    border-radius: 4px !important;
   }
 </style>
