@@ -11,7 +11,9 @@
         />
       </div>
       <div class="tidings-list-item-main">
-        <div class="tidings-list-item-nickname">{{ props.tidingsInfo.nickname }}</div>
+        <div class="tidings-list-item-header">
+          <div class="tidings-list-item-nickname">{{ props.tidingsInfo.name }}</div>
+        </div>
         <div class="tidings-list-item-title">{{ props.tidingsInfo.title }}</div>
         <div class="tidings-list-item-content">{{ props.tidingsInfo.content }}</div>
         <div
@@ -32,21 +34,33 @@
             <div class="time">{{ props.tidingsInfo.createTime.replace('T', ' ').split('.')[0] }}</div>
           </div>
           <div class="thumbs">
-            <div class="comments">
-              <svg class="icon" aria-hidden="true" @click="navigateToLifeDetail">
-                <use xlink:href="#icon-comments"></use>
-              </svg>
-              <span>{{ props.tidingsInfo.commentsCount }}</span>
-            </div>
             <div class="thumbs">
               <svg class="icon" aria-hidden="true">
                 <use :xlink:href="props.tidingsInfo.isThumbsUp === 1 ? '#icon-thumbs-active' : '#icon-thumbs'"></use>
               </svg>
               <span>{{ props.tidingsInfo.thumbsUpCount }}</span>
             </div>
+            <div class="comments">
+              <svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-comments" @click="listenNavigateToLifeDetail"></use>
+              </svg>
+              <span>{{ props.tidingsInfo.commentsCount }}</span>
+            </div>
+            <div class="collection">
+              <svg class="icon" aria-hidden="true" @click="listenCollectTidings">
+                <use :xlink:href="props.tidingsInfo.isCollect ? '#icon-collection-active' : '#icon-collection'"></use>
+              </svg>
+              <span>{{ props.tidingsInfo.collectionsCount }}</span>
+            </div>
+            <div class="detail">
+              <svg class="icon" aria-hidden="true" @click="listenNavigateToLifeDetail">
+                <use xlink:href="#icon-detail"></use>
+              </svg>
+              <span>{{ props.tidingsInfo.readings }}</span>
+            </div>
           </div>
         </div>
-        <div class="tidings-list-item-hot-review">
+        <div v-if="props.tidingsInfo.hotReview" class="tidings-list-item-hot-review">
           <div class="hot-thumbs-count">
             <div class="hot">
               <svg class="icon" aria-hidden="true">
@@ -69,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-  import { reactive } from 'vue'
+  import { inject, reactive } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { LifeTidingsType } from '@/types/life'
   import useStore from '@/store/index'
@@ -80,6 +94,7 @@
   const props = defineProps<{
     tidingsInfo: LifeTidingsType
   }>()
+  const collectTiding: any = inject('collectTiding')
 
   const previewList = reactive<string[]>([]) // 图片预览列表
 
@@ -97,8 +112,13 @@
   }
 
   // 跳转到生活圈动态的详情界面
-  const navigateToLifeDetail = () => {
+  const listenNavigateToLifeDetail = () => {
     router.push({ path: `/lifeDetail/${props.tidingsInfo.id}` })
+  }
+
+  // 收藏动态
+  const listenCollectTidings = () => {
+    collectTiding(props.tidingsInfo.id)
   }
 </script>
 
@@ -120,14 +140,22 @@
       }
       .tidings-list-item-main {
         flex: 1;
-        .tidings-list-item-nickname {
-          height: 50px;
+        .tidings-list-item-header {
           display: flex;
           align-items: center;
-          font-size: var(--pyq-name-font-size);
-          color: var(--pyq-name-color);
-          font-weight: bold;
+          justify-content: space-between;
+          .tidings-list-item-nickname {
+            height: 50px;
+            line-height: 50px;
+            font-size: var(--pyq-name-font-size);
+            color: var(--pyq-name-color);
+            font-weight: bold;
+          }
+          .tidings-list-item-op {
+            height: 50px;
+          }
         }
+
         .tidings-list-item-title {
           line-height: 25px;
           font-size: var(--pyq-name-font-size);
@@ -195,10 +223,12 @@
             display: flex;
             align-items: center;
             .thumbs,
-            .comments {
+            .comments,
+            .collection,
+            .detail {
               display: flex;
               align-items: center;
-              margin-left: 30px;
+              margin-left: 20px;
               .icon {
                 margin-right: 5px;
               }

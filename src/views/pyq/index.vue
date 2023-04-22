@@ -33,7 +33,7 @@
           />
         </div>
       </el-scrollbar>
-      <div v-else class="tidings-null">TA目前暂未发布过动态</div>
+      <div v-else class="tidings-null">朋友圈还没有动态，快来发布动态吧</div>
     </div>
     <div class="pyq-release">
       <svg v-show="id === store.user_id || id === -1" class="icon" aria-hidden="true" @click="listenReleaseTidings">
@@ -198,6 +198,9 @@
 
   // 发布动态
   const listenReleaseTidings = () => {
+    tidingInfo.content = ''
+    tidingInfo.pictureIds.splice(0, tidingInfo.pictureIds.length)
+    prePictureList.splice(0, prePictureList.length)
     isRelease.value = true
   }
 
@@ -239,9 +242,6 @@
   // 取消发布动态
   const listenCancleReleaseTiding = () => {
     isRelease.value = false
-    tidingInfo.content = ''
-    tidingInfo.pictureIds = []
-    prePictureList.splice(0, prePictureList.length)
   }
 
   // 确定发布动态

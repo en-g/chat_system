@@ -50,6 +50,7 @@ const TIP_TYPE = {
   UPDATE_PERSONAL_INFO_SUCCESS: '修改个人信息成功！',
   UPDATE_PERSONAL_INFO_FAIL: '修改个人信息失败！',
   TIDING_CONTENT_IS_NOT_NULL: '动态内容不能为空，请重新输入！',
+  TIDING_TITLE_IS_NOT_NULL: '动态标题不能为空，请重新输入！',
   RELEASE_TIDING_SUCCESS: '发布动态成功！',
   RELEASE_TIDING_FAIL: '发布动态失败，请检查网络是否通畅！',
   COMMENT_IS_NOT_NULL: '评论不能为空，请重新输入！',

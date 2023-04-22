@@ -9,39 +9,83 @@
         <div class="personal-center-data">
           <div class="item">
             <div class="label">获赞数</div>
-            <div class="num">{{ props.personalCenterInfo.like }}</div>
+            <div class="num">{{ props.personalCenterInfo.likes }}</div>
           </div>
           <div class="item">
             <div class="label">获评数</div>
-            <div class="num">{{ props.personalCenterInfo.comment }}</div>
+            <div class="num">{{ props.personalCenterInfo.comments }}</div>
           </div>
           <div class="item">
             <div class="label">粉丝数</div>
             <div class="num">{{ props.personalCenterInfo.fans }}</div>
           </div>
         </div>
-        <div class="personal-center-statistics">
+        <div v-if="props.personalCenterInfo.userId === store.user_id" class="personal-center-statistics">
           <div class="item">
             <div class="icon">
-              <svg class="icon" aria-hidden="true">
+              <svg class="icon" aria-hidden="true" @click="listenShowSelfTidingsList">
                 <use xlink:href="#icon-dongtai"></use>
               </svg>
             </div>
             <div class="label">动态</div>
           </div>
           <div class="item">
-            <div class="icon">
-              <svg class="icon" aria-hidden="true">
-                <use xlink:href="#icon-shoucang"></use>
-              </svg>
-            </div>
+            <el-popover class="popover-wrapper" placement="right-start" :width="250" trigger="click">
+              <el-scrollbar class="collection-popover-scrollbar">
+                <div class="popover-content">
+                  <div v-for="item in collectionList" :key="item.id" class="collection-item">
+                    <div class="info">
+                      <div class="avatar">
+                        <el-avatar :size="30" :src="item.avatarUrl" />
+                      </div>
+                      <div class="name">{{ item.name }}</div>
+                    </div>
+                    <div class="title">
+                      【<span class="content">{{ item.title }}</span
+                      >】
+                    </div>
+                  </div>
+                </div>
+              </el-scrollbar>
+              <template #reference>
+                <div class="icon">
+                  <svg class="icon" aria-hidden="true" @click="listenShowRegardList">
+                    <use xlink:href="#icon-shoucang"></use>
+                  </svg>
+                </div>
+              </template>
+            </el-popover>
             <div class="label">收藏</div>
           </div>
           <div class="item">
             <div class="icon">
-              <svg class="icon" aria-hidden="true">
-                <use xlink:href="#icon-xiaoxi"></use>
-              </svg>
+              <el-popover class="popover-wrapper" placement="right-start" :width="250" trigger="click">
+                <el-scrollbar class="message-popover-scrollbar">
+                  <div class="popover-content">
+                    <div v-for="item in messageList" :key="item.id" class="message-item">
+                      <div class="time">{{ item.createTime.split('T')[0] }}</div>
+                      <div class="info">
+                        <div class="avatar">
+                          <el-avatar :size="30" :src="item.fromAvatarUrl" />
+                        </div>
+                        <div class="name">{{ item.fromName }}</div>
+                        <div class="active">{{ item.type === 1 ? '评论了你：' : '回复了你：' }}</div>
+                      </div>
+                      <div class="title">
+                        【{{ item.title }}】
+                        <span class="content">{{ item.content }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </el-scrollbar>
+                <template #reference>
+                  <div class="icon">
+                    <svg class="icon" aria-hidden="true" @click="listenShowMessageList">
+                      <use xlink:href="#icon-xiaoxi"></use>
+                    </svg>
+                  </div>
+                </template>
+              </el-popover>
             </div>
             <div class="label">消息</div>
           </div>
@@ -54,8 +98,33 @@
             已关注
           </el-button>
         </div>
-        <div v-else class="personal-center-regard-list">
-          <el-button class="button">关注列表</el-button>
+        <div v-if="props.personalCenterInfo.userId === store.user_id" class="personal-center-regard-list">
+          <el-popover class="popover-wrapper" placement="right" :width="250" trigger="click">
+            <el-scrollbar class="regard-popover-scrollbar">
+              <div class="popover-content">
+                <div
+                  v-for="item in regardList"
+                  :key="item.userId"
+                  class="regard-item"
+                  @click="listenNavigateToUserLife(item.userId)"
+                >
+                  <div class="avatar">
+                    <el-avatar :size="40" :src="item.avatarUrl" />
+                  </div>
+                  <div class="desc">
+                    <div class="name">{{ item.name }}</div>
+                  </div>
+                </div>
+              </div>
+            </el-scrollbar>
+            <template #reference>
+              <el-button class="button" @click="listenGetRegardsList">关注列表</el-button>
+            </template>
+          </el-popover>
+        </div>
+        <div v-if="props.personalCenterInfo.userId !== store.user_id" class="personal-center-add">
+          <el-button v-if="props.personalCenterInfo.isAdd" class="button">添加好友</el-button>
+          <el-button v-else class="button" disabled>已添加</el-button>
         </div>
         <div v-if="props.personalCenterInfo.userId === store.user_id" class="personal-center-release">
           <el-button class="button" type="primary" @click="listenrelease"> 发布动态 </el-button>
@@ -66,15 +135,73 @@
 </template>
 
 <script setup lang="ts">
-  import { PersonalCenterInfoType } from '@/types/life'
+  import {
+    PersonalCenterInfoCollectionsType,
+    PersonalCenterInfoMessagesType,
+    PersonalCenterInfoRegardsType,
+    PersonalCenterInfoType,
+  } from '@/types/life'
   import { reactive } from 'vue'
+  import { useRouter } from 'vue-router'
   import useStore from '@/store'
+  import { getCollectionsList, getMessagesList, getRegardsList } from '@/api/life'
 
+  const router = useRouter()
   const store = useStore()
   const emit = defineEmits(['release', 'regard'])
   const props = defineProps<{
     personalCenterInfo: PersonalCenterInfoType
   }>()
+
+  const regardList = reactive<PersonalCenterInfoRegardsType[]>([]) // 关注列表
+  const messageList = reactive<PersonalCenterInfoMessagesType[]>([]) // 消息列表
+  const collectionList = reactive<PersonalCenterInfoCollectionsType[]>([]) // 收藏列表
+
+  // 获取关注列表
+  const getRegardsListData = async () => {
+    const { data } = await getRegardsList({
+      userId: store.user_id,
+    })
+    regardList.splice(0, regardList.length, ...data)
+  }
+
+  // 获取消息列表
+  const getMessagesListData = async () => {
+    const { data } = await getMessagesList({
+      userId: store.user_id,
+    })
+    console.log(data)
+    messageList.splice(0, messageList.length, ...data)
+  }
+
+  // 获取收藏列表
+  const getCollectionsListData = async () => {
+    const { data } = await getCollectionsList({
+      userId: 2, //store.user_id
+    })
+    console.log(data)
+    collectionList.splice(0, collectionList.length, ...data)
+  }
+
+  // 监听获取关注列表
+  const listenGetRegardsList = async () => {
+    await getRegardsListData()
+  }
+
+  // 查看收藏列表
+  const listenShowRegardList = async () => {
+    await getCollectionsListData()
+  }
+
+  // 查看消息列表
+  const listenShowMessageList = async () => {
+    await getMessagesListData()
+  }
+
+  // 查看个人动态
+  const listenShowSelfTidingsList = () => {
+    router.push({ name: 'life', query: { id: store.user_id } })
+  }
 
   // 关注
   const listenRegard = () => {
@@ -84,6 +211,11 @@
   // 发布动态
   const listenrelease = () => {
     emit('release')
+  }
+
+  // 跳转到用户的生活圈
+  const listenNavigateToUserLife = (id: number) => {
+    router.push({ name: 'life', query: { id } })
   }
 </script>
 
@@ -153,9 +285,127 @@
           width: 100%;
         }
       }
+      .personal-center-add {
+        margin-bottom: 10px;
+        .button {
+          width: 100%;
+        }
+      }
+      .personal-center-self-tiding {
+        margin-bottom: 10px;
+        .button {
+          width: 100%;
+        }
+      }
       .personal-center-release {
         .button {
           width: 100%;
+        }
+      }
+    }
+  }
+  .regard-popover-scrollbar {
+    height: 400px;
+    .regard-item {
+      display: flex;
+      align-items: center;
+      padding: 5px;
+      box-sizing: border-box;
+      &:hover {
+        cursor: pointer;
+        background-color: var(--mouse-hover-active);
+      }
+      .avatar {
+        margin-right: 10px;
+      }
+      .desc {
+        height: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        .name {
+          height: 20px;
+          line-height: 20px;
+          font-weight: bold;
+        }
+        .signature {
+          height: 20px;
+          line-height: 20px;
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.4);
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+  .collection-popover-scrollbar {
+    height: 400px;
+    .collection-item {
+      padding: 8px 5px;
+      box-sizing: border-box;
+      .info {
+        height: 30px;
+        display: flex;
+        align-items: center;
+        .avatar {
+          margin-right: 10px;
+        }
+        .name {
+          height: 30px;
+          line-height: 30px;
+        }
+      }
+      .title {
+        .content {
+          &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+  .message-popover-scrollbar {
+    height: 400px;
+    .message-item {
+      padding: 5px;
+      box-sizing: border-box;
+      margin-bottom: 5px;
+      .time {
+        display: flex;
+        justify-content: center;
+        font-size: var(--small-desc-size);
+        color: var(--desc-color);
+        margin-bottom: 5px;
+      }
+      .title {
+        margin-bottom: 5px;
+        .content {
+          color: #eb7340;
+          &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+          }
+        }
+      }
+      .info {
+        display: flex;
+        align-items: center;
+        .avatar {
+          width: 30px;
+        }
+        .name {
+          margin: 0 10px;
+          font-size: var(--middle-font-size);
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+        .active {
+          width: 75px;
+          color: var(--notice-source-color);
         }
       }
     }
