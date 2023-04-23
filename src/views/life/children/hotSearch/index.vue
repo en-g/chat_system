@@ -12,7 +12,7 @@
           >
             <div class="ranking">{{ index + 1 }}</div>
             <div class="title">{{ item.title }}</div>
-            <div class="read">{{ item.read }}</div>
+            <div class="read">{{ item.readings }}</div>
           </div>
         </div>
       </div>
@@ -26,10 +26,11 @@
   const props = defineProps<{
     hotTidingsList: HotTidingsListItemType[]
   }>()
+  const emit = defineEmits(['detail'])
 
   // 跳转到动态详情
   const listenNavigateToLifeDetail = (id: number) => {
-    console.log(id)
+    emit('detail', id)
   }
 </script>
 
@@ -67,8 +68,7 @@
             }
           }
           .read {
-            width: 40px;
-            text-align: right;
+            width: fit-content;
             margin-left: 10px;
             font-size: var(--small-font-size);
             color: var(--desc-color);

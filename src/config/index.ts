@@ -87,6 +87,14 @@ const TIP_TYPE = {
   INVITE_GROUP_SCCESS: '邀请成功，请等待回复！',
   UPLOAD_EMOTION_SCCESS: '上传表情包成功！',
   UPLOAD_EMOTION_FAIL: '上传表情包失败，请检查网络是否通畅！',
+  COLLECT_LIFE_TIDING_SUCCESS: '收藏动态成功！',
+  COLLECT_LIFE_TIDING_FAIL: '收藏动态失败！',
+  CANCEL_COLLECT_LIFE_TIDING_SUCCESS: '取消收藏动态！',
+  DELETE_LIFE_TIDING_SUCCESS: '删除生活圈动态成功！',
+  NOT_COLLECTE_SELF_LIFE_TIDING: '不能收藏自己的动态！',
+  COMMENT_FAIL: '评论失败，请检查网络是否通畅！',
+  REPLY_IS_NOT_NLL: '回复内容不能为空，请重新输入！',
+  REPLY_FAIL: '回复失败，请检查网络是否通畅！',
 }
 
 export { BASE_URL, WEBSOCKET_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

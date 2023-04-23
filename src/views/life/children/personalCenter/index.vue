@@ -33,7 +33,12 @@
             <el-popover class="popover-wrapper" placement="right-start" :width="250" trigger="click">
               <el-scrollbar class="collection-popover-scrollbar">
                 <div class="popover-content">
-                  <div v-for="item in collectionList" :key="item.id" class="collection-item">
+                  <div
+                    v-for="item in collectionList"
+                    :key="item.id"
+                    class="collection-item"
+                    @click="listenShowTidingDetail(item.lifeTidingsId)"
+                  >
                     <div class="info">
                       <div class="avatar">
                         <el-avatar :size="30" :src="item.avatarUrl" />
@@ -91,10 +96,15 @@
           </div>
         </div>
         <div v-if="props.personalCenterInfo.userId !== store.user_id" class="personal-center-regard">
-          <el-button v-show="props.personalCenterInfo.isRegard" class="button" type="primary" @click="listenRegard">
+          <el-button
+            v-show="props.personalCenterInfo.isRegard === 0"
+            class="button"
+            type="primary"
+            @click="listenRegard"
+          >
             关注
           </el-button>
-          <el-button v-show="!props.personalCenterInfo.isRegard" class="button" type="info" @click="listenRegard">
+          <el-button v-show="props.personalCenterInfo.isRegard === 1" class="button" type="info" @click="listenRegard">
             已关注
           </el-button>
         </div>
@@ -123,7 +133,7 @@
           </el-popover>
         </div>
         <div v-if="props.personalCenterInfo.userId !== store.user_id" class="personal-center-add">
-          <el-button v-if="props.personalCenterInfo.isAdd" class="button">添加好友</el-button>
+          <el-button v-if="props.personalCenterInfo.isAdd === 0" class="button">添加好友</el-button>
           <el-button v-else class="button" disabled>已添加</el-button>
         </div>
         <div v-if="props.personalCenterInfo.userId === store.user_id" class="personal-center-release">
@@ -148,7 +158,7 @@
 
   const router = useRouter()
   const store = useStore()
-  const emit = defineEmits(['release', 'regard'])
+  const emit = defineEmits(['release', 'regard', 'detail'])
   const props = defineProps<{
     personalCenterInfo: PersonalCenterInfoType
   }>()
@@ -216,6 +226,11 @@
   // 跳转到用户的生活圈
   const listenNavigateToUserLife = (id: number) => {
     router.push({ name: 'life', query: { id } })
+  }
+
+  // 查看动态详情
+  const listenShowTidingDetail = (id: number) => {
+    emit('detail', id)
   }
 </script>
 

@@ -27,13 +27,13 @@
             </svg>
           </el-tooltip>
         </div>
-        <div class="item video">
+        <!-- <div class="item video">
           <el-tooltip content="视频通话" placement="top">
             <svg class="icon" aria-hidden="true">
               <use xlink:href="#icon-video"></use>
             </svg>
           </el-tooltip>
-        </div>
+        </div> -->
         <div class="item delete">
           <el-tooltip content="删除好友" placement="top">
             <svg class="icon" aria-hidden="true">

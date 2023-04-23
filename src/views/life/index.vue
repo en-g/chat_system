@@ -1,12 +1,17 @@
 <template>
   <div class="life-container">
     <div class="life-personal-center">
-      <PersonalCenter :personal-center-info="personalCenterInfo" @regard="listenRegard" @release="listenRelease" />
+      <PersonalCenter
+        :personal-center-info="personalCenterInfo"
+        @regard="listenRegard"
+        @release="listenRelease"
+        @detail="showLifeTidingDetail"
+      />
     </div>
     <div class="life-hot-search">
-      <HotSearch :hot-tidings-list="hotTidingsList" />
+      <HotSearch :hot-tidings-list="hotTidingsList" @detail="showLifeTidingDetail" />
     </div>
-    <div class="life-content">
+    <div v-show="!showDetailVisible" class="life-content">
       <el-card class="life-navbar-card">
         <div class="life-navbar">
           <div class="navbar-item" :class="{ active: isNew && id === -1 }" @click="listenShowNewTidings">最新</div>
@@ -41,6 +46,99 @@
             <span v-else>TA还没有发布过动态</span>
           </div>
         </div>
+      </el-card>
+    </div>
+    <div v-show="showDetailVisible" class="life-detail">
+      <div class="close">
+        <svg class="icon" aria-hidden="true" @click="listenCloseLifeTidingDetail">
+          <use xlink:href="#icon-detail-close"></use>
+        </svg>
+      </div>
+      <el-card class="life-detail-card">
+        <el-scrollbar class="detail-scrollbar">
+          <div class="detail-wrapper">
+            <div class="title">{{ lifeTidingDetailInfo?.title }}</div>
+            <div class="info">
+              <div class="avatar">
+                <el-avatar :size="40" :src="lifeTidingDetailInfo?.avatarUrl" />
+              </div>
+              <div class="name">{{ lifeTidingDetailInfo?.name }}</div>
+              <div class="data">
+                <div class="item">
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-detail-thumb"></use>
+                  </svg>
+                  <span>{{ lifeTidingDetailInfo?.thumbsUpCount }}</span>
+                </div>
+                <div class="item">
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-detail-comment"></use>
+                  </svg>
+                  <span>{{ lifeTidingDetailInfo?.thumbsUpCount }}</span>
+                </div>
+                <div class="item">
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-collection"></use>
+                  </svg>
+                  <span>{{ lifeTidingDetailInfo?.commentsCount }}</span>
+                </div>
+                <div class="item">
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-detail-see"></use>
+                  </svg>
+                  <span>{{ lifeTidingDetailInfo?.readings }}</span>
+                </div>
+                <div class="item">
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-detail-time"></use>
+                  </svg>
+                  <span>{{ lifeTidingDetailInfo?.createTime }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="content">{{ lifeTidingDetailInfo?.content }}</div>
+            <div class="picture">
+              <div v-for="item in lifeTidingDetailInfo?.pictures" :key="item.id" class="item">
+                <img class="image" :src="item.url" alt="image" />
+              </div>
+            </div>
+            <div class="comment">
+              <div class="label">评论</div>
+              <div class="input">
+                <el-input
+                  v-model="comment"
+                  class="comment-input"
+                  :autosize="{ minRows: 2 }"
+                  maxlength="200"
+                  type="textarea"
+                  placeholder="发表评论"
+                />
+                <div class="send">
+                  <Emoji @emoji="listenInputEmoji">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-emoji"></use>
+                    </svg>
+                  </Emoji>
+                  <el-button
+                    class="button"
+                    size="small"
+                    type="primary"
+                    @click="
+                      listenSendComment(lifeTidingDetailInfo?.id as number, lifeTidingDetailInfo?.userId as number)
+                    "
+                    >发送</el-button
+                  >
+                </div>
+              </div>
+              <div v-if="lifeTidingDetailInfo?.commentsList?.length">
+                <CommentList
+                  :comment-list="lifeTidingDetailInfo?.commentsList"
+                  :life-tiding-id="lifeTidingDetailInfo.id"
+                />
+              </div>
+            </div>
+          </div>
+        </el-scrollbar>
       </el-card>
     </div>
     <el-dialog v-model="isRelease" title="发布动态" width="50%" top="5vh">
@@ -97,9 +195,6 @@
         </span>
       </template>
     </el-dialog>
-    <el-dialog id="detail" v-model="showDetailVisible" width="798px" :modal="false" :show-close="false" top="60px">
-      动态详情
-    </el-dialog>
   </div>
 </template>
 
@@ -107,32 +202,51 @@
   import { reactive, computed, watch, ref, provide } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import Tidings from './children/tidings/index.vue'
+  import CommentList from './children/commentList/index.vue'
+  import Emoji from '@/components/emoji/index.vue'
   import useStore from '@/store'
   import { Plus } from '@element-plus/icons-vue'
   import { ElMessage } from 'element-plus'
   import type { UploadProps, UploadFile } from 'element-plus'
   import fileUpload from '@/utils/fileUpload'
   import { TIP_TYPE } from '@/config'
-  import { sessionStorage } from '@/utils/storage'
-  import { HotTidingsListItemType, LifeTidingsInfoType, LifeTidingsType, PersonalCenterInfoType } from '@/types/life'
+  import {
+    HotTidingsListItemType,
+    LifeTidingDetailInfoType,
+    LifeTidingsInfoType,
+    LifeTidingsType,
+    PersonalCenterInfoType,
+    ReplyLifeTidingsInfoType,
+    ThumbsUpCommentIdsType,
+  } from '@/types/life'
   import PersonalCenter from './children/personalCenter/index.vue'
   import HotSearch from './children/hotSearch/index.vue'
   import {
+    cancelCollectLifeTidings,
+    cancelThumbsUpComment,
+    cancelThumbsUpLifeTidings,
+    collectLifeTidings,
+    commentLifeTiding,
+    deleteLifeTidings,
+    getBaseHotTidingList,
     getHotLifeTidingsList,
+    getLifeTidingDetail,
     getNewLifeTidingsList,
     getUserCenterInfo,
     getUserTidingsList,
     releaseLifeTiding,
+    replyLifeTiding,
+    thumbsUpComment,
+    thumbsUpLifeTidings,
   } from '@/api/life'
 
   const router = useRouter()
   const route = useRoute()
   const store = useStore()
-  const storage = sessionStorage(`${store.user_id}`)
 
   const isRelease = ref<boolean>(false) // 标记是否显示发布动态
   const isNew = ref<boolean>(true) // 标记是否为最新动态
-  const showDetailVisible = ref<boolean>(true) // 查看动态详情
+  const showDetailVisible = ref<boolean>(false) // 查看动态详情
   // 获取要查看的用户的 ID
   const id = computed(() => {
     if (route.query.id) {
@@ -166,18 +280,26 @@
     isAdd: 0,
   })
   // 热门动态列表
-  const hotTidingsList = reactive<HotTidingsListItemType[]>([
-    { id: 1, title: '成都大运会倒计时100天', read: 12345 },
-    { id: 2, title: '成都大运会倒计时100天', read: 12345 },
-    { id: 3, title: '成都大运会倒计时100天', read: 12345 },
-    { id: 4, title: '成都大运会倒计时100天', read: 12345 },
-    { id: 5, title: '成都大运会倒计时100天', read: 12345 },
-    { id: 6, title: '成都大运会倒计时100天', read: 12345 },
-    { id: 7, title: '成都大运会倒计时100天', read: 12345 },
-    { id: 8, title: '成都大运会倒计时100天', read: 12345 },
-    { id: 9, title: '成都大运会倒计时100天', read: 12345 },
-    { id: 10, title: '成都大运会倒计时100天', read: 12345 },
-  ])
+  const hotTidingsList = reactive<HotTidingsListItemType[]>([])
+  // 动态详情
+  const lifeTidingDetailInfo = ref<LifeTidingDetailInfoType>({
+    id: -1,
+    userId: -1,
+    name: '',
+    avatarUrl: '',
+    title: '',
+    content: '',
+    createTime: '',
+    isThumbsUp: -1,
+    isCollect: -1,
+    thumbsUpCount: -1,
+    commentsCount: -1,
+    collectionsCount: -1,
+    readings: -1,
+    pictures: [],
+    commentsList: [],
+  })
+  const comment = ref<string>('') // 评论
 
   // 获取生活圈动态列表
   const getLifeTidingsListData = async () => {
@@ -204,6 +326,13 @@
   }
   await getLifeTidingsListData()
 
+  // 获取基本热门动态列表
+  const getBaseHotTidingListData = async () => {
+    const { data } = await getBaseHotTidingList()
+    hotTidingsList.splice(0, hotTidingsList.length, ...data)
+  }
+  await getBaseHotTidingListData()
+
   // 获取个人中心信息
   const getUserCenterInfoData = async () => {
     const { data } = await getUserCenterInfo({
@@ -226,17 +355,61 @@
     tidingsList.splice(0, tidingsList.length, ...data.list)
   }
 
-  // 收藏动态
-  const collectTiding = (id: number) => {
-    const tiding = tidingsList.find((item) => item.id === id)
+  // 点赞动态
+  const thumbsUpTiding = async (lifeTidingId: number, userId: number) => {
+    const tiding = tidingsList.find((item) => item.id === lifeTidingId)
     if (tiding) {
-      if (tiding.isCollect === 0) {
-        tiding.isCollect = 1
+      if (tiding.isThumbsUp === 0) {
+        const { data } = await thumbsUpLifeTidings({
+          lifeTidingId,
+          userId,
+        })
+        if (data) {
+          tiding.isThumbsUp = 1
+          tiding.thumbsUpCount += 1
+        }
       } else {
-        tiding.isCollect = 0
+        const { data } = await cancelThumbsUpLifeTidings({
+          lifeTidingId,
+          userId,
+        })
+        if (data) {
+          tiding.isThumbsUp = 0
+          tiding.thumbsUpCount -= 1
+        }
       }
     }
-    // 发送请求并提示
+  }
+  provide('thumbsUpTiding', thumbsUpTiding)
+
+  // 收藏动态
+  const collectTiding = async (lifeTidingId: number, userId: number) => {
+    const tiding = tidingsList.find((item) => item.id === lifeTidingId)
+    if (tiding) {
+      if (tiding.isCollect === 0) {
+        const { data } = await collectLifeTidings({
+          lifeTidingId,
+          userId,
+        })
+        if (data) {
+          ElMessage.success(TIP_TYPE.COLLECT_LIFE_TIDING_SUCCESS)
+          tiding.isCollect = 1
+          tiding.collectionsCount += 1
+        } else {
+          ElMessage.error(TIP_TYPE.COLLECT_LIFE_TIDING_FAIL)
+        }
+      } else {
+        const { data } = await cancelCollectLifeTidings({
+          lifeTidingId,
+          userId,
+        })
+        if (data) {
+          ElMessage.success(TIP_TYPE.CANCEL_COLLECT_LIFE_TIDING_SUCCESS)
+          tiding.isCollect = 0
+          tiding.collectionsCount -= 1
+        }
+      }
+    }
   }
   provide('collectTiding', collectTiding)
 
@@ -256,6 +429,19 @@
     isRelease.value = true
   }
 
+  // 删除动态
+  const deleteLifeTiding = async (id: number) => {
+    const { data } = await deleteLifeTidings({
+      lifeTidingId: id,
+    })
+    if (data) {
+      ElMessage.success(TIP_TYPE.DELETE_LIFE_TIDING_SUCCESS)
+      await getUserTidingsListData()
+      await getBaseHotTidingListData()
+    }
+  }
+  provide('deleteLifeTiding', deleteLifeTiding)
+
   // 获取最新动态
   const listenShowNewTidings = async () => {
     isNew.value = true
@@ -270,14 +456,122 @@
     router.push({ name: 'life' })
   }
 
-  // 跳转到生活圈界面
-  const listenNavigateTolife = () => {
-    router.push({ name: 'life' })
+  // 查看动态详情
+  const showLifeTidingDetail = async (id: number) => {
+    if (showDetailVisible.value && lifeTidingDetailInfo.value.id === id) return
+    const { data } = await getLifeTidingDetail({
+      userId: store.user_id,
+      lifeTidingId: id,
+    })
+    lifeTidingDetailInfo.value = data
+    showDetailVisible.value = true
+    const tiding = tidingsList.find((item) => item.id === id)
+    if (tiding) {
+      tiding.readings += 1
+    }
+    const hotTiding = hotTidingsList.find((item) => item.id === id)
+    if (hotTiding) {
+      hotTiding.readings += 1
+    }
+  }
+  provide('showLifeTidingDetail', showLifeTidingDetail)
+
+  // 关闭动态详情
+  const listenCloseLifeTidingDetail = () => {
+    showDetailVisible.value = false
   }
 
-  // 跳转到我的生活圈界面
-  const listenNavigateToMylife = () => {
-    router.push({ name: 'life', query: { id: store.user_id } })
+  // 发送评论
+  const listenSendComment = async (lifeTidingId: number, toId: number) => {
+    if (!comment.value) {
+      ElMessage.error(TIP_TYPE.COMMENT_IS_NOT_NULL)
+    }
+    const { data } = await commentLifeTiding({
+      lifeTidingId,
+      fromId: store.user_id,
+      toId,
+      content: comment.value,
+    })
+    if (data.status) {
+      if (data.comment) {
+        lifeTidingDetailInfo.value.commentsCount += 1
+        lifeTidingDetailInfo.value?.commentsList.unshift(data.comment)
+        const tiding = tidingsList.find((item) => item.id === lifeTidingId)
+        if (tiding) {
+          tiding.commentsCount += 1
+        }
+      }
+      comment.value = ''
+    } else {
+      ElMessage.error(TIP_TYPE.COMMENT_FAIL)
+    }
+  }
+
+  // 回复评论
+  const replyComment = async (info: ReplyLifeTidingsInfoType) => {
+    if (!info.content) {
+      ElMessage.error(TIP_TYPE.REPLY_IS_NOT_NLL)
+    }
+    const { data } = await replyLifeTiding(info)
+    if (data.status) {
+      if (data.comment) {
+        lifeTidingDetailInfo.value.commentsCount += 1
+        const comment = lifeTidingDetailInfo.value?.commentsList.find((item) => item.id === info.lifeCommentId)
+        comment && comment?.children.push(data.comment)
+        const tiding = tidingsList.find((item) => item.id === info.lifeTidingId)
+        tiding && (tiding.commentsCount += 1)
+      }
+    } else {
+      ElMessage.error(TIP_TYPE.REPLY_FAIL)
+    }
+  }
+  provide('replyComment', replyComment)
+
+  // 点赞评论
+  const thumbsUpComments = async (ids: ThumbsUpCommentIdsType, isHot: boolean) => {
+    const { data } = await thumbsUpComment(ids)
+    if (data) {
+      if (isHot) {
+        const tiding = tidingsList.find((item) => item.id === ids.lifeTidingId)
+        if (tiding) {
+          tiding.hotReview.isThumbsUp = 1
+          tiding.hotReview.thumbsUpCount += 1
+        }
+      } else {
+        const comment = lifeTidingDetailInfo.value.commentsList.find((item) => item.id === ids.lifeCommentId)
+        if (comment) {
+          comment.isThumbsUp = 1
+          comment.thumbsUpCount += 1
+        }
+      }
+    }
+  }
+  provide('thumbsUpComments', thumbsUpComments)
+
+  // 取消点赞评论
+  const cancelThumbsUpComments = async (ids: ThumbsUpCommentIdsType, isHot: boolean) => {
+    const { data } = await cancelThumbsUpComment(ids)
+    if (data) {
+      if (isHot) {
+        const tiding = tidingsList.find((item) => item.id === ids.lifeTidingId)
+        if (tiding) {
+          tiding.hotReview.isThumbsUp = 0
+          tiding.hotReview.thumbsUpCount -= 1
+        }
+      } else {
+        const comment = lifeTidingDetailInfo.value.commentsList.find((item) => item.id === ids.lifeCommentId)
+        if (comment) {
+          comment.isThumbsUp = 0
+          comment.thumbsUpCount -= 1
+        }
+      }
+    }
+  }
+  provide('cancelThumbsUpComments', cancelThumbsUpComments)
+
+  // 输入emoji
+  const listenInputEmoji = (emoji: string) => {
+    comment.value += emoji
   }
 
   // 上传动态图片
@@ -435,6 +729,112 @@
             font-size: var(--title-font-size);
             color: var(--desc-color);
             font-family: '楷体';
+          }
+        }
+      }
+    }
+    .life-detail {
+      width: 798px;
+      height: calc(100vh - 62px);
+      position: relative;
+      .close {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        .icon {
+          font-size: 16px;
+        }
+      }
+      .life-detail-card {
+        width: 100%;
+        height: calc(100vh - 62px);
+        .detail-scrollbar {
+          height: calc(100vh - 102px);
+          .detail-wrapper {
+            padding: 10px;
+            box-sizing: border-box;
+            .title {
+              font-size: 25px;
+              line-height: 35px;
+              margin-bottom: 20px;
+            }
+            .info {
+              display: flex;
+              align-items: center;
+              margin-bottom: 20px;
+              .avatar {
+                margin-right: 10px;
+              }
+              .name {
+                font-size: var(--middle-font-size);
+              }
+              .data {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                .item {
+                  display: flex;
+                  align-items: center;
+                  margin-left: 20px;
+                  font-size: var(--small-desc-size);
+                  color: var(--desc-color);
+                  .icon {
+                    color: var(--desc-color);
+                    margin-right: 5px;
+                  }
+                }
+              }
+            }
+            .content {
+              font-size: var(--middle-font-size);
+              line-height: 24px;
+              margin-bottom: 20px;
+              white-space: pre-line;
+              text-indent: 4;
+            }
+            .picture {
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;
+              grid-template-rows: 1fr;
+              column-gap: 10px;
+              margin-bottom: 20px;
+              .item {
+                width: 100%;
+                height: 100%;
+                .image {
+                  width: 100%;
+                  height: 100%;
+                }
+              }
+            }
+            .comment {
+              .label {
+                font-size: var(--title-font-size);
+                font-weight: bold;
+                border-top: 1px solid var(--border-color);
+                padding: 20px 0;
+                box-sizing: border-box;
+              }
+              .input {
+                padding: 5px 0 10px;
+                box-sizing: border-box;
+                border: 1px solid var(--border-color);
+                margin-bottom: 20px;
+                .comment-input {
+                }
+                .send {
+                  display: flex;
+                  justify-content: space-between;
+                  .icon {
+                    margin-left: 10px;
+                  }
+                  .button {
+                    margin-right: 10px;
+                  }
+                }
+              }
+            }
           }
         }
       }

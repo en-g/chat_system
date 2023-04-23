@@ -35,10 +35,12 @@
           </div>
           <div class="thumbs-comments">
             <svg class="icon" aria-hidden="true" @click="listenThumbsUpTiding">
-              <use :xlink:href="props.tidingsInfo.isThumbsUp === 1 ? '#icon-thumbs-active' : '#icon-thumbs'"></use>
+              <use
+                :xlink:href="props.tidingsInfo.isThumbsUp === 1 ? '#icon-thumbs-active' : '#icon-detail-thumb'"
+              ></use>
             </svg>
             <svg class="icon" aria-hidden="true" @click="listenClickComment">
-              <use xlink:href="#icon-comments"></use>
+              <use xlink:href="#icon-detail-comment"></use>
             </svg>
           </div>
         </div>
@@ -86,9 +88,11 @@
               placeholder="发表评论"
             />
             <div class="send">
-              <svg class="icon" aria-hidden="true">
-                <use xlink:href="#icon-emoji"></use>
-              </svg>
+              <Emoji @emoji="listenInputEmoji">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-emoji"></use>
+                </svg>
+              </Emoji>
               <el-button type="primary" @click="listenSendComment">发送</el-button>
             </div>
           </div>
@@ -105,6 +109,7 @@
   import useStore from '@/store/index'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { TIP_TYPE } from '@/config'
+  import Emoji from '@/components/emoji/index.vue'
 
   const route = useRoute()
   const router = useRouter()
@@ -146,6 +151,11 @@
     if (thumbsUpTiding) {
       thumbsUpTiding(props.tidingsInfo.id)
     }
+  }
+
+  // 输入emoji
+  const listenInputEmoji = (emoji: string) => {
+    comment.value += emoji
   }
 
   // 回复好友

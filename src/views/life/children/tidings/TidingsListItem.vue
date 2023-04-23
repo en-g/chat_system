@@ -32,17 +32,22 @@
         <div class="tidings-list-item-time">
           <div class="release-time">
             <div class="time">{{ props.tidingsInfo.createTime.replace('T', ' ').split('.')[0] }}</div>
+            <div v-if="id === store.user_id" class="delete">
+              <el-link type="danger" @click="listenDeleteTiding">删除</el-link>
+            </div>
           </div>
           <div class="thumbs">
             <div class="thumbs">
-              <svg class="icon" aria-hidden="true">
-                <use :xlink:href="props.tidingsInfo.isThumbsUp === 1 ? '#icon-thumbs-active' : '#icon-thumbs'"></use>
+              <svg class="icon" aria-hidden="true" @click="listenThumbsUpTiding">
+                <use
+                  :xlink:href="props.tidingsInfo.isThumbsUp === 1 ? '#icon-thumbs-active' : '#icon-detail-thumb'"
+                ></use>
               </svg>
               <span>{{ props.tidingsInfo.thumbsUpCount }}</span>
             </div>
             <div class="comments">
               <svg class="icon" aria-hidden="true">
-                <use xlink:href="#icon-comments" @click="listenNavigateToLifeDetail"></use>
+                <use xlink:href="#icon-detail-comment"></use>
               </svg>
               <span>{{ props.tidingsInfo.commentsCount }}</span>
             </div>
@@ -54,7 +59,7 @@
             </div>
             <div class="detail">
               <svg class="icon" aria-hidden="true" @click="listenNavigateToLifeDetail">
-                <use xlink:href="#icon-detail"></use>
+                <use xlink:href="#icon-detail-see"></use>
               </svg>
               <span>{{ props.tidingsInfo.readings }}</span>
             </div>
@@ -69,10 +74,12 @@
               <span class="title">热评</span>
             </div>
             <div class="thumbs-count">
-              <svg class="icon" aria-hidden="true">
-                <use xlink:href="#icon-thumbs"></use>
+              <svg class="icon" aria-hidden="true" @click="listenThumbsUpComment">
+                <use
+                  :xlink:href="props.tidingsInfo.hotReview.isThumbsUp ? '#icon-thumbs-active' : '#icon-detail-thumb'"
+                ></use>
               </svg>
-              <span class="count">{{ props.tidingsInfo.commentsCount }}</span>
+              <span class="count">{{ props.tidingsInfo.hotReview.thumbsUpCount }}</span>
             </div>
           </div>
           <div class="content">{{ props.tidingsInfo.hotReview.content }}</div>
@@ -83,10 +90,12 @@
 </template>
 
 <script setup lang="ts">
-  import { inject, reactive } from 'vue'
+  import { computed, inject, reactive, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { LifeTidingsType } from '@/types/life'
   import useStore from '@/store/index'
+  import { ElMessage, ElMessageBox } from 'element-plus'
+  import { TIP_TYPE } from '@/config'
 
   const route = useRoute()
   const router = useRouter()
@@ -95,8 +104,20 @@
     tidingsInfo: LifeTidingsType
   }>()
   const collectTiding: any = inject('collectTiding')
+  const thumbsUpTiding: any = inject('thumbsUpTiding')
+  const deleteLifeTiding: any = inject('deleteLifeTiding')
+  const showLifeTidingDetail: any = inject('showLifeTidingDetail')
+  const thumbsUpComments: any = inject('thumbsUpComments')
+  const cancelThumbsUpComments: any = inject('cancelThumbsUpComments')
 
   const previewList = reactive<string[]>([]) // 图片预览列表
+  // 获取要查看的用户的 ID
+  const id = computed(() => {
+    if (route.query.id) {
+      return parseInt(route.query.id as string)
+    }
+    return -1
+  })
 
   // 初始化图片预览列表
   const initPreviewList = () => {
@@ -111,14 +132,61 @@
     router.push({ name: 'life', query: { id: props.tidingsInfo.userId } })
   }
 
-  // 跳转到生活圈动态的详情界面
+  // 点赞动态
+  const listenThumbsUpTiding = () => {
+    thumbsUpTiding(props.tidingsInfo.id, store.user_id)
+  }
+
+  // 查看动态详情
   const listenNavigateToLifeDetail = () => {
-    router.push({ path: `/lifeDetail/${props.tidingsInfo.id}` })
+    showLifeTidingDetail(props.tidingsInfo.id)
   }
 
   // 收藏动态
-  const listenCollectTidings = () => {
-    collectTiding(props.tidingsInfo.id)
+  const listenCollectTidings = async () => {
+    if (props.tidingsInfo.userId === store.user_id) {
+      ElMessage.info(TIP_TYPE.NOT_COLLECTE_SELF_LIFE_TIDING)
+      return
+    }
+    if (collectTiding) {
+      await collectTiding(props.tidingsInfo.id, store.user_id)
+    }
+  }
+
+  // 删除动态
+  const listenDeleteTiding = () => {
+    ElMessageBox.confirm('确定要删除该动态吗？', '删除动态', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(async () => {
+      if (deleteLifeTiding) {
+        await deleteLifeTiding(props.tidingsInfo.id)
+      }
+    })
+  }
+
+  // 点赞热评
+  const listenThumbsUpComment = async () => {
+    if (props.tidingsInfo.hotReview.isThumbsUp === 0) {
+      await thumbsUpComments(
+        {
+          lifeTidingId: props.tidingsInfo.id,
+          lifeCommentId: props.tidingsInfo.hotReview.id,
+          userId: store.user_id,
+        },
+        true
+      )
+    } else {
+      await cancelThumbsUpComments(
+        {
+          lifeTidingId: props.tidingsInfo.id,
+          lifeCommentId: props.tidingsInfo.hotReview.id,
+          userId: store.user_id,
+        },
+        true
+      )
+    }
   }
 </script>
 
@@ -217,6 +285,11 @@
             align-items: center;
             .time {
               color: var(--desc-color);
+              margin-right: 20px;
+            }
+            .delete {
+              display: flex;
+              align-items: center;
             }
           }
           .thumbs {
@@ -260,6 +333,7 @@
               align-items: center;
               justify-content: flex-end;
               .icon {
+                margin-right: 5px;
               }
               .count {
               }

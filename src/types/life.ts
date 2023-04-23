@@ -13,7 +13,7 @@ export interface LifeTidingsType {
   collectionsCount: number
   readings: number
   pictures: Array<LifeTidingsPictureType>
-  hotReview?: LifeTidingsHotReviewType
+  hotReview: LifeTidingsHotReviewType
 }
 
 export interface LifeTidingsPictureType {
@@ -75,7 +75,7 @@ export interface PersonalCenterInfoCollectionsType {
 export interface HotTidingsListItemType {
   id: number
   title: string
-  read: number
+  readings: number
 }
 
 export interface GetNewTidingsListInfoType {
@@ -112,5 +112,88 @@ export interface MessageListIdType {
 }
 
 export interface CollectionListIdType {
+  userId: number
+}
+
+export interface ThumbsUpLifeTidingsIdsType {
+  lifeTidingId: number
+  userId: number
+}
+
+export interface CollectLifeTidingsIdsType {
+  lifeTidingId: number
+  userId: number
+}
+
+export interface DeleteLifeTidingsIdType {
+  lifeTidingId: number
+}
+
+export interface LifeTidingDetailIdsType {
+  lifeTidingId: number
+  userId: number
+}
+
+export interface LifeTidingDetailInfoType {
+  id: number
+  userId: number
+  name: string
+  avatarUrl: string
+  title: string
+  content: string
+  createTime: string
+  isThumbsUp: number
+  isCollect: number
+  thumbsUpCount: number
+  commentsCount: number
+  collectionsCount: number
+  readings: number
+  pictures: Array<LifeTidingsPictureType>
+  commentsList: Array<LifeTidingDetailCommentType>
+}
+
+export interface LifeTidingDetailCommentType {
+  id: number
+  userId: number
+  name: string
+  avatarUrl: string
+  content: string
+  thumbsUpCount: number
+  isThumbsUp: number
+  createTime: string
+  children: Array<LifeTidingDetailCommentChildrenType>
+}
+
+export interface LifeTidingDetailCommentChildrenType {
+  id: number
+  commentId: number
+  fromId: number
+  toId: number
+  fromName: string
+  fromAvatarUrl: string
+  toName: string
+  toAvatarUrl: string
+  content: string
+  createTime: string
+}
+
+export interface CommentLifeTidingsInfoType {
+  lifeTidingId: number
+  fromId: number
+  toId: number
+  content: string
+}
+
+export interface ReplyLifeTidingsInfoType {
+  lifeTidingId: number
+  lifeCommentId: number
+  fromId: number
+  toId: number
+  content: string
+}
+
+export interface ThumbsUpCommentIdsType {
+  lifeTidingId: number
+  lifeCommentId: number
   userId: number
 }
