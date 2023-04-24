@@ -92,14 +92,15 @@
                   <svg class="icon" aria-hidden="true">
                     <use xlink:href="#icon-detail-time"></use>
                   </svg>
-                  <span>{{ lifeTidingDetailInfo?.createTime }}</span>
+                  <span>{{ lifeTidingDetailInfo?.createTime.replace('T', ' ').split('.')[0] }}</span>
                 </div>
               </div>
             </div>
             <div class="content">{{ lifeTidingDetailInfo?.content }}</div>
             <div class="picture">
               <div v-for="item in lifeTidingDetailInfo?.pictures" :key="item.id" class="item">
-                <img class="image" :src="item.url" alt="image" />
+                <el-image class="image" :src="item.url" fit="contain" />
+                <!-- <img class="image" :src="item.url" alt="image" /> -->
               </div>
             </div>
             <div class="comment">
@@ -165,9 +166,11 @@
             type="textarea"
           />
           <div class="life-release-emoji">
-            <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-emoji"></use>
-            </svg>
+            <Emoji @emoji="listenSendTidingsInputEmoji">
+              <svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-emoji"></use>
+              </svg>
+            </Emoji>
           </div>
         </div>
       </div>
@@ -223,6 +226,7 @@
   import HotSearch from './children/hotSearch/index.vue'
   import {
     cancelCollectLifeTidings,
+    cancelRegardUser,
     cancelThumbsUpComment,
     cancelThumbsUpLifeTidings,
     collectLifeTidings,
@@ -234,11 +238,13 @@
     getNewLifeTidingsList,
     getUserCenterInfo,
     getUserTidingsList,
+    regardUser,
     releaseLifeTiding,
     replyLifeTiding,
     thumbsUpComment,
     thumbsUpLifeTidings,
   } from '@/api/life'
+  import websocket from '@/websocket'
 
   const router = useRouter()
   const route = useRoute()
@@ -414,7 +420,26 @@
   provide('collectTiding', collectTiding)
 
   // 点击关注
-  const listenRegard = (isRegard: boolean) => {
+  const listenRegard = async (isRegard: boolean) => {
+    if (isRegard) {
+      const { data } = await cancelRegardUser({
+        userId: store.user_id,
+        regardId: personalCenterInfo.userId,
+      })
+      if (data) {
+        personalCenterInfo.fans -= 1
+      }
+    } else {
+      const { data } = await regardUser({
+        userId: store.user_id,
+        regardId: personalCenterInfo.userId,
+      })
+      if (data) {
+        // 通知对方更新生活圈消息数
+        websocket.send('updateLifeMessageCount', { userId: personalCenterInfo.userId })
+        personalCenterInfo.fans += 1
+      }
+    }
     personalCenterInfo.isRegard = isRegard ? 0 : 1
   }
 
@@ -501,6 +526,8 @@
           tiding.commentsCount += 1
         }
       }
+      // 通知对方更新生活圈消息数
+      websocket.send('updateLifeMessageCount', { userId: toId })
       comment.value = ''
     } else {
       ElMessage.error(TIP_TYPE.COMMENT_FAIL)
@@ -521,6 +548,8 @@
         const tiding = tidingsList.find((item) => item.id === info.lifeTidingId)
         tiding && (tiding.commentsCount += 1)
       }
+      // 通知对方更新生活圈消息数
+      websocket.send('updateLifeMessageCount', { userId: info.toId })
     } else {
       ElMessage.error(TIP_TYPE.REPLY_FAIL)
     }
@@ -572,6 +601,11 @@
   // 输入emoji
   const listenInputEmoji = (emoji: string) => {
     comment.value += emoji
+  }
+
+  // 发布动态输入emoji
+  const listenSendTidingsInputEmoji = (emoji: string) => {
+    tidingInfo.content += emoji
   }
 
   // 上传动态图片
@@ -631,10 +665,11 @@
     if (data) {
       ElMessage.success(TIP_TYPE.RELEASE_TIDING_SUCCESS)
       // 跳转到最新动态
+      showDetailVisible.value = false
       isNew.value = true
       await getLifeTidingsListData()
-      router.push({ name: 'life' })
       isRelease.value = false
+      router.push({ name: 'life' })
     } else {
       ElMessage.error(TIP_TYPE.RELEASE_TIDING_FAIL)
     }
@@ -647,6 +682,7 @@
       if (id.value !== -1) {
         // 获取个人动态列表
         await getUserTidingsListData()
+        showDetailVisible.value = false
       }
       // 更新个人中心信息
       await getUserCenterInfoData()
@@ -804,7 +840,7 @@
                 height: 100%;
                 .image {
                   width: 100%;
-                  height: 100%;
+                  height: 240px;
                 }
               }
             }

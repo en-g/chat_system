@@ -4,13 +4,16 @@ import {
   CollectionListIdType,
   CommentLifeTidingsInfoType,
   DeleteLifeTidingsIdType,
+  FansListIdType,
   GetNewTidingsListInfoType,
   GetUserCenterInfoIdsType,
   GetUserTidingsListInfoType,
+  LifeMessageCountIdType,
   LifeTidingDetailIdsType,
   LifeTidingsInfoType,
   MessageListIdType,
   RegardListIdType,
+  RegardUserIdsType,
   ReplyLifeTidingsInfoType,
   ThumbsUpCommentIdsType,
   ThumbsUpLifeTidingsIdsType,
@@ -190,6 +193,36 @@ const getBaseHotTidingList = () => {
   return Promise.resolve(get({ url: 'life/list/hot/base' }))
 }
 
+// 获取生活圈消息数
+const getLifeMessageCount = (id: LifeMessageCountIdType) => {
+  return Promise.resolve(get({ url: `life/messages/count/${id.userId}` }))
+}
+
+// 关注
+const regardUser = (ids: RegardUserIdsType) => {
+  return Promise.resolve(
+    post({
+      url: 'life/regard',
+      data: ids,
+    })
+  )
+}
+
+// 取消关注
+const cancelRegardUser = (ids: RegardUserIdsType) => {
+  return Promise.resolve(
+    del({
+      url: 'life/regard',
+      data: ids,
+    })
+  )
+}
+
+// 获取粉丝列表
+const getFansList = (id: FansListIdType) => {
+  return Promise.resolve(get({ url: `life/fans/list/${id.userId}` }))
+}
+
 export {
   getNewLifeTidingsList,
   getHotLifeTidingsList,
@@ -210,4 +243,8 @@ export {
   thumbsUpComment,
   cancelThumbsUpComment,
   getBaseHotTidingList,
+  getLifeMessageCount,
+  regardUser,
+  cancelRegardUser,
+  getFansList,
 }

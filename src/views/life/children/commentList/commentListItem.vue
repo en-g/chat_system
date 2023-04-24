@@ -8,7 +8,7 @@
         <div class="name">{{ props.comment?.name }}</div>
         <div class="fa-content">{{ props.comment?.content }}</div>
         <div class="op">
-          <div class="time">{{ props.comment?.createTime }}</div>
+          <div class="time">{{ props.comment?.createTime.replace('T', ' ').split('.')[0] }}</div>
           <div class="thumb">
             <svg class="icon" aria-hidden="true" @click="listenThumbsComment">
               <use :xlink:href="props.comment.isThumbsUp ? '#icon-thumbs-active' : '#icon-detail-thumb'"></use>
@@ -42,7 +42,7 @@
               </div>
             </div>
             <div class="op">
-              <div class="time">{{ item.createTime }}</div>
+              <div class="time">{{ item.createTime.replace('T', ' ').split('.')[0] }}</div>
               <div class="reply">
                 <el-link type="info" @click="listenReply(item.fromId, item.fromName)">回复</el-link>
               </div>

@@ -13,6 +13,42 @@
         </svg>
         <span :class="{ active: id === store.user_id }">我的朋友圈</span>
       </div>
+      <div class="pyq-messages">
+        <el-badge :value="store.pyqMessagesCount" :hidden="store.pyqMessagesCount === 0" :max="99" class="item">
+          <div class="message-icon">
+            <el-popover placement="right-start" :width="250" trigger="click">
+              <el-scrollbar class="message-popover-scrollbar">
+                <div v-if="messagesList.length > 0" class="message-list">
+                  <div v-for="item in messagesList" :key="item.id" class="message-item">
+                    <div class="time">{{ item.createTime.replace('T', ' ').split('.')[0] }}</div>
+                    <div class="title">
+                      <div class="other">【</div>
+                      <div class="main">{{ item.title }}</div>
+                      <div class="other">】</div>
+                    </div>
+                    <div class="tip">
+                      <div class="avatar">
+                        <el-avatar :size="30" :src="item.fromAvatarUrl" />
+                      </div>
+                      <div class="name">{{ item.fromName }}</div>
+                      <div v-if="item.type === 1" class="item">评论了你：</div>
+                      <div v-else-if="item.type === 2" class="item">回复了你：</div>
+                      <div v-else-if="item.type === 3" class="item">点赞了你</div>
+                    </div>
+                    <div v-if="item.content" class="content">{{ item.content }}</div>
+                  </div>
+                </div>
+                <div v-else class="message-null">暂无消息</div>
+              </el-scrollbar>
+              <template #reference>
+                <svg class="icon" aria-hidden="true" @click="getPyqMessagesListData">
+                  <use xlink:href="#icon-tip-message"></use>
+                </svg>
+              </template>
+            </el-popover>
+          </div>
+        </el-badge>
+      </div>
     </div>
     <div class="pyq-main">
       <el-scrollbar v-if="!!tidingsList.length" class="pyq-tidings-list-scroll">
@@ -53,9 +89,11 @@
           />
         </div>
         <div class="pyq-release-emoji">
-          <svg class="icon" aria-hidden="true">
-            <use xlink:href="#icon-emoji"></use>
-          </svg>
+          <Emoji @emoji="listenInputEmoji">
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-emoji"></use>
+            </svg>
+          </Emoji>
         </div>
         <div class="pyq-release-pictures">
           <el-upload
@@ -84,10 +122,16 @@
 </template>
 
 <script setup lang="ts">
-  import { reactive, computed, watch, ref, provide } from 'vue'
+  import { reactive, computed, watch, ref, provide, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import Tidings from './children/tidings/index.vue'
-  import { PyqTidingsInfoType, PyqTidingsThumbsType, PyqTidingsType, SendPyqTidingsCommentInfoType } from '@/types/pyq'
+  import {
+    PyqTidingsInfoType,
+    PyqTidingsThumbsType,
+    PyqTidingsType,
+    SendPyqTidingsCommentInfoType,
+    PyqMessagesListInfoType,
+  } from '@/types/pyq'
   import useStore from '@/store'
   import {
     getContactPyqTidingsList,
@@ -97,6 +141,7 @@
     thumbsUpPyqTiding,
     sendPyqTidingComment,
     deletePyqTiding,
+    getPyqMessagesList,
   } from '@/api/pyq'
   import { Plus } from '@element-plus/icons-vue'
   import { ElMessage } from 'element-plus'
@@ -104,6 +149,7 @@
   import fileUpload from '@/utils/fileUpload'
   import { TIP_TYPE } from '@/config'
   import { sessionStorage } from '@/utils/storage'
+  import websocket from '@/websocket'
 
   const router = useRouter()
   const route = useRoute()
@@ -123,6 +169,7 @@
   const pageNum = ref<number>(1) // 当前页数
   const pageSize = ref<number>(10) // 当前每页条数
   const total = ref<number>(0) // 朋友圈动态总条数
+  const messagesList = reactive<PyqMessagesListInfoType[]>([])
 
   // 获取要查看的联系人的 ID
   const id = computed(() => {
@@ -175,6 +222,21 @@
     console.log(total.value)
   }
 
+  // 获取消息数
+  const getPyqMessagesCountData = async () => {
+    await store.initpyqMessageCount()
+  }
+  await getPyqMessagesCountData()
+
+  // 获取消息列表
+  const getPyqMessagesListData = async () => {
+    const { data } = await getPyqMessagesList({
+      userId: store.user_id,
+    })
+    messagesList.splice(0, messagesList.length, ...data)
+    store.pyqMessagesCount = 0
+  }
+
   // 更新朋友圈动态列表数据
   watch(id, async () => {
     const data = await getTidingsList()
@@ -194,6 +256,11 @@
       name: 'pyq',
       query: { id: store.user_id },
     })
+  }
+
+  // 输入emoji
+  const listenInputEmoji = (emoji: string) => {
+    tidingInfo.content += emoji
   }
 
   // 发布动态
@@ -287,6 +354,10 @@
           userId: store.user_id,
           pyqTidingId: id,
         })
+        if (tiding.userId !== store.user_id) {
+          // 通知对方更新朋友圈消息数
+          websocket.send('updatePyqMessageCount', { userId: tiding.userId })
+        }
       }
     }
   }
@@ -307,6 +378,8 @@
           toName: toName as string,
           content: info.content,
         })
+        // 通知对方更新朋友圈消息数
+        websocket.send('updatePyqMessageCount', { userId: info.toId })
       } else {
         tiding?.comments.push({
           id: data.id,
@@ -316,6 +389,10 @@
           toName: null,
           content: info.content,
         })
+        if (tiding?.userId !== store.user_id) {
+          // 通知对方更新朋友圈消息数
+          websocket.send('updatePyqMessageCount', { userId: tiding?.userId })
+        }
       }
     } else {
       ElMessage.error(TIP_TYPE.SEND_TIDING_COMMENT_FAIL)
@@ -337,6 +414,12 @@
     }
   }
   provide('deleteTiding', deleteTiding)
+
+  onMounted(() => {
+    websocket.listen('updatePyqMessageCount', () => {
+      store.pyqMessagesCount += 1
+    })
+  })
 </script>
 
 <style scoped lang="less">
@@ -363,6 +446,24 @@
         cursor: pointer;
         .active {
           color: var(--nav-active-color);
+        }
+      }
+      .pyq-messages {
+        margin-top: 20px;
+        margin-right: 30px;
+        .message-icon {
+          border-radius: 50%;
+          padding: 8px;
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          &:hover {
+            cursor: pointer;
+            background-color: var(--mouse-hover-active);
+          }
+          .icon {
+          }
         }
       }
     }
@@ -426,6 +527,70 @@
       }
     }
   }
+  .message-popover-scrollbar {
+    height: 400px;
+    .message-list {
+      .message-item {
+        margin-bottom: 10px;
+        .time {
+          display: flex;
+          justify-content: center;
+          font-size: var(--small-desc-size);
+          color: var(--desc-color);
+          margin-bottom: 5px;
+        }
+        .title {
+          display: flex;
+          margin-bottom: 5px;
+          .main {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+          .orther {
+            width: fit-content;
+          }
+        }
+        .tip {
+          display: flex;
+          align-items: center;
+          margin-bottom: 5px;
+          padding: 0 5px;
+          box-sizing: border-box;
+          .avatar {
+            width: 30px;
+          }
+          .name {
+            margin: 0 10px;
+            font-size: var(--middle-font-size);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+          .item {
+            width: 75px;
+            color: var(--notice-source-color);
+          }
+        }
+        .content {
+          color: #eb7340;
+          padding: 0 5px;
+          box-sizing: border-box;
+          &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+    .message-null {
+      font-size: var(--middle-font-size);
+      color: var(--desc-color);
+      display: flex;
+      justify-content: center;
+    }
+  }
+
   :deep(.el-dialog__body) {
     padding: 10px 20px;
   }

@@ -2,6 +2,7 @@ import { get, post, del } from '@/request/index'
 import {
   ContactPyqTidingsListInfoType,
   DeletePyqTidingsIdType,
+  GetPyqMessagesListIdType,
   PyqTidingsInfoType,
   PyqTidingsListInfoType,
   SendPyqTidingsCommentInfoType,
@@ -81,6 +82,16 @@ const deletePyqTiding = (id: DeletePyqTidingsIdType) => {
   )
 }
 
+// 获取消息列表
+const getPyqMessagesList = (id: GetPyqMessagesListIdType) => {
+  return Promise.resolve(get({ url: `pyq/messages/list/${id.userId}` }))
+}
+
+// 获取消息数
+const getPyqMessagesCount = (id: GetPyqMessagesListIdType) => {
+  return Promise.resolve(get({ url: `pyq/messages/count/${id.userId}` }))
+}
+
 export {
   getPyqTidingsList,
   getContactPyqTidingsList,
@@ -89,4 +100,6 @@ export {
   cancleThumbsUpPyqTiding,
   sendPyqTidingComment,
   deletePyqTiding,
+  getPyqMessagesList,
+  getPyqMessagesCount,
 }

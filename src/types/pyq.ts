@@ -64,3 +64,19 @@ export interface SendPyqTidingsCommentInfoType {
 export interface DeletePyqTidingsIdType {
   pyqTidingId: number
 }
+
+export interface GetPyqMessagesListIdType {
+  userId: number
+}
+
+export interface PyqMessagesListInfoType {
+  id: number
+  pyqTidingsId: number
+  fromId: number
+  fromName: string
+  fromAvatarUrl: string
+  content?: string
+  title: string
+  type: number
+  createTime: string
+}

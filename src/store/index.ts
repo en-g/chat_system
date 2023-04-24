@@ -1,4 +1,6 @@
 import { getUnHandleNotices } from '@/api/contacts'
+import { getLifeMessageCount } from '@/api/life'
+import { getPyqMessagesCount } from '@/api/pyq'
 import { defineStore } from 'pinia'
 
 const useStore = defineStore('main', {
@@ -10,6 +12,8 @@ const useStore = defineStore('main', {
       groupUnHandleNoticeIds: [-1], // 未处理的群聊通知
       isUpdateContactList: false, // 标记是否更新联系人列表
       isUpdateGroupList: false, // 标记是否更新群聊列表
+      lifeMessagesCount: 0, // 生活圈消息数
+      pyqMessagesCount: 0, // 朋友圈消息数
     }
   },
   getters: {},
@@ -31,6 +35,24 @@ const useStore = defineStore('main', {
       })
       const ids = data?.ids || []
       this.groupUnHandleNoticeIds.splice(0, this.groupUnHandleNoticeIds.length, ...ids)
+    },
+    // 初始化生活圈消息数
+    async initLifeMessageCount() {
+      const { data } = await getLifeMessageCount({
+        userId: this.user_id,
+      })
+      if (data) {
+        this.lifeMessagesCount = data.messageCount
+      }
+    },
+    // 初始化朋友圈消息数
+    async initpyqMessageCount() {
+      const { data } = await getPyqMessagesCount({
+        userId: this.user_id,
+      })
+      if (data) {
+        this.pyqMessagesCount = data.messageCount
+      }
     },
   },
 })

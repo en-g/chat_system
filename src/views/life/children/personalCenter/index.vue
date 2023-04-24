@@ -62,38 +62,45 @@
             </el-popover>
             <div class="label">收藏</div>
           </div>
-          <div class="item">
-            <div class="icon">
-              <el-popover class="popover-wrapper" placement="right-start" :width="250" trigger="click">
-                <el-scrollbar class="message-popover-scrollbar">
-                  <div class="popover-content">
-                    <div v-for="item in messageList" :key="item.id" class="message-item">
-                      <div class="time">{{ item.createTime.split('T')[0] }}</div>
-                      <div class="info">
-                        <div class="avatar">
-                          <el-avatar :size="30" :src="item.fromAvatarUrl" />
+          <el-badge :value="store.lifeMessagesCount" :hidden="store.lifeMessagesCount === 0" :max="99">
+            <div class="item">
+              <div class="icon">
+                <el-popover class="popover-wrapper" placement="right-start" :width="250" trigger="click">
+                  <el-scrollbar class="message-popover-scrollbar">
+                    <div v-if="messageList.length > 0" class="popover-content">
+                      <div v-for="item in messageList" :key="item.id" class="message-item">
+                        <div class="time">{{ item.createTime.split('T')[0] }}</div>
+                        <div class="info">
+                          <div class="avatar">
+                            <el-avatar :size="30" :src="item.fromAvatarUrl" />
+                          </div>
+                          <div class="name">{{ item.fromName }}</div>
+                          <div v-if="item.type === 1" class="active">评论了你</div>
+                          <div v-else-if="item.type === 2" class="active">回复了你</div>
+                          <div v-else-if="item.type === 3" class="active">关注了你</div>
                         </div>
-                        <div class="name">{{ item.fromName }}</div>
-                        <div class="active">{{ item.type === 1 ? '评论了你：' : '回复了你：' }}</div>
-                      </div>
-                      <div class="title">
-                        【{{ item.title }}】
-                        <span class="content">{{ item.content }}</span>
+                        <div v-if="item.title" class="title">
+                          【{{ item.title }}】
+                          <span class="content" @click="listenShowTidingDetail(item.lifeTidingId as number)">{{
+                            item.content
+                          }}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </el-scrollbar>
-                <template #reference>
-                  <div class="icon">
-                    <svg class="icon" aria-hidden="true" @click="listenShowMessageList">
-                      <use xlink:href="#icon-xiaoxi"></use>
-                    </svg>
-                  </div>
-                </template>
-              </el-popover>
+                    <div v-else class="content-null">暂无消息</div>
+                  </el-scrollbar>
+                  <template #reference>
+                    <div class="icon">
+                      <svg class="icon" aria-hidden="true" @click="listenShowMessageList">
+                        <use xlink:href="#icon-xiaoxi"></use>
+                      </svg>
+                    </div>
+                  </template>
+                </el-popover>
+              </div>
+              <div class="label">消息</div>
             </div>
-            <div class="label">消息</div>
-          </div>
+          </el-badge>
         </div>
         <div v-if="props.personalCenterInfo.userId !== store.user_id" class="personal-center-regard">
           <el-button
@@ -132,10 +139,34 @@
             </template>
           </el-popover>
         </div>
-        <div v-if="props.personalCenterInfo.userId !== store.user_id" class="personal-center-add">
+        <div v-if="props.personalCenterInfo.userId === store.user_id" class="personal-center-regard-list">
+          <el-popover class="popover-wrapper" placement="right" :width="250" trigger="click">
+            <el-scrollbar class="regard-popover-scrollbar">
+              <div class="popover-content">
+                <div
+                  v-for="item in fansList"
+                  :key="item.userId"
+                  class="regard-item"
+                  @click="listenNavigateToUserLife(item.userId)"
+                >
+                  <div class="avatar">
+                    <el-avatar :size="40" :src="item.avatarUrl" />
+                  </div>
+                  <div class="desc">
+                    <div class="name">{{ item.name }}</div>
+                  </div>
+                </div>
+              </div>
+            </el-scrollbar>
+            <template #reference>
+              <el-button class="button" @click="listenGetFansList">粉丝列表</el-button>
+            </template>
+          </el-popover>
+        </div>
+        <!-- <div v-if="props.personalCenterInfo.userId !== store.user_id" class="personal-center-add">
           <el-button v-if="props.personalCenterInfo.isAdd === 0" class="button">添加好友</el-button>
           <el-button v-else class="button" disabled>已添加</el-button>
-        </div>
+        </div> -->
         <div v-if="props.personalCenterInfo.userId === store.user_id" class="personal-center-release">
           <el-button class="button" type="primary" @click="listenrelease"> 发布动态 </el-button>
         </div>
@@ -151,10 +182,11 @@
     PersonalCenterInfoRegardsType,
     PersonalCenterInfoType,
   } from '@/types/life'
-  import { reactive } from 'vue'
+  import { onMounted, reactive } from 'vue'
   import { useRouter } from 'vue-router'
   import useStore from '@/store'
-  import { getCollectionsList, getMessagesList, getRegardsList } from '@/api/life'
+  import { getCollectionsList, getFansList, getMessagesList, getRegardsList } from '@/api/life'
+  import websocket from '@/websocket'
 
   const router = useRouter()
   const store = useStore()
@@ -164,6 +196,7 @@
   }>()
 
   const regardList = reactive<PersonalCenterInfoRegardsType[]>([]) // 关注列表
+  const fansList = reactive<PersonalCenterInfoRegardsType[]>([]) // 粉丝列表
   const messageList = reactive<PersonalCenterInfoMessagesType[]>([]) // 消息列表
   const collectionList = reactive<PersonalCenterInfoCollectionsType[]>([]) // 收藏列表
 
@@ -175,27 +208,45 @@
     regardList.splice(0, regardList.length, ...data)
   }
 
+  // 获取粉丝列表
+  const getFansListData = async () => {
+    const { data } = await getFansList({
+      userId: store.user_id,
+    })
+    fansList.splice(0, fansList.length, ...data)
+  }
+
   // 获取消息列表
   const getMessagesListData = async () => {
     const { data } = await getMessagesList({
       userId: store.user_id,
     })
-    console.log(data)
     messageList.splice(0, messageList.length, ...data)
   }
 
   // 获取收藏列表
   const getCollectionsListData = async () => {
     const { data } = await getCollectionsList({
-      userId: 2, //store.user_id
+      userId: store.user_id,
     })
     console.log(data)
     collectionList.splice(0, collectionList.length, ...data)
   }
 
+  // 获取生活圈消息数
+  const getLifeMessageCountData = async () => {
+    await store.initLifeMessageCount()
+  }
+  await getLifeMessageCountData()
+
   // 监听获取关注列表
   const listenGetRegardsList = async () => {
     await getRegardsListData()
+  }
+
+  // 监听获取粉丝列表
+  const listenGetFansList = async () => {
+    await getFansListData()
   }
 
   // 查看收藏列表
@@ -206,6 +257,7 @@
   // 查看消息列表
   const listenShowMessageList = async () => {
     await getMessagesListData()
+    store.lifeMessagesCount = 0
   }
 
   // 查看个人动态
@@ -232,6 +284,12 @@
   const listenShowTidingDetail = (id: number) => {
     emit('detail', id)
   }
+
+  onMounted(() => {
+    websocket.listen('updateLifeMessageCount', () => {
+      store.lifeMessagesCount += 1
+    })
+  })
 </script>
 
 <style scoped lang="less">
@@ -289,7 +347,7 @@
         }
       }
       .personal-center-regard {
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         .button {
           width: 100%;
         }
@@ -364,6 +422,7 @@
         height: 30px;
         display: flex;
         align-items: center;
+        margin-bottom: 5px;
         .avatar {
           margin-right: 10px;
         }
@@ -424,5 +483,11 @@
         }
       }
     }
+  }
+  .content-null {
+    font-size: var(--middle-font-size);
+    color: var(--desc-color);
+    display: flex;
+    justify-content: center;
   }
 </style>

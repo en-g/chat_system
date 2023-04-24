@@ -45,12 +45,12 @@ export interface PersonalCenterInfoType {
 
 export interface PersonalCenterInfoMessagesType {
   id: number
-  lifeTidingId: number
-  title: string
+  lifeTidingId?: number
+  title?: string
   fromId: number
   fromName: string
   fromAvatarUrl: string
-  content: number
+  content?: number
   type: number
   createTime: string
 }
@@ -195,5 +195,18 @@ export interface ReplyLifeTidingsInfoType {
 export interface ThumbsUpCommentIdsType {
   lifeTidingId: number
   lifeCommentId: number
+  userId: number
+}
+
+export interface LifeMessageCountIdType {
+  userId: number
+}
+
+export interface RegardUserIdsType {
+  userId: number
+  regardId: number
+}
+
+export interface FansListIdType {
   userId: number
 }
