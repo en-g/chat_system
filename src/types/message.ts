@@ -42,16 +42,23 @@ export interface ChatMessageItemType {
 }
 
 export interface ChatMessageNoticeType {
+  id: number
   fromId: number
   toId?: number
   groupId?: number
   type: number
   message?: string
   url?: string
+  createTime: string
   isContact: boolean
 }
 
 export interface DeleteChatMessageListItemType {
   id: number
   type: string
+}
+
+export interface OfflineChatMessagesInfoType {
+  contact?: Array<ChatMessageItemType>
+  group?: Array<ChatMessageItemType>
 }

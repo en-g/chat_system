@@ -10,7 +10,7 @@ import {
   onInviteGroupNotice,
   onUpdateGroupList,
 } from './groupNotice'
-import { onChat, onDeleteChatMessageItem } from './chatMessage'
+import { onChat, onDeleteChatMessageItem, onOfflineChatMessages } from './chatMessage'
 
 interface WebSocketControllerType {
   url: string
@@ -175,6 +175,8 @@ const initListenEvent = (websocket: any) => {
   websocket.listen('deleteChatMessageItem', onDeleteChatMessageItem)
   // 聊天
   websocket.listen('chat', onChat)
+  // 接收离线聊天消息
+  websocket.listen('offlineChatMessages', onOfflineChatMessages)
 }
 
 const websocket = new WebSocketController(WEBSOCKET_URL)

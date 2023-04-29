@@ -51,7 +51,6 @@ class IndexedDbInstance implements IndexedDbInstanceType {
         // 创建存储库
         const friendChatMessagesStore = this.db.createObjectStore('friendChatMessages', {
           keyPath: 'id', // 主键
-          autoIncrement: true, // 实现自增
         })
         // 创建索引，在后面查询数据的时候可以根据索引查
         friendChatMessagesStore.createIndex('chatIds', ['fromId', 'toId'], { unique: false })
@@ -59,7 +58,6 @@ class IndexedDbInstance implements IndexedDbInstanceType {
       if (!this.db.objectStoreNames.contains('groupChatMessages')) {
         const groupChatMessagesStore = this.db.createObjectStore('groupChatMessages', {
           keyPath: 'id', // 主键
-          autoIncrement: true, // 实现自增
         })
         // 创建索引，在后面查询数据的时候可以根据索引查
         groupChatMessagesStore.createIndex('groupId', 'groupId', { unique: false })

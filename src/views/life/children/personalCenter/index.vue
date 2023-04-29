@@ -69,7 +69,7 @@
                   <el-scrollbar class="message-popover-scrollbar">
                     <div v-if="messageList.length > 0" class="popover-content">
                       <div v-for="item in messageList" :key="item.id" class="message-item">
-                        <div class="time">{{ item.createTime.split('T')[0] }}</div>
+                        <div class="time">{{ formateTime(item.createTime, 1) }}</div>
                         <div class="info">
                           <div class="avatar">
                             <el-avatar :size="30" :src="item.fromAvatarUrl" />
@@ -187,6 +187,7 @@
   import useStore from '@/store'
   import { getCollectionsList, getFansList, getMessagesList, getRegardsList } from '@/api/life'
   import websocket from '@/websocket'
+  import { formateTime } from '@/utils/utils'
 
   const router = useRouter()
   const store = useStore()

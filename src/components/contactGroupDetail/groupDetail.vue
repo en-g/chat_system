@@ -133,6 +133,7 @@
   import { dismissGroup, exitGroup } from '@/api/groups'
   import { getContactListAboutGroup, getGroupInfo } from '@/api/contacts'
   import { ContactListAboutGroupType, GetGroupInfoType } from '@/types/contacts'
+  import { formateTime } from '@/utils/utils'
 
   const store = useStore()
   const storage = sessionStorage(`${store.user_id}`)
@@ -208,7 +209,7 @@
       groupId: groupInfo.id,
     }
     const { data } = await getGroupInfo(ids)
-    data.createTime = data.createTime.split('T')[0]
+    data.createTime = formateTime(data.createTime, 1)
     Object.assign(groupInfo, data)
     groupsInfo.splice(index, 1, data)
     storage.set('groupsInfo', groupsInfo)

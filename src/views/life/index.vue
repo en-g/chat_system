@@ -92,7 +92,7 @@
                   <svg class="icon" aria-hidden="true">
                     <use xlink:href="#icon-detail-time"></use>
                   </svg>
-                  <span>{{ lifeTidingDetailInfo?.createTime.replace('T', ' ').split('.')[0] }}</span>
+                  <span>{{ formateTime(lifeTidingDetailInfo?.createTime) }}</span>
                 </div>
               </div>
             </div>
@@ -245,6 +245,7 @@
     thumbsUpLifeTidings,
   } from '@/api/life'
   import websocket from '@/websocket'
+  import { formateTime } from '@/utils/utils'
 
   const router = useRouter()
   const route = useRoute()

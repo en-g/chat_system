@@ -31,7 +31,7 @@
         </div>
         <div class="tidings-list-item-time">
           <div class="release-time">
-            <div class="time">{{ props.tidingsInfo.createTime.replace('T', ' ').split('.')[0] }}</div>
+            <div class="time">{{ formateTime(props.tidingsInfo.createTime) }}</div>
             <div v-if="id === store.user_id" class="delete">
               <el-link type="danger" @click="listenDeleteTiding">删除</el-link>
             </div>
@@ -96,6 +96,7 @@
   import useStore from '@/store/index'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { TIP_TYPE } from '@/config'
+  import { formateTime } from '@/utils/utils'
 
   const route = useRoute()
   const router = useRouter()

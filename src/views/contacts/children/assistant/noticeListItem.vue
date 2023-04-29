@@ -1,6 +1,6 @@
 <template>
   <div class="notice-list-item-container">
-    <div class="notice-list-item-time">{{ props.noticeListItem.createTime.replace('T', ' ').split('.')[0] }}</div>
+    <div class="notice-list-item-time">{{ formateTime(props.noticeListItem.createTime) }}</div>
     <div class="notice-list-item-main">
       <div class="avatar">
         <el-avatar :size="50" :src="props.noticeListItem.fromAvatarUrl" />
@@ -90,6 +90,7 @@
   import { TIP_TYPE } from '@/config'
   import { ElMessage } from 'element-plus'
   import websocket from '@/websocket'
+  import { formateTime } from '@/utils/utils'
 
   const props = defineProps<{
     noticeListItem: NoticeListItemType

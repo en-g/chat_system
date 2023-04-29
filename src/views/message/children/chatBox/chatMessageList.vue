@@ -115,6 +115,7 @@
       // 切换聊天对象
       virtualList = createVirtualList(props.chatMessageList.length, estimatedItemHeight)
       initVisibleList()
+      setTimeout(() => scrollbarRef.value?.setScrollTop(virtualList.getTatolHeight()), 10)
     }
   })
 

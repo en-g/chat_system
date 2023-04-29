@@ -50,14 +50,14 @@
             </svg>
           </el-tooltip>
         </div>
-        <div class="item message">
+        <div v-if="info.isLeader !== store.user_id" class="item message">
           <el-tooltip content="退出群聊" placement="top">
             <svg class="icon" aria-hidden="true">
               <use xlink:href="#icon-out"></use>
             </svg>
           </el-tooltip>
         </div>
-        <div v-if="info.isLeader === 1" class="item message">
+        <div v-if="info.isLeader === store.user_id" class="item message">
           <el-tooltip content="解散群聊" placement="top">
             <svg class="icon" aria-hidden="true">
               <use xlink:href="#icon-delete"></use>
@@ -180,6 +180,7 @@
   import { ElMessage } from 'element-plus'
   import { TIP_TYPE } from '@/config'
   import { MessageListItemInfoType } from '@/types/message'
+  import { formateTime } from '@/utils/utils'
 
   const router = useRouter()
   const route = useRoute()
@@ -209,7 +210,7 @@
       friendId: id.value,
     }
     const { data } = await getFriendInfo(ids)
-    data.birthday = data.birthday.split('T')[0]
+    data.birthday = formateTime(data.birthday, 1)
     contactsInfo.push(data)
     storage.set('contactsInfo', contactsInfo)
     return data
@@ -227,7 +228,7 @@
       groupId: id.value,
     }
     const { data } = await getGroupInfo(ids)
-    data.createTime = data.createTime.split('T')[0]
+    data.createTime = formateTime(data.createTime, 1)
     groupsInfo.push(data)
     storage.set('groupsInfo', groupsInfo)
     return data
@@ -405,6 +406,7 @@
       width: 100%;
       display: flex;
       justify-content: center;
+      font-size: var(--middle-font-size);
       .info-show-desc-friend,
       .info-show-desc-group {
         padding-top: 20px;
@@ -419,7 +421,7 @@
             color: var(--desc-color);
           }
           .content {
-            line-height: 15px;
+            line-height: 16px;
             -webkit-line-clamp: 2;
             display: -webkit-box;
             -webkit-box-orient: vertical;
@@ -439,20 +441,20 @@
         }
       }
       .info-show-desc-friend .info-show-desc-item {
-        width: 200px;
+        width: 230px;
       }
       .info-show-desc-friend .title {
-        width: 26px;
+        width: 36px;
         margin-right: 20px;
       }
       .info-show-desc-group .info-show-desc-item {
-        width: 250px;
+        width: 260px;
       }
       .info-show-desc-group .content {
-        max-width: 155px;
+        max-width: 175px;
       }
       .info-show-desc-group .title {
-        width: 65px;
+        width: 80px;
         margin-right: 20px;
       }
     }

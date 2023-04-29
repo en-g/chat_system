@@ -1,32 +1,82 @@
 import useStore from '@/store'
 import { localStorage, sessionStorage } from '@/utils/storage'
-import { ChatMessageNoticeType, DeleteChatMessageListItemType, MessageListItemInfoType } from '@/types/message'
+import {
+  ChatMessageNoticeType,
+  DeleteChatMessageListItemType,
+  MessageListItemInfoType,
+  OfflineChatMessagesInfoType,
+} from '@/types/message'
 import { getFriendInfo, getGroupInfo } from '@/api/contacts'
 import idb from '@/utils/indexedDB'
+import { formateTime } from '@/utils/utils'
 
 // 更新本地缓存
 const onChat = async (info: ChatMessageNoticeType) => {
-  await updateChatMessageList(info)
+  const store = useStore()
+  // 更新本地聊天列表
+  await updateChatMessageList(info, info.fromId === store.user_id)
 
-  // Todo 保存该消息
+  // 保存消息到本地
   if (info.isContact) {
+    console.log('好友消息，更新indexedDB缓存消息', info)
     await idb.addData('friendChatMessages', {
+      id: info.id,
       fromId: info.fromId,
       toId: info.toId,
       type: info.type,
       message: info.message,
       url: info.url,
-      createTime: new Date().toLocaleString(),
+      createTime: formateTime(info.createTime),
     })
   } else {
+    console.log('群聊消息，更新indexedDB缓存消息', info)
     await idb.addData('groupChatMessages', {
+      id: info.id,
       fromId: info.fromId,
       groupId: info.groupId,
       type: info.type,
       message: info.message,
       url: info.url,
-      createTime: new Date().toLocaleString(),
+      createTime: formateTime(info.createTime),
     })
+  }
+}
+
+// 接收离线聊天消息
+const onOfflineChatMessages = async (offlineChatMessages: OfflineChatMessagesInfoType) => {
+  console.log('接收离线消息，更新本地缓存', offlineChatMessages)
+  const store = useStore()
+  if (offlineChatMessages.contact) {
+    for (const message of offlineChatMessages.contact) {
+      // 更新左侧聊天列表
+      await updateChatMessageList(Object.assign(message, { isContact: true }), message.fromId === store.user_id)
+      // 保存到indexedDB
+      await idb.addData('friendChatMessages', {
+        id: message.id,
+        fromId: message.fromId,
+        toId: message.toId,
+        type: message.type,
+        message: message.message,
+        url: message.url,
+        createTime: formateTime(message.createTime),
+      })
+    }
+  }
+  if (offlineChatMessages.group) {
+    for (const message of offlineChatMessages.group) {
+      // 更新左侧聊天列表
+      await updateChatMessageList(Object.assign(message, { isContact: false }), message.fromId === store.user_id)
+      // 保存到indexedDB
+      await idb.addData('groupChatMessages', {
+        id: message.id,
+        fromId: message.fromId,
+        groupId: message.groupId,
+        type: message.type,
+        message: message.message,
+        url: message.url,
+        createTime: formateTime(message.createTime),
+      })
+    }
   }
 }
 
@@ -55,7 +105,7 @@ const updateChatMessageList = async (info: ChatMessageNoticeType, isCur = false,
           userId: store.user_id,
           friendId: fromId,
         })
-        data.birthday = data.birthday.split('T')[0]
+        data.birthday && (data.birthday = formateTime(data.birthday, 1))
         contactInfo = data
         contactsInfo.push(data)
         storage.set('contactsInfo', contactsInfo)
@@ -91,7 +141,7 @@ const updateChatMessageList = async (info: ChatMessageNoticeType, isCur = false,
           userId: store.user_id,
           groupId: info.groupId as number,
         })
-        data.createTime = data.createTime.split('T')[0]
+        data.createTime && (data.createTime = formateTime(data.createTime, 1))
         groupInfo = data
         groupsInfo.push(data)
         storage.set('groupsInfo', groupsInfo)
@@ -131,7 +181,6 @@ const actualUpdateChatMessageList = async (
     const index = chatMessageList.findIndex(
       (item: MessageListItemInfoType) => item.contactId === fromId && item.type === 'friend'
     )
-    console.log(fromId, index)
     if (index === -1) {
       let contactsInfo = (storage.get('contactsInfo') || []).find((item: any) => item.id === fromId)
       if (!contactsInfo) {
@@ -140,6 +189,8 @@ const actualUpdateChatMessageList = async (
           userId: store.user_id,
           friendId: fromId,
         })
+        console.log('===========', isCur, fromId, data)
+        data?.birthday && (data.birthday = formateTime(data.birthday, 1))
         contactsInfo = data
       }
       const chatMessage: MessageListItemInfoType = {
@@ -171,6 +222,7 @@ const actualUpdateChatMessageList = async (
           userId: store.user_id,
           groupId: info.groupId as number,
         })
+        data.createTime && (data.createTime = formateTime(data.createTime, 1))
         groupsInfo = data
       }
       const chatMessage: MessageListItemInfoType = {
@@ -246,4 +298,5 @@ export {
   deleteChatMessageListItem,
   actualDeleteChatMessageListItem,
   onDeleteChatMessageItem,
+  onOfflineChatMessages,
 }

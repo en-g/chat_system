@@ -28,6 +28,7 @@
     ChatMessageNoticeType,
     DeleteChatMessageListItemType,
     MessageListItemInfoType,
+    OfflineChatMessagesInfoType,
   } from '@/types/message'
   import MessageList from './children/messageList/index.vue'
   import ChatBox from './children/chatBox/index.vue'
@@ -41,6 +42,7 @@
   } from '@/websocket/chatMessage'
   import { getFriendInfo, getGroupInfo } from '@/api/contacts'
   import idb from '@/utils/indexedDB'
+  import { formateTime } from '@/utils/utils'
 
   const route = useRoute()
   const router = useRouter()
@@ -52,8 +54,8 @@
   const chatName = ref<string>('') // 聊天对象名称
   const chatType = ref<string>('') // 聊天对象类型
   const isSend = ref<boolean>(false) // 标记是否为发送消息
-  const messageList = reactive<MessageListItemInfoType[]>([])
-  const chatMessageList = reactive<ChatMessageItemType[]>([])
+  const messageList = reactive<MessageListItemInfoType[]>([]) // 左侧聊天列表
+  const chatMessageList = reactive<ChatMessageItemType[]>([]) // 聊天记录列表
 
   // 获取聊天列表
   const getMessageList = () => {
@@ -75,7 +77,7 @@
   // 获取群聊聊天记录
   const getGroupChatMessageList = async (id: number) => {
     const chatList = <Array<any>>await idb.getDataByIndex('groupChatMessages', 'groupId', id) || []
-    console.log(chatList)
+    chatList.sort((m1: any, m2: any) => m1.id - m2.id)
     chatMessageList.splice(0, chatMessageList.length, ...chatList)
   }
 
@@ -88,7 +90,7 @@
     ) as MessageListItemInfoType
     chatName.value = type === 'friend' ? chatObj?.remarks || chatObj?.name : chatObj?.name
 
-    // Todo 获取聊天记录
+    // 获取聊天记录
     if (type === 'friend') {
       await getContactChatMessageList(id)
     } else {
@@ -107,32 +109,31 @@
 
   // 更新聊天记录
   const updateAllChatMessageList = (info: ChatMessageNoticeType) => {
-    // TODO 消息的时间需要统一
     if (info.isContact) {
       chatMessageList.push({
-        id: (chatMessageList[chatMessageList.length - 1]?.id || 0) + 1,
+        id: info.id,
         fromId: info.fromId,
         toId: info.toId,
         type: info.type,
         message: info.message,
         url: info.url,
-        createTime: new Date().toLocaleString(),
+        createTime: formateTime(info.createTime) as string,
       })
     } else {
       chatMessageList.push({
-        id: (chatMessageList[chatMessageList.length - 1]?.id || 0) + 1,
+        id: info.id,
         fromId: info.fromId,
         groupId: info.groupId,
         type: info.type,
         message: info.message,
         url: info.url,
-        createTime: new Date().toLocaleString(),
+        createTime: formateTime(info.createTime) as string,
       })
     }
   }
   provide('updateAllChatMessageList', updateAllChatMessageList)
 
-  // 监听点击好友聊天
+  // 监听点击聊天
   const listenChatToContact = async (type: string, id: number) => {
     isSend.value = false
     if (type === 'friend') {
@@ -144,7 +145,7 @@
           userId: store.user_id,
           friendId: id,
         })
-        data.birthday = data.birthday.split('T')[0]
+        data.birthday = formateTime(data.birthday, 1)
         contactsInfo.push(data)
         storage.set('contactsInfo', contactsInfo)
       }
@@ -157,11 +158,20 @@
           userId: store.user_id,
           groupId: id,
         })
-        data.createTime = data.createTime.split('T')[0]
+        data.createTime = formateTime(data.createTime, 1)
         groupsInfo.push(data)
         storage.set('groupsInfo', groupsInfo)
       }
     }
+    // 未读消息数置0
+    const messageItem = messageList.find(
+      (item) => (type === 'friend' && item?.contactId === id) || (type === 'group' && item?.groupId === id)
+    )
+    if (messageItem) {
+      messageItem.unRead = 0
+      lStorage.set('chatMessageList', messageList)
+    }
+    // 获取聊天记录列表
     getChatMessageInfo(id, type)
     router.push({
       name: 'message',
@@ -183,20 +193,6 @@
         message,
         url,
       }
-      const createTime = new Date().toLocaleString()
-      const id = (chatMessageList[chatMessageList.length - 1]?.id || 0) + 1
-      // 更新左侧聊天列表
-      actualUpdateChatMessageList(messageList, { ...chatMessage, isContact: true }, true, true)
-      // 更新本地缓存中的聊天列表
-      updateChatMessageList({ ...chatMessage, isContact: true }, true, true)
-      // 更新聊天记录
-      chatMessageList.push({
-        id,
-        ...chatMessage,
-        createTime,
-      })
-      // 保存到 indexedDB
-      await idb.addData('friendChatMessages', { ...chatMessage, createTime })
       // 发送到 websocket 服务器
       websocket.send('chat', { ...chatMessage, isContact: true })
     } else {
@@ -207,19 +203,6 @@
         message,
         url,
       }
-      const createTime = new Date().toDateString()
-      // 更新左侧聊天列表
-      actualUpdateChatMessageList(messageList, { ...chatMessage, isContact: false }, true, true)
-      // 更新本地缓存中的聊天列表
-      updateChatMessageList({ ...chatMessage, isContact: false }, true, true)
-      // 更新聊天记录
-      chatMessageList.push({
-        id: (chatMessageList[chatMessageList.length - 1]?.id || 0) + 1,
-        ...chatMessage,
-        createTime,
-      })
-      // 保存到 indexedDB
-      await idb.addData('groupChatMessages', { ...chatMessage, createTime })
       // 发送到 websocket 服务器
       websocket.send('chat', { ...chatMessage, isContact: false })
     }
@@ -229,16 +212,57 @@
     // 更新页面聊天数据，只有处于当前组件中时，才采用实时页面数据更新
     websocket.listen('chat', async (info: ChatMessageNoticeType) => {
       // 更新聊天列表
-      if (info.fromId === chatId.value && chatType.value === 'friend' && info.isContact) {
+      if (
+        info.fromId === chatId.value &&
+        info.toId === store.user_id &&
+        chatType.value === 'friend' &&
+        info.isContact
+      ) {
+        console.log('接收到好友消息')
+        // 接收到好友消息
         await actualUpdateChatMessageList(messageList, info, false, true)
         // 更新本地缓存中的聊天列表
         await updateChatMessageList(info, false, true)
-      } else if (info.groupId === chatId.value && chatType.value === 'group' && !info.isContact) {
+        console.log('对方发送，好友消息，更新左侧聊天列表', info)
+      } else if (
+        info.fromId === store.user_id &&
+        info.toId === chatId.value &&
+        chatType.value === 'friend' &&
+        info.isContact
+      ) {
+        console.log('接收到自己发送的消息')
+        // 接收到自己发送的消息
+        await actualUpdateChatMessageList(messageList, info, true, true)
+        // 更新本地缓存中的聊天列表
+        await updateChatMessageList(info, true, true)
+        console.log('自己发送，好友消息，更新左侧聊天列表', info)
+      } else if (
+        info.fromId !== store.user_id &&
+        info.groupId === chatId.value &&
+        chatType.value === 'group' &&
+        !info.isContact
+      ) {
+        console.log('接收到群友发送的消息')
+        // 接收到群友发送的消息
         await actualUpdateChatMessageList(messageList, info, false, true)
         // 更新本地缓存中的聊天列表
         await updateChatMessageList(info, false, true)
+        console.log('群友发送，群聊消息，更新左侧聊天列表', info)
+      } else if (
+        info.fromId === store.user_id &&
+        info.groupId === chatId.value &&
+        chatType.value === 'group' &&
+        !info.isContact
+      ) {
+        console.log('接收到自己发送的消息2')
+        // 接收到自己发送的消息
+        await actualUpdateChatMessageList(messageList, info, true, true)
+        // 更新本地缓存中的聊天列表
+        await updateChatMessageList(info, true, true)
+        console.log('自己发送，群聊消息，更新左侧聊天列表', info)
       } else {
         await actualUpdateChatMessageList(messageList, info)
+        console.log('不在聊天界面，只更新左侧聊天列表', info)
       }
     })
     // 删除聊天列表项
@@ -249,6 +273,30 @@
         router.push({ name: 'message' })
       }
       actualDeleteChatMessageListItem(messageList, info)
+    })
+    // 接收离线消息，更新左侧聊天列表
+    websocket.listen('offlineChatMessages', async (offlineChatMessages: OfflineChatMessagesInfoType) => {
+      console.log('接收离线消息，实时更新左侧聊天列表', offlineChatMessages)
+      if (offlineChatMessages.contact) {
+        for (const message of offlineChatMessages.contact) {
+          // 更新左侧聊天列表
+          await actualUpdateChatMessageList(
+            messageList,
+            Object.assign(message, { isContact: true }),
+            message.fromId === store.user_id
+          )
+        }
+      }
+      if (offlineChatMessages.group) {
+        for (const message of offlineChatMessages.group) {
+          // 更新左侧聊天列表
+          await actualUpdateChatMessageList(
+            messageList,
+            Object.assign(message, { isContact: false }),
+            message.fromId === store.user_id
+          )
+        }
+      }
     })
   })
 </script>

@@ -115,6 +115,7 @@
   import { localStorage, sessionStorage } from '@/utils/storage'
   import type { UploadFile } from 'element-plus'
   import fileUpload from '@/utils/fileUpload'
+  import { formateTime } from '@/utils/utils'
 
   const router = useRouter()
   const store = useStore()
@@ -133,7 +134,8 @@
     const { data } = await getPersonalInfo({
       userId: store.user_id,
     })
-    data.birthday = data.birthday.split('T')[0]
+    console.log(data)
+    data.birthday = formateTime(data.birthday, 1)
     sStorage.set('personalInfo', data)
     return data
   }

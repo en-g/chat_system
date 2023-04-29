@@ -20,7 +20,7 @@
               <el-scrollbar class="message-popover-scrollbar">
                 <div v-if="messagesList.length > 0" class="message-list">
                   <div v-for="item in messagesList" :key="item.id" class="message-item">
-                    <div class="time">{{ item.createTime.replace('T', ' ').split('.')[0] }}</div>
+                    <div class="time">{{ formateTime(item.createTime) }}</div>
                     <div class="title">
                       <div class="other">【</div>
                       <div class="main">{{ item.title }}</div>
@@ -150,6 +150,7 @@
   import { TIP_TYPE } from '@/config'
   import { sessionStorage } from '@/utils/storage'
   import websocket from '@/websocket'
+  import { formateTime } from '@/utils/utils'
 
   const router = useRouter()
   const route = useRoute()

@@ -51,7 +51,9 @@
   import ContactGroupDetail from '@/components/contactGroupDetail/index.vue'
   import Emoji from '@/components/emoji/index.vue'
   import Emotion from '@/components/emotion/index.vue'
+  import useStore from '@/store'
 
+  const store = useStore()
   const props = defineProps<{
     chatName: string
     chatMessageList: ChatMessageItemType[]
@@ -108,11 +110,18 @@
   onMounted(() => {
     // 更新页面聊天数据，只有处于当前组件中时，才采用实时页面数据更新
     websocket.listen('chat', (info: ChatMessageNoticeType) => {
-      if (info.fromId === props.chatId && props.chatType === 'friend' && info.isContact) {
+      if (
+        ((info.fromId === props.chatId && info.toId === store.user_id) ||
+          (info.fromId === store.user_id && info.toId === props.chatId)) &&
+        props.chatType === 'friend' &&
+        info.isContact
+      ) {
         updateAllChatMessageList(info)
+        console.log('更新好友聊天记录', info)
       }
       if (info.groupId === props.chatId && props.chatType === 'group' && !info.isContact) {
         updateAllChatMessageList(info)
+        console.log('更新群聊聊天记录', info)
       }
     })
   })

@@ -28,7 +28,7 @@
         </div>
         <div class="tidings-list-item-time-thumbs">
           <div class="release-time">
-            <div class="time">{{ props.tidingsInfo.createTime.replace('T', ' ').split('.')[0] }}</div>
+            <div class="time">{{ formateTime(props.tidingsInfo.createTime) }}</div>
             <div v-show="parseInt(route.query.id as string) === store.user_id" class="delete">
               <el-link type="danger" @click="listenDeletePyqTiding">删除</el-link>
             </div>
@@ -110,6 +110,7 @@
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { TIP_TYPE } from '@/config'
   import Emoji from '@/components/emoji/index.vue'
+  import { formateTime } from '@/utils/utils'
 
   const route = useRoute()
   const router = useRouter()
