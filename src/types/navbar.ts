@@ -6,6 +6,8 @@ export interface ContactOrGroupResultType {
   name: string
   signature?: string
   avatarUrl: string
+  number?: string
+  username?: string
   isGroup: number
   isAdd: number
 }

@@ -172,7 +172,7 @@
       lStorage.set('chatMessageList', messageList)
     }
     // 获取聊天记录列表
-    getChatMessageInfo(id, type)
+    await getChatMessageInfo(id, type)
     router.push({
       name: 'message',
       query: {

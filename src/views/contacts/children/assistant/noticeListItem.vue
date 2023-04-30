@@ -188,6 +188,11 @@
               userId: props.noticeListItem.toId,
               groupId: props.noticeListItem.groupId,
             })
+            // 通知对方更新群聊信息
+            websocket.send('updateGroupInfo', {
+              userId: props.noticeListItem.fromId,
+              groupId: props.noticeListItem.groupId,
+            })
             // 更新群聊列表
             await updateGroupList()
           }
@@ -266,6 +271,11 @@
       // 通知对方更新联系人列表
       websocket.send('updateContactList', {
         userId: props.noticeListItem.fromId,
+      })
+      // 添加成功
+      websocket.send('addContactSuccess', {
+        fromId: props.noticeListItem.fromId,
+        toId: props.noticeListItem.toId,
       })
       // 更新联系人列表
       await updateContactList()

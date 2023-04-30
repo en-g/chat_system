@@ -14,6 +14,7 @@ import {
   ReadNoticeIdType,
   RefseAddContactInfoType,
   RefseAddGroupIdType,
+  SearchContactsGroupsListInfoType,
   UnHandleNoticesInfoType,
   UpdateContactFriendGroupType,
   UpdateContactsRemarksType,
@@ -216,6 +217,16 @@ const getContactListAboutGroup = (ids: ContactListAboutGroupIdsType) => {
   )
 }
 
+// 查找联系人和群聊列表
+const searchContactGroupsList = (info: SearchContactsGroupsListInfoType) => {
+  return Promise.resolve(
+    get({
+      url: 'friends/groups/added/search',
+      params: info,
+    })
+  )
+}
+
 export {
   getContactsList,
   getGroupsList,
@@ -238,4 +249,5 @@ export {
   updateContactFriendGroup,
   deleteContact,
   getContactListAboutGroup,
+  searchContactGroupsList,
 }

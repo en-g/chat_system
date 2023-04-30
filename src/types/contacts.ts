@@ -131,3 +131,20 @@ export interface ContactListAboutGroupType {
   avatarUrl: string
   isMember: number
 }
+
+export interface SearchContactsGroupsListInfoType {
+  userId: number
+  keyword: string
+}
+
+export interface ContactsGroupsListInfoType {
+  contact: Array<ContactsGroupsListItemInfoType>
+  group: Array<ContactsGroupsListItemInfoType>
+}
+
+export interface ContactsGroupsListItemInfoType {
+  id: number
+  name: string
+  remarks?: string
+  avatarUrl: string
+}

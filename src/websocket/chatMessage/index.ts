@@ -130,7 +130,7 @@ const updateChatMessageList = async (info: ChatMessageNoticeType, isCur = false,
     lStorage.set('chatMessageList', chatMessageList)
   } else {
     const index = chatMessageList.findIndex(
-      (item: MessageListItemInfoType) => item.groupId === info.groupId && item.type === 'group'
+      (item: MessageListItemInfoType) => item.groupId == info.groupId && item.type == 'group'
     )
     if (index === -1) {
       const groupsInfo = storage.get('groupsInfo') || []

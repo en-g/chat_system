@@ -136,7 +136,7 @@
     width: 100%;
     .write-info-card {
       width: 100%;
-      min-height: 387px;
+      min-height: 400px;
       padding: 20px;
       box-sizing: border-box;
       .write-info-title {

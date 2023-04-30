@@ -263,6 +263,7 @@
     }
     .login-main {
       width: 370px;
+      min-height: 400px;
       position: fixed;
       right: 10%;
       top: 50%;

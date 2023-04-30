@@ -29,3 +29,21 @@ export interface DismissGroupType {
   leaderId: number
   groupId: number
 }
+
+export interface UpdategroupsRemarksType {
+  userId: number
+  groupId: number
+  remarks: string
+}
+
+export interface UpdateGroupNameInfoType {
+  userId: number
+  groupId: number
+  name: string
+}
+
+export interface UpdateGroupNoticeInfoType {
+  userId: number
+  groupId: number
+  notice: string
+}

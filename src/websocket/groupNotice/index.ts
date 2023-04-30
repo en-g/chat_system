@@ -1,4 +1,8 @@
+import { getGroupInfo } from '@/api/contacts'
 import useStore from '@/store'
+import { GetGroupInfoType } from '@/types/contacts'
+import { sessionStorage } from '@/utils/storage'
+import { formateTime } from '@/utils/utils'
 
 // 添加群聊通知
 const onAddGroupNotice = (notice: any) => {
@@ -58,6 +62,29 @@ const onUpdateGroupList = async () => {
   store.isUpdateGroupList = true
 }
 
+// 更新群聊信息
+const onUpdateGroupInfo = async (id: { groupId: number }) => {
+  console.log('更新群聊信息', id)
+  await updateGroupInfo(id.groupId)
+}
+
+// 更新群聊信息
+const updateGroupInfo = async (groupId: number) => {
+  const store = useStore()
+  const storage = sessionStorage(`${store.user_id}`)
+  const groupsInfo = storage.get('groupsInfo') || []
+  const index = groupsInfo.findIndex((item: any) => item.id === groupId)
+  if (index === -1) return
+  const ids: GetGroupInfoType = {
+    userId: store.user_id,
+    groupId: groupId,
+  }
+  const { data } = await getGroupInfo(ids)
+  data.createTime = formateTime(data.createTime, 1)
+  groupsInfo.splice(index, 1, data)
+  storage.set('groupsInfo', groupsInfo)
+}
+
 export {
   onAddGroupNotice,
   onUpdateGroupList,
@@ -65,4 +92,5 @@ export {
   onExitGroupNotice,
   onDismissGroupNotice,
   onInviteGroupNotice,
+  onUpdateGroupInfo,
 }

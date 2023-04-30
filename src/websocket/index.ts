@@ -8,6 +8,7 @@ import {
   onDismissGroupNotice,
   onExitGroupNotice,
   onInviteGroupNotice,
+  onUpdateGroupInfo,
   onUpdateGroupList,
 } from './groupNotice'
 import { onChat, onDeleteChatMessageItem, onOfflineChatMessages } from './chatMessage'
@@ -171,6 +172,8 @@ const initListenEvent = (websocket: any) => {
   websocket.listen('updateContactList', onUpdatecontactList)
   // 更新群聊列表
   websocket.listen('updateGroupList', onUpdateGroupList)
+  // 更新群聊信息
+  websocket.listen('updateGroupInfo', onUpdateGroupInfo)
   // 删除聊天列表项
   websocket.listen('deleteChatMessageItem', onDeleteChatMessageItem)
   // 聊天

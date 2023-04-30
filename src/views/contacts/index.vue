@@ -31,13 +31,13 @@
             title="好友列表"
             type="friend"
             :contacts-list="friendsList"
-            @showContactsInfo="listenShowContactsInfo"
+            @show-contacts-info="listenShowContactsInfo"
           />
           <Contacts
             title="群聊列表"
             type="group"
             :contacts-list="groupsList"
-            @showContactsInfo="listenShowContactsInfo"
+            @show-contacts-info="listenShowContactsInfo"
           />
         </div>
       </el-scrollbar>
@@ -49,7 +49,7 @@
             <use xlink:href="#icon-back"></use>
           </svg>
         </div>
-        <router-view v-slot="{ Component }">
+        <router-view v-slot="{ Component }" @show-info="listenShowContactsInfo">
           <component :is="Component" />
         </router-view>
       </div>

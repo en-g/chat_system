@@ -95,6 +95,12 @@ const TIP_TYPE = {
   COMMENT_FAIL: '评论失败，请检查网络是否通畅！',
   REPLY_IS_NOT_NLL: '回复内容不能为空，请重新输入！',
   REPLY_FAIL: '回复失败，请检查网络是否通畅！',
+  ONLY_LEADER_CAN_UPDATE_GROUP_NAME: '只有群主能修改群聊名称！',
+  ONLU_LEADER_CAN_UPDATE_GROUP_NOTICE: '只有群主能修改群聊公告！',
+  UPDATE_GROUP_NAME_SUCCESS: '修改群聊名称成功！',
+  UPDATE_GROUP_NAME_FAIL: '修改群聊名称失败，请检查网络是否通畅！',
+  UPDATE_GROUP_NOTICE_SUCCESS: '修改群聊公告成功！',
+  UPDATE_GROUP_NOTICE_FAIL: '修改群聊公告失败，请检查网络是否通畅！',
 }
 
 export { BASE_URL, WEBSOCKET_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

@@ -27,7 +27,7 @@
                 </div>
                 <div class="desc">
                   <div class="name-tag">
-                    <div class="name">{{ item.name }}</div>
+                    <div class="name">{{ `${item.name}（${item.isGroup ? item.number : item.username}）` }}</div>
                     <div v-show="item.isGroup" class="tag">
                       <el-tag effect="light">群聊</el-tag>
                     </div>
@@ -265,6 +265,7 @@
       keyword: searchKeyword.value,
       userId: store.user_id,
     })
+    console.log(data)
     searchContactOrGroupResult.splice(0, searchContactOrGroupResult.length, ...data)
   })
 

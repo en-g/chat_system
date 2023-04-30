@@ -187,6 +187,7 @@
   const store = useStore()
   const storage = sessionStorage(`${store.user_id}`)
   const lStorage = localStorage(`${store.user_id}`)
+  const emit = defineEmits(['showInfo'])
 
   // 联系人/群聊 ID
   const id = computed((): number => {
@@ -246,9 +247,15 @@
   const info = ref<any>(await getInfo())
 
   // 监听联系人和群聊、不同联系人、不同群聊间的切换，重新请求数据
-  watch([type, id], async () => {
-    info.value = await getInfo()
-  })
+  watch(
+    [type, id],
+    async () => {
+      console.log(type.value, id.value)
+      info.value = await getInfo()
+      emit('showInfo')
+    },
+    { immediate: true }
+  )
 
   // 点击编辑备注/群昵称
   const listenEditRemarks = () => {
@@ -421,8 +428,9 @@
             color: var(--desc-color);
           }
           .content {
+            flex: 1;
             line-height: 16px;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             display: -webkit-box;
             -webkit-box-orient: vertical;
             overflow: hidden;

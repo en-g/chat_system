@@ -31,8 +31,23 @@
         <el-icon class="icon"><Plus /></el-icon>
       </div>
     </div>
+    <div class="group-detail-update-name" @click="listenUpdateGroupName">
+      <div class="label">群聊名称</div>
+      <div v-if="!isUpdateGroupName" class="op">{{ groupInfo.name }}</div>
+      <div v-else class="update">
+        <el-input
+          v-model="groupInfo.name"
+          autofocus
+          maxlength="10"
+          placeholder="请输入群聊名称"
+          type="text"
+          @change="listenConfirmUpdateGroupName"
+          @blur="isUpdateGroupName = false"
+        />
+      </div>
+    </div>
     <div class="group-detail-update-remarks" @click="listenUpdateRemarks">
-      <div class="label">我的群聊名称</div>
+      <div class="label">我的群聊昵称</div>
       <div v-if="!isUpdateRemarks" class="op">{{ groupInfo.remarks || '无' }}</div>
       <div v-else class="update">
         <el-input
@@ -121,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, watch } from 'vue'
+  import { ref, reactive, watch, onMounted } from 'vue'
   import useStore from '@/store'
   import { sessionStorage } from '@/utils/storage'
   // import { FriendGroupsListType, UpdategroupsRemarksType } from '@/types/groups'
@@ -130,10 +145,11 @@
   import { TIP_TYPE } from '@/config'
   import websocket from '@/websocket'
   import { Plus } from '@element-plus/icons-vue'
-  import { dismissGroup, exitGroup } from '@/api/groups'
-  import { getContactListAboutGroup, getGroupInfo } from '@/api/contacts'
+  import { dismissGroup, exitGroup, updateGroupName, updateGroupNotice } from '@/api/groups'
+  import { getContactListAboutGroup, getGroupInfo, updateGroupsRemarks } from '@/api/contacts'
   import { ContactListAboutGroupType, GetGroupInfoType } from '@/types/contacts'
   import { formateTime } from '@/utils/utils'
+  import { UpdateGroupNameInfoType, UpdateGroupNoticeInfoType, UpdategroupsRemarksType } from '@/types/groups'
 
   const store = useStore()
   const storage = sessionStorage(`${store.user_id}`)
@@ -143,6 +159,7 @@
   const emit = defineEmits(['back'])
 
   const groupInfo = reactive<any>({}) // 群聊信息
+  const isUpdateGroupName = ref<boolean>(false) // 标记是否修改群聊名称
   const isUpdateRemarks = ref<boolean>(false) // 标记是否修改群昵称
   const isUpdateGroupNotice = ref<boolean>(false) // 标记是否修改群公告
   const inviteGropVisible = ref<boolean>(false) // 标记是否显示邀请进群的 dialog
@@ -201,18 +218,45 @@
   }
 
   // 更新群聊信息
-  const updateGroupInfo = async () => {
-    const groupsInfo = storage.get('groupsInfo') || []
-    const index = groupsInfo.findIndex((item: any) => item.id === groupInfo.id)
+  const updateGroupInfo = async (groupId: number) => {
     const ids: GetGroupInfoType = {
       userId: store.user_id,
-      groupId: groupInfo.id,
+      groupId,
     }
     const { data } = await getGroupInfo(ids)
     data.createTime = formateTime(data.createTime, 1)
     Object.assign(groupInfo, data)
-    groupsInfo.splice(index, 1, data)
-    storage.set('groupsInfo', groupsInfo)
+  }
+
+  // 修改群聊名称
+  const listenUpdateGroupName = () => {
+    if (groupInfo.leaderId === store.user_id) {
+      isUpdateGroupName.value = true
+    } else {
+      ElMessage.error(TIP_TYPE.ONLY_LEADER_CAN_UPDATE_GROUP_NAME)
+    }
+  }
+
+  // 确认修改群聊名称
+  const listenConfirmUpdateGroupName = async () => {
+    const groupNameInfo: UpdateGroupNameInfoType = {
+      userId: store.user_id,
+      groupId: props.groupId,
+      name: groupInfo.name,
+    }
+    const { data } = await updateGroupName(groupNameInfo)
+    if (data) {
+      ElMessage.success(TIP_TYPE.UPDATE_GROUP_NAME_SUCCESS)
+      const groupsInfo = storage.get('groupsInfo') || []
+      const index = groupsInfo.findIndex((item: any) => item.id === props.groupId)
+      if (index !== -1) {
+        groupsInfo.splice(index, 1, groupInfo)
+        storage.set('groupsInfo', groupsInfo)
+      }
+      isUpdateGroupName.value = false
+    } else {
+      ElMessage.error(TIP_TYPE.UPDATE_GROUP_NAME_FAIL)
+    }
   }
 
   // 修改备注
@@ -222,37 +266,55 @@
 
   // 确认修改备注
   const listenConfirmUpdateRemarks = async () => {
-    console.log('remarks')
-    // const remarksInfo: UpdategroupsRemarksType = {
-    //   userId: store.user_id,
-    //   friendId: props.userId,
-    //   remarks: groupInfo.remarks,
-    // }
-    // const { data } = await updategroupsRemarks(remarksInfo)
-    // if (data) {
-    //   ElMessage.success(TIP_TYPE.UPDATE_groupS_REMARKS_SUCCESS)
-    //   const groupsInfo = storage.get('groupsInfo') || []
-    //   const index = groupsInfo.findIndex((item: any) => item.id === props.userId)
-    //   if (index !== -1) {
-    //     groupsInfo.splice(index, 1, groupInfo)
-    //     storage.set('groupsInfo', groupsInfo)
-    //   }
-    //   isUpdateRemarks.value = false
-    // } else {
-    //   ElMessage.error(TIP_TYPE.UPDATE_groupS_REMARKS_FAIL)
-    // }
+    const remarksInfo: UpdategroupsRemarksType = {
+      userId: store.user_id,
+      groupId: props.groupId,
+      remarks: groupInfo.remarks,
+    }
+    const { data } = await updateGroupsRemarks(remarksInfo)
+    if (data) {
+      ElMessage.success(TIP_TYPE.UPDATE_GROUPS_REMARKS_SUCCESS)
+      const groupsInfo = storage.get('groupsInfo') || []
+      const index = groupsInfo.findIndex((item: any) => item.id === props.groupId)
+      if (index !== -1) {
+        groupsInfo.splice(index, 1, groupInfo)
+        storage.set('groupsInfo', groupsInfo)
+      }
+      isUpdateRemarks.value = false
+    } else {
+      ElMessage.error(TIP_TYPE.UPDATE_GROUPS_REMARKS_FAIL)
+    }
   }
 
   // 修改群公告
   const listenUpdateGroupNotice = () => {
     if (groupInfo.isLeader) {
       isUpdateGroupNotice.value = true
+    } else {
+      ElMessage.error(TIP_TYPE.ONLU_LEADER_CAN_UPDATE_GROUP_NOTICE)
     }
   }
 
   // 确认修改群公告
-  const listenConfirmUpdateGropNotice = () => {
-    console.log('=')
+  const listenConfirmUpdateGropNotice = async () => {
+    const groupNticeInfo: UpdateGroupNoticeInfoType = {
+      userId: store.user_id,
+      groupId: props.groupId,
+      notice: groupInfo.notice,
+    }
+    const { data } = await updateGroupNotice(groupNticeInfo)
+    if (data) {
+      ElMessage.success(TIP_TYPE.UPDATE_GROUP_NOTICE_SUCCESS)
+      const groupsInfo = storage.get('groupsInfo') || []
+      const index = groupsInfo.findIndex((item: any) => item.id === props.groupId)
+      if (index !== -1) {
+        groupsInfo.splice(index, 1, groupInfo)
+        storage.set('groupsInfo', groupsInfo)
+      }
+      isUpdateGroupNotice.value = false
+    } else {
+      ElMessage.error(TIP_TYPE.UPDATE_GROUP_NOTICE_FAIL)
+    }
   }
 
   // // 查看聊天记录
@@ -333,6 +395,15 @@
     },
     { immediate: true }
   )
+
+  onMounted(() => {
+    websocket.listen('updateGroupInfo', async (id: { groupId: number }) => {
+      // 更新页面群聊信息
+      if (groupInfo.id === id.groupId) {
+        await updateGroupInfo(id.groupId)
+      }
+    })
+  })
 </script>
 
 <style scoped lang="less">
@@ -413,6 +484,7 @@
         }
       }
     }
+    .group-detail-update-name,
     .group-detail-update-remarks,
     .group-detail-show-messages,
     .group-detail-disturb,
@@ -433,6 +505,7 @@
       .select {
       }
     }
+    .group-detail-update-name,
     .group-detail-update-remarks,
     .group-detail-update-notice,
     .group-detail-show-messages,

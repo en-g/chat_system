@@ -194,7 +194,7 @@
     width: 100%;
     .register-card {
       width: 100%;
-      min-height: 387px;
+      min-height: 400px;
       padding: 20px;
       box-sizing: border-box;
       .register-title {

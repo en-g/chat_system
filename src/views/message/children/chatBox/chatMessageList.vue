@@ -28,7 +28,7 @@
   const chatMessageListRef = ref<any>(null)
   const scrollbarRef = ref<any>(null)
   const estimatedItemHeight = 95 // 动态默认最小高度
-  let virtualList = createVirtualList(props.chatMessageList.length, estimatedItemHeight)
+  let virtualList: any = null
 
   const startOffset = ref<number>(0) // 列表 padding-top
   const endOffset = ref<number>(0) // 列表 padding-bottom
@@ -48,6 +48,11 @@
     const data = props.chatMessageList.slice(startIndex.value, endIndex.value + 1)
     visibleList.value = data
     // console.log(visibleList.length, startIndex.value, endIndex.value)
+  }
+
+  // 初始化虚拟列表
+  const initVirtualList = () => {
+    virtualList = createVirtualList(props.chatMessageList.length, estimatedItemHeight)
   }
 
   // 初始化数据
@@ -109,18 +114,30 @@
      */
     if (props.isSend) {
       // 发送消息
-      virtualList.update(props.chatMessageList.length - 1, estimatedItemHeight * 2)
+      if (virtualList) {
+        virtualList.update(props.chatMessageList.length - 1, estimatedItemHeight * 2)
+      } else {
+        initVirtualList()
+      }
       initVisibleList()
     } else {
       // 切换聊天对象
-      virtualList = createVirtualList(props.chatMessageList.length, estimatedItemHeight)
-      initVisibleList()
-      setTimeout(() => scrollbarRef.value?.setScrollTop(virtualList.getTatolHeight()), 10)
+      virtualList = null
+      visibleList.value = []
+      if (props.chatMessageList.length > 0) {
+        initVirtualList()
+        initVisibleList()
+        setTimeout(() => scrollbarRef.value?.setScrollTop(virtualList.getTatolHeight()), 10)
+      }
     }
   })
 
   onMounted(() => {
-    initVisibleList()
+    // 有数据再初始化虚拟列表
+    if (props.chatMessageList.length > 0) {
+      initVirtualList()
+      initVisibleList()
+    }
   })
 </script>
 
