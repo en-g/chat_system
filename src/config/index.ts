@@ -101,6 +101,7 @@ const TIP_TYPE = {
   UPDATE_GROUP_NAME_FAIL: '修改群聊名称失败，请检查网络是否通畅！',
   UPDATE_GROUP_NOTICE_SUCCESS: '修改群聊公告成功！',
   UPDATE_GROUP_NOTICE_FAIL: '修改群聊公告失败，请检查网络是否通畅！',
+  NO_FRIEND_GROUP: '暂无好友分组，请先添加好友分组！',
 }
 
 export { BASE_URL, WEBSOCKET_URL, TIME_OUT, ERROR_TYPE, TIP_TYPE }

@@ -189,7 +189,6 @@ const actualUpdateChatMessageList = async (
           userId: store.user_id,
           friendId: fromId,
         })
-        console.log('===========', isCur, fromId, data)
         data?.birthday && (data.birthday = formateTime(data.birthday, 1))
         contactsInfo = data
       }

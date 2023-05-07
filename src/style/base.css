@@ -2,7 +2,6 @@
 html,
 body {
   font-size: 13px;
-  user-select: none;
   color: var(--theme-color);
 }
 .el-container,

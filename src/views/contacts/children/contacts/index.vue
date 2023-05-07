@@ -2,7 +2,11 @@
   <div class="index-container">
     <div class="index-title">{{ props.title }}</div>
     <div class="index-contacts-list">
-      <ContactsList :type="props.type" :contacts-list="props.contactsList" @showContactsInfo="listenShowContactsInfo" />
+      <ContactsList
+        :type="props.type"
+        :contacts-list="props.contactsList"
+        @show-contacts-info="listenShowContactsInfo"
+      />
     </div>
   </div>
 </template>

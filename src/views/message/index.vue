@@ -159,6 +159,7 @@
           groupId: id,
         })
         data.createTime = formateTime(data.createTime, 1)
+        data.members = data.members.reverse()
         groupsInfo.push(data)
         storage.set('groupsInfo', groupsInfo)
       }

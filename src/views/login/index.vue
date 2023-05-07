@@ -137,6 +137,7 @@
     if (loginInfo.username && loginInfo.password) {
       // 查询用户是否存在
       const res = await searchUser(loginInfo)
+      console.log(res)
       if (!res.data) {
         ElMessage.error(TIP_TYPE.LOGIN_INFO_ERROR)
       } else {

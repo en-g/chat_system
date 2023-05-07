@@ -36,7 +36,7 @@
         </div> -->
         <div class="item delete">
           <el-tooltip content="删除好友" placement="top">
-            <svg class="icon" aria-hidden="true">
+            <svg class="icon" aria-hidden="true" @click="listenDeleteContact">
               <use xlink:href="#icon-delete"></use>
             </svg>
           </el-tooltip>
@@ -52,14 +52,14 @@
         </div>
         <div v-if="info.isLeader !== store.user_id" class="item message">
           <el-tooltip content="退出群聊" placement="top">
-            <svg class="icon" aria-hidden="true">
+            <svg class="icon" aria-hidden="true" @click="listenExitGroup">
               <use xlink:href="#icon-out"></use>
             </svg>
           </el-tooltip>
         </div>
         <div v-if="info.isLeader === store.user_id" class="item message">
           <el-tooltip content="解散群聊" placement="top">
-            <svg class="icon" aria-hidden="true">
+            <svg class="icon" aria-hidden="true" @click="listenDismissGroup">
               <use xlink:href="#icon-delete"></use>
             </svg>
           </el-tooltip>
@@ -168,7 +168,13 @@
 <script setup lang="ts">
   import { ref, computed, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-  import { getFriendInfo, getGroupInfo, updateContactsRemarks, updateGroupsRemarks } from '@/api/contacts'
+  import {
+    deleteContact,
+    getFriendInfo,
+    getGroupInfo,
+    updateContactsRemarks,
+    updateGroupsRemarks,
+  } from '@/api/contacts'
   import {
     GetContactsInfoType,
     GetGroupInfoType,
@@ -177,10 +183,12 @@
   } from '@/types/contacts'
   import useStore from '@/store/index'
   import { sessionStorage, localStorage } from '@/utils/storage'
-  import { ElMessage } from 'element-plus'
+  import { ElMessage, ElMessageBox } from 'element-plus'
   import { TIP_TYPE } from '@/config'
   import { MessageListItemInfoType } from '@/types/message'
   import { formateTime } from '@/utils/utils'
+  import websocket from '@/websocket'
+  import { dismissGroup, exitGroup } from '@/api/groups'
 
   const router = useRouter()
   const route = useRoute()
@@ -230,6 +238,7 @@
     }
     const { data } = await getGroupInfo(ids)
     data.createTime = formateTime(data.createTime, 1)
+    data.members = data.members.reverse()
     groupsInfo.push(data)
     storage.set('groupsInfo', groupsInfo)
     return data
@@ -245,6 +254,94 @@
     }
   }
   const info = ref<any>(await getInfo())
+
+  // 删除好友
+  const listenDeleteContact = () => {
+    ElMessageBox.confirm('您正在删除该联系人，请确认！', '删除联系人', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(async () => {
+      const { data } = await deleteContact({
+        userId: store.user_id,
+        friendId: info.value.id,
+      })
+      if (data) {
+        ElMessage.success(TIP_TYPE.DELETE_CONTACT_SUCCESS)
+        // 更新联系人列表
+        store.isUpdateContactList = true
+        // 通知对方更新联系人列表
+        websocket.send('updateContactList', { userId: info.value.id })
+        // 将联系人从聊天列表中删除
+        // 也要通知对方从聊天列表中删除
+        websocket.send('deleteContact', {
+          userId: store.user_id,
+          friendId: info.value.id,
+        })
+        router.push({ path: '/contacts' })
+      } else {
+        ElMessage.error(TIP_TYPE.DELETE_CONTACT_FAIL)
+      }
+    })
+  }
+
+  // 退出群聊
+  const listenExitGroup = () => {
+    ElMessageBox.confirm('您正在退出该群聊，请确认！', '退出群聊', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(async () => {
+      const { data } = await exitGroup({
+        userId: store.user_id,
+        groupId: info.value.id,
+      })
+      if (data) {
+        ElMessage.success(TIP_TYPE.EXIT_GROUP_SUCCESS)
+        // 更新群聊列表
+        store.isUpdateGroupList = true
+        // 对群主发送退群通知, 通知群成员更新群聊信息
+        websocket.send('exitGroup', {
+          fromId: store.user_id,
+          toId: info.value.leaderId,
+          groupId: info.value.id,
+          type: 'exit',
+        })
+        router.push({ path: '/contacts' })
+      } else {
+        ElMessage.success(TIP_TYPE.EXIT_GROUP_FAIL)
+      }
+    })
+  }
+
+  // 解散群聊
+  const listenDismissGroup = () => {
+    ElMessageBox.confirm('您正在解散该群聊，请确认！', '解散群聊', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(async () => {
+      const { data } = await dismissGroup({
+        leaderId: store.user_id,
+        groupId: info.value.id,
+      })
+      if (data) {
+        ElMessage.success(TIP_TYPE.DISMISS_GROUP_SUCCESS)
+        // 更新群聊列表
+        store.isUpdateGroupList = true
+        // 对群成员发送解散群聊通知
+        websocket.send('dismissGroup', {
+          fromId: store.user_id,
+          toId: -1,
+          groupId: info.value.id,
+          type: 'dismiss',
+        })
+        router.push({ path: '/contacts' })
+      } else {
+        ElMessage.success(TIP_TYPE.DISMISS_GROUP_FAIL)
+      }
+    })
+  }
 
   // 监听联系人和群聊、不同联系人、不同群聊间的切换，重新请求数据
   watch(
@@ -313,7 +410,9 @@
   // 跳转到聊天界面
   const listenNavigateToChat = () => {
     const chatMessageList: MessageListItemInfoType[] = lStorage.get('chatMessageList') || []
-    const index = chatMessageList.findIndex((item) => item.contactId === id.value && item.type === type.value)
+    const index = chatMessageList.findIndex(
+      (item) => (item.contactId === id.value || item.groupId === id.value) && item.type === type.value
+    )
     if (index !== -1) {
       const chatMessage: MessageListItemInfoType[] = chatMessageList.splice(index, 1)
       chatMessageList.unshift(chatMessage[0])

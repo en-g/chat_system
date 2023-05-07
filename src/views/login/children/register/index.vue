@@ -225,7 +225,6 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                border-radius: 5px;
                 cursor: pointer;
                 background-color: rgb(236, 236, 236);
                 position: relative;

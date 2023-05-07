@@ -27,8 +27,8 @@
           </div>
         </el-sub-menu>
       </el-menu>
-      <el-link v-else class="contacts-list-add" type="primary" @click="listenAddFriendOrGroup">
-        {{ props.type === 'friend' ? '暂无好友，点击添加好友' : '暂未加入群聊，点击加入群聊' }}
+      <el-link v-else class="contacts-list-add" type="primary" :underline="false">
+        {{ props.type === 'friend' ? '暂无好友，快去添加好友吧！' : '暂无群聊，快去加入群聊吧！' }}
       </el-link>
     </div>
   </div>
@@ -43,7 +43,7 @@
 
   const router = useRouter()
   const store = useStore()
-  const emit = defineEmits(['showContactsInfo'])
+  const emit = defineEmits(['showContactsInfo', 'showSearch'])
 
   const props = defineProps<{
     type: string // 列表类型
@@ -76,11 +76,6 @@
         id,
       },
     })
-  }
-
-  // 添加好友/加入群聊
-  const listenAddFriendOrGroup = () => {
-    console.log('add')
   }
 </script>
 

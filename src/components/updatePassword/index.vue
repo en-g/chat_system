@@ -8,7 +8,7 @@
           :model="passInfo"
           :rules="verificationRules"
           label-position="left"
-          label-width="70px"
+          label-width="80px"
           status-icon
         >
           <el-form-item class="update-password-main-form-item" label="邮箱" prop="email">
@@ -229,7 +229,7 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                border-radius: 5px;
+                font-size: var(--small-desc-size);
                 cursor: pointer;
                 background-color: rgb(236, 236, 236);
                 position: relative;

@@ -212,7 +212,6 @@
       groupId: groupInfo.id,
       inviteIds,
     })
-    // TODO 更新群聊信息
     ElMessage.success(TIP_TYPE.INVITE_GROUP_SCCESS)
     inviteGropVisible.value = false
   }
