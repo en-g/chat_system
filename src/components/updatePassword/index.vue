@@ -172,6 +172,7 @@
     // 信息完整
     if (info.email && info.username && info.newPass && info.verificationCode) {
       const { data } = await updatePassword(info)
+      console.log(data)
       switch (data.status) {
         case 0:
           ElMessage.error(TIP_TYPE.UPDATE_PASS_FAIL)

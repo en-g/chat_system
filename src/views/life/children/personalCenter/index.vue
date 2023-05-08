@@ -32,7 +32,7 @@
           <div class="item">
             <el-popover class="popover-wrapper" placement="right-start" :width="250" trigger="click">
               <el-scrollbar class="collection-popover-scrollbar">
-                <div class="popover-content">
+                <div v-if="collectionList.length > 0" class="popover-content">
                   <div
                     v-for="item in collectionList"
                     :key="item.id"
@@ -51,6 +51,7 @@
                     </div>
                   </div>
                 </div>
+                <div v-else class="popover-null">暂无收藏</div>
               </el-scrollbar>
               <template #reference>
                 <div class="icon">
@@ -118,7 +119,7 @@
         <div v-if="props.personalCenterInfo.userId === store.user_id" class="personal-center-regard-list">
           <el-popover class="popover-wrapper" placement="right" :width="250" trigger="click">
             <el-scrollbar class="regard-popover-scrollbar">
-              <div class="popover-content">
+              <div v-if="regardList.length > 0" class="popover-content">
                 <div
                   v-for="item in regardList"
                   :key="item.userId"
@@ -133,6 +134,7 @@
                   </div>
                 </div>
               </div>
+              <div v-else class="popover-null">暂无关注</div>
             </el-scrollbar>
             <template #reference>
               <el-button class="button" @click="listenGetRegardsList">关注列表</el-button>
@@ -142,7 +144,7 @@
         <div v-if="props.personalCenterInfo.userId === store.user_id" class="personal-center-regard-list">
           <el-popover class="popover-wrapper" placement="right" :width="250" trigger="click">
             <el-scrollbar class="regard-popover-scrollbar">
-              <div class="popover-content">
+              <div v-if="fansList.length > 0" class="popover-content">
                 <div
                   v-for="item in fansList"
                   :key="item.userId"
@@ -157,6 +159,7 @@
                   </div>
                 </div>
               </div>
+              <div v-else class="popover-null">暂无粉丝</div>
             </el-scrollbar>
             <template #reference>
               <el-button class="button" @click="listenGetFansList">粉丝列表</el-button>
@@ -380,6 +383,15 @@
   }
   .regard-popover-scrollbar {
     height: 400px;
+    .popover-null {
+      display: flex;
+      justify-content: center;
+      padding: 30px 0;
+      box-sizing: border-box;
+      font-size: var(--title-font-size);
+      color: var(--desc-color);
+      font-family: '楷体';
+    }
     .regard-item {
       display: flex;
       align-items: center;
@@ -416,6 +428,24 @@
   }
   .collection-popover-scrollbar {
     height: 400px;
+    .popover-null {
+      display: flex;
+      justify-content: center;
+      padding: 30px 0;
+      box-sizing: border-box;
+      font-size: var(--title-font-size);
+      color: var(--desc-color);
+      font-family: '楷体';
+    }
+    .popover-null {
+      display: flex;
+      justify-content: center;
+      padding: 30px 0;
+      box-sizing: border-box;
+      font-size: var(--title-font-size);
+      color: var(--desc-color);
+      font-family: '楷体';
+    }
     .collection-item {
       padding: 8px 5px;
       box-sizing: border-box;
@@ -486,9 +516,12 @@
     }
   }
   .content-null {
-    font-size: var(--middle-font-size);
-    color: var(--desc-color);
     display: flex;
     justify-content: center;
+    padding: 30px 0;
+    box-sizing: border-box;
+    font-size: var(--title-font-size);
+    color: var(--desc-color);
+    font-family: '楷体';
   }
 </style>

@@ -50,14 +50,14 @@
             </svg>
           </el-tooltip>
         </div>
-        <div v-if="info.isLeader !== store.user_id" class="item message">
+        <div v-if="info.leaderId !== store.user_id" class="item message">
           <el-tooltip content="退出群聊" placement="top">
             <svg class="icon" aria-hidden="true" @click="listenExitGroup">
               <use xlink:href="#icon-out"></use>
             </svg>
           </el-tooltip>
         </div>
-        <div v-if="info.isLeader === store.user_id" class="item message">
+        <div v-if="info.leaderId === store.user_id" class="item message">
           <el-tooltip content="解散群聊" placement="top">
             <svg class="icon" aria-hidden="true" @click="listenDismissGroup">
               <use xlink:href="#icon-delete"></use>
@@ -336,7 +336,7 @@
           groupId: info.value.id,
           type: 'dismiss',
         })
-        router.push({ path: '/contacts' })
+        router.push({ name: 'contacts' })
       } else {
         ElMessage.success(TIP_TYPE.DISMISS_GROUP_FAIL)
       }

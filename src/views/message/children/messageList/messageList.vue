@@ -1,6 +1,6 @@
 <template>
   <div class="message-list-container">
-    <div class="message-list-wrap">
+    <div v-if="props.messageList.length > 0" class="message-list-wrap">
       <div
         v-for="item in props.messageList"
         :key="item.id"
@@ -10,6 +10,7 @@
         <MessageListItem :message-list-item="item" :chat-id="props.chatId" :chat-type="props.chatType" />
       </div>
     </div>
+    <div v-else class="message-list-null">暂无聊天记录</div>
   </div>
 </template>
 
@@ -38,6 +39,15 @@
       .message-list-item {
         width: 100%;
       }
+    }
+    .message-list-null {
+      display: flex;
+      justify-content: center;
+      padding: 30px 0;
+      box-sizing: border-box;
+      font-size: var(--title-font-size);
+      color: var(--desc-color);
+      font-family: '楷体';
     }
   }
 </style>

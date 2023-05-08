@@ -69,7 +69,7 @@
           />
         </div>
       </el-scrollbar>
-      <div v-else class="tidings-null">朋友圈还没有动态，快来发布动态吧</div>
+      <div v-else class="tidings-null">{{ id === -1 ? '朋友圈还没有动态，快来发布动态吧' : 'TA还没有发布过动态' }}</div>
     </div>
     <div class="pyq-release">
       <svg v-show="id === store.user_id || id === -1" class="icon" aria-hidden="true" @click="listenReleaseTidings">
@@ -314,7 +314,7 @@
 
   // 确定发布动态
   const listenConfirmReleaseTiding = async () => {
-    if (!tidingInfo.content) {
+    if (!tidingInfo.content.trim()) {
       ElMessage.error(TIP_TYPE.TIDING_CONTENT_IS_NOT_NULL)
       return
     }
@@ -494,7 +494,7 @@
         display: flex;
         justify-content: center;
         margin-top: 10%;
-        font-size: var(--pyq-null-font-size);
+        font-size: var(--title-font-size);
         color: var(--desc-color);
         font-family: '楷体';
       }

@@ -86,11 +86,11 @@
         <el-switch v-model="groupInfo.disturb" size="small" />
       </div>
     </div> -->
-    <div class="group-detail-clear-messages" @click="listenClearChatMessages">
+    <!-- <div class="group-detail-clear-messages" @click="listenClearChatMessages">
       <div class="label">清空聊天记录</div>
       <div class="op"></div>
-    </div>
-    <div v-if="groupInfo.isLeader === store.user_id" class="group-detail-dismiss-group">
+    </div> -->
+    <div v-if="groupInfo.leaderId === store.user_id" class="group-detail-dismiss-group">
       <el-button class="botton" type="danger" @click="listenDismissGroup">解散群聊</el-button>
     </div>
     <div v-else class="group-detail-delete-group">
@@ -101,7 +101,7 @@
     </div>
     <el-dialog v-model="inviteGropVisible" title="邀请进群" width="30%">
       <el-scrollbar height="300px">
-        <div class="contact-list">
+        <div v-if="contactList.length > 0" class="contact-list">
           <div
             v-for="item in contactList"
             :key="item.userId"
@@ -123,6 +123,7 @@
             </div>
           </div>
         </div>
+        <div v-else class="contact-null">暂无联系人</div>
       </el-scrollbar>
 
       <template #footer>
@@ -568,6 +569,15 @@
           cursor: pointer;
         }
       }
+    }
+    .contact-null {
+      display: flex;
+      justify-content: center;
+      padding: 30px 0;
+      box-sizing: border-box;
+      font-size: var(--title-font-size);
+      color: var(--desc-color);
+      font-family: '楷体';
     }
   }
   :deep(.el-input__wrapper.is-focus),

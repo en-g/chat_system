@@ -509,7 +509,7 @@
 
   // 发送评论
   const listenSendComment = async (lifeTidingId: number, toId: number) => {
-    if (!comment.value) {
+    if (!comment.value.trim()) {
       ElMessage.error(TIP_TYPE.COMMENT_IS_NOT_NULL)
     }
     const { data } = await commentLifeTiding({
@@ -528,7 +528,7 @@
         }
       }
       // 通知对方更新生活圈消息数
-      websocket.send('updateLifeMessageCount', { userId: toId })
+      toId !== store.user_id && websocket.send('updateLifeMessageCount', { userId: toId })
       comment.value = ''
     } else {
       ElMessage.error(TIP_TYPE.COMMENT_FAIL)
@@ -537,7 +537,7 @@
 
   // 回复评论
   const replyComment = async (info: ReplyLifeTidingsInfoType) => {
-    if (!info.content) {
+    if (!info.content.trim()) {
       ElMessage.error(TIP_TYPE.REPLY_IS_NOT_NLL)
     }
     const { data } = await replyLifeTiding(info)
@@ -651,11 +651,11 @@
 
   // 确定发布动态
   const listenConfirmReleaseTiding = async () => {
-    if (!tidingInfo.title) {
+    if (!tidingInfo.title.trim()) {
       ElMessage.error(TIP_TYPE.TIDING_TITLE_IS_NOT_NULL)
       return
     }
-    if (!tidingInfo.content) {
+    if (!tidingInfo.content.trim()) {
       ElMessage.error(TIP_TYPE.TIDING_CONTENT_IS_NOT_NULL)
       return
     }

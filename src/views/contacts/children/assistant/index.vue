@@ -1,26 +1,29 @@
 <template>
   <div class="assistant-container">
     <div class="assistant-title">{{ title }}</div>
-    <div class="assistant-notice-list-wrap">
-      <el-scrollbar class="assistant-notice-list-scroll">
-        <div class="assistant-notice-list">
-          <NoticeList :notice-list="noticeList" :type="type" />
-        </div>
-      </el-scrollbar>
+    <div v-if="noticeList.length > 0" class="assistant-main">
+      <div class="assistant-notice-list-wrap">
+        <el-scrollbar class="assistant-notice-list-scroll">
+          <div class="assistant-notice-list">
+            <NoticeList :notice-list="noticeList" :type="type" />
+          </div>
+        </el-scrollbar>
+      </div>
+      <div class="assistant-notice-page">
+        <el-pagination
+          v-model:current-page="pageNum"
+          v-model:page-size="pageSize"
+          :page-sizes="[2, 5, 10]"
+          :small="true"
+          :background="true"
+          layout="sizes, prev, pager, next"
+          :total="total"
+          @size-change="listenPaginationChange"
+          @current-change="listenPaginationChange"
+        />
+      </div>
     </div>
-    <div class="assistant-notice-page">
-      <el-pagination
-        v-model:current-page="pageNum"
-        v-model:page-size="pageSize"
-        :page-sizes="[2, 5, 10]"
-        :small="true"
-        :background="true"
-        layout="sizes, prev, pager, next"
-        :total="total"
-        @size-change="listenPaginationChange"
-        @current-change="listenPaginationChange"
-      />
-    </div>
+    <div v-else class="assistant-null">暂无验证消息</div>
   </div>
 </template>
 
@@ -127,22 +130,35 @@
       font-size: var(--middle-font-size);
       font-weight: bold;
     }
-    .assistant-notice-list-wrap {
+    .assistant-main {
       width: 100%;
-      height: 88%;
-      .assistant-notice-list-scroll {
+      height: 95%;
+      .assistant-notice-list-wrap {
         width: 100%;
-        height: 100%;
-        .assistant-notice-list {
+        height: 93%;
+        .assistant-notice-list-scroll {
+          width: 100%;
+          height: 100%;
+          .assistant-notice-list {
+          }
         }
       }
+      .assistant-notice-page {
+        width: 100%;
+        height: 7%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+      }
     }
-    .assistant-notice-page {
-      width: 100%;
-      height: 7%;
+    .assistant-null {
       display: flex;
-      justify-content: flex-end;
-      align-items: flex-end;
+      justify-content: center;
+      padding: 30px 0;
+      box-sizing: border-box;
+      font-size: var(--title-font-size);
+      color: var(--desc-color);
+      font-family: '楷体';
     }
   }
 </style>

@@ -66,10 +66,10 @@
         <el-switch v-model="contactInfo.disturb" size="small" />
       </div>
     </div> -->
-    <div class="contact-detail-clear-messages" @click="listenClearChatMessages">
+    <!-- <div class="contact-detail-clear-messages" @click="listenClearChatMessages">
       <div class="label">清空聊天记录</div>
       <div class="op"></div>
-    </div>
+    </div> -->
     <div class="contact-detail-delete-contact">
       <el-button class="botton" type="danger" @click="listenDleteContact">删除</el-button>
     </div>
