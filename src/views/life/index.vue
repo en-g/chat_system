@@ -8,9 +8,6 @@
         @detail="showLifeTidingDetail"
       />
     </div>
-    <div class="life-hot-search">
-      <HotSearch :hot-tidings-list="hotTidingsList" @detail="showLifeTidingDetail" />
-    </div>
     <div v-show="!showDetailVisible" class="life-content">
       <el-card class="life-navbar-card">
         <div class="life-navbar">
@@ -47,6 +44,9 @@
           </div>
         </div>
       </el-card>
+    </div>
+    <div class="life-hot-search">
+      <HotSearch :hot-tidings-list="hotTidingsList" @detail="showLifeTidingDetail" />
     </div>
     <div v-show="showDetailVisible" class="life-detail">
       <div class="close">
@@ -709,15 +709,19 @@
       position: fixed;
       top: 60px;
       left: 100px;
+      // margin-left: 20px;
     }
     .life-hot-search {
       width: 300px;
       position: fixed;
       top: 60px;
       right: 50px;
+      // margin-right: 20px;
     }
     .life-content {
-      width: 798px;
+      width: 60%;
+      // flex: 1;
+      max-width: 798px;
       height: calc(100vh - 60px);
       .life-navbar-card {
         width: 100%;

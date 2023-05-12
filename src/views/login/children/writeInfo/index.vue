@@ -23,7 +23,7 @@
               </div>
             </div>
           </el-form-item>
-          <el-form-item class="write-info-main-form-item" label="选择昵称">
+          <el-form-item class="write-info-main-form-item" label="输入昵称">
             <el-input v-model="selfInfo.nickname" maxlength="10" size="default" placeholder="请输入昵称" type="text" />
           </el-form-item>
           <el-form-item class="write-info-main-form-item" label="选择性别">

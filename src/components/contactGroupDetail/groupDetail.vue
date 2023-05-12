@@ -225,6 +225,7 @@
     }
     const { data } = await getGroupInfo(ids)
     data.createTime = formateTime(data.createTime, 1)
+    // data.members = data.members.reverse()
     Object.assign(groupInfo, data)
   }
 

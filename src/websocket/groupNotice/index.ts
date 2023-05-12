@@ -81,6 +81,7 @@ const updateGroupInfo = async (groupId: number) => {
   }
   const { data } = await getGroupInfo(ids)
   data.createTime = formateTime(data.createTime, 1)
+  // data.members = data.members.reverse()
   groupsInfo.splice(index, 1, data)
   storage.set('groupsInfo', groupsInfo)
 }

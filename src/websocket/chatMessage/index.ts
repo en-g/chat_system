@@ -142,6 +142,7 @@ const updateChatMessageList = async (info: ChatMessageNoticeType, isCur = false,
           groupId: info.groupId as number,
         })
         data.createTime && (data.createTime = formateTime(data.createTime, 1))
+        data.members = data.members.reverse()
         groupInfo = data
         groupsInfo.push(data)
         storage.set('groupsInfo', groupsInfo)
@@ -222,6 +223,7 @@ const actualUpdateChatMessageList = async (
           groupId: info.groupId as number,
         })
         data.createTime && (data.createTime = formateTime(data.createTime, 1))
+        // data.members = data.members.reverse()
         groupsInfo = data
       }
       const chatMessage: MessageListItemInfoType = {

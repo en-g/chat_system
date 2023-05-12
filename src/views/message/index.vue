@@ -159,7 +159,7 @@
           groupId: id,
         })
         data.createTime = formateTime(data.createTime, 1)
-        data.members = data.members.reverse()
+        // data.members = data.members.reverse()
         groupsInfo.push(data)
         storage.set('groupsInfo', groupsInfo)
       }
@@ -271,7 +271,9 @@
       if (chatId.value === info.id && chatType.value === info.type) {
         chatId.value = -1
         chatType.value = ''
-        router.push({ name: 'message' })
+        if (route.name === 'message') {
+          router.push({ name: 'message' })
+        }
       }
       actualDeleteChatMessageListItem(messageList, info)
     })

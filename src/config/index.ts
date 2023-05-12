@@ -1,5 +1,5 @@
-const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : 'http://114.132.237.200:3000/'
-const WEBSOCKET_URL = process.env.NODE_ENV === 'development' ? 'ws://localhost:3002/' : 'ws://114.132.237.200:3002/'
+const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3003/' : 'http://114.132.237.200:3003/'
+const WEBSOCKET_URL = process.env.NODE_ENV === 'development' ? 'ws://localhost:3004/' : 'ws://114.132.237.200:3004/'
 const TIME_OUT = 10000
 
 // 请求错误类型
